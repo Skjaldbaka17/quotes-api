@@ -9,8 +9,11 @@ import (
 )
 
 func main() {
+
 	r := mux.NewRouter()
-	r.HandleFunc("/", handlers.GetQuotesById)
-	// http.Handle("/", r)
+	gets := r.Methods(http.MethodGet).Subrouter()
+	posts := r.Methods(http.MethodPost).Subrouter()
+	posts.HandleFunc("/api/quotes", handlers.GetQuotesById)
+	gets.HandleFunc("/api/authors/{id}", handlers.GetAuthorById)
 	http.ListenAndServe(":8080", r)
 }

@@ -3,6 +3,7 @@ CREATE TABLE quotes(
    author_id integer not null,
    quote text NOT NULL,
    count integer default 0,
+   isIcelandic boolean default false,
    created_at timestamptz,
    FOREIGN KEY (author_id) REFERENCES authors(id) ON DELETE CASCADE
 );
