@@ -6,3 +6,5 @@
     * https://www.freecodecamp.org/news/fuzzy-string-matching-with-postgresql/
     * https://www.compose.com/articles/mastering-postgresql-tools-full-text-search-and-phrase-search/ 
 * Implement GetQuotesById (multiple quotes route) and GetAuthorsById (Multiple authors route)
+* Add categories-search (Motivational etc)
+* Add Search-"scroll", User is searching and is scrolling through her search and wants next batch of results matching her search.
