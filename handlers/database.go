@@ -18,7 +18,7 @@ func init() {
 
 	// defer db.Close()
 
-	db.AutoMigrate(&Authors1{})
+	db.AutoMigrate(&Authors{})
 
-	db.AutoMigrate(&Quotes1{})
+	db.AutoMigrate(&Quotes{})
 }

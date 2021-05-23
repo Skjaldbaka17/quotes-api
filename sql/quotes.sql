@@ -1,9 +1,11 @@
 CREATE TABLE quotes(
    id SERIAL PRIMARY KEY,
-   author_id integer not null,
+   authorid integer not null,
    quote text NOT NULL,
    count integer default 0,
    isIcelandic boolean default false,
-   created_at timestamptz,
-   FOREIGN KEY (author_id) REFERENCES authors(id) ON DELETE CASCADE
+   createdat timestamptz,
+   updatedat timestamptz,
+   deletedat timestamptz,
+   FOREIGN KEY (authorid) REFERENCES authors(id) ON DELETE CASCADE
 );
