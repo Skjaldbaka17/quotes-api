@@ -8,3 +8,6 @@
 * Implement GetQuotesById (multiple quotes route) and GetAuthorsById (Multiple authors route)
 * Add categories-search (Motivational etc)
 * Add Search-"scroll", User is searching and is scrolling through her search and wants next batch of results matching her search.
+* Setup Testing (Unit, remember test-driven dev!)
+* Setup Swagger for api-docs
+* Setup AWS server
