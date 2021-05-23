@@ -5,3 +5,4 @@
     * https://medium.com/@bencagri/implementing-multi-table-full-text-search-with-gorm-632518257d15
     * https://www.freecodecamp.org/news/fuzzy-string-matching-with-postgresql/
     * https://www.compose.com/articles/mastering-postgresql-tools-full-text-search-and-phrase-search/ 
+* Implement GetQuotesById (multiple quotes route) and GetAuthorsById (Multiple authors route)
