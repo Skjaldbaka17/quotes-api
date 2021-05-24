@@ -5,15 +5,17 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"time"
 
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Quotes struct {
 	gorm.Model
-	Id          int    `json:"id" gorm:"primary_key"`
+	Id          int    `json:"id"`
 	Authorid    int    `json:"authorid"`
 	Quote       string `json:"quote"`
 	Count       int    `json:"count"`
@@ -24,7 +26,7 @@ type Authors struct {
 	gorm.Model
 	Name   string   `json:"name"`
 	Count  int      `json:"count"`
-	Quotes []Quotes `gorm:"foreignKey:authorid;references:Id" json:"quotes" `
+	Quotes []Quotes `json:"quotes" gorm:"foreignKey:authorid"`
 }
 
 type SearchView struct {
@@ -39,8 +41,6 @@ type SearchView struct {
 type QuotesRequest struct {
 	Ids []int `json:"ids"`
 }
-
-var db *gorm.DB
 
 func GetAuthorById(rw http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -98,14 +98,21 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	params := mux.Vars(r)
 	searchString := params["searchString"]
-	fmt.Print(searchString)
 
 	var results []SearchView
+	m1 := regexp.MustCompile(` `)
+	phrasesearch := m1.ReplaceAllString(searchString, " <-> ")
+	generalsearch := m1.ReplaceAllString(searchString, " | ")
 
-	err := db.Table("searchview").
-		Where("tsv @@ q").
-		Select("*, plainto_tsquery(?) as q, ts_rank(tsv, q) as rank", searchString, searchString).
-		Order("rank DESC").
+	err := db.Table("searchview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq,to_tsquery(?) as generalq ",
+		searchString, phrasesearch, generalsearch).
+		Where("tsv @@ plainq").
+		Or("tsv @@ phraseq").
+		Select("*, ts_rank(tsv, plainq || generalq || phraseq) as plainrank").
+		Clauses(clause.OrderBy{
+			Expression: clause.Expr{SQL: "plainrank DESC, similarity(name, ?) DESC", Vars: []interface{}{searchString}, WithoutParentheses: true},
+		}).
+		Or("tsv @@ generalq").
 		Limit(25).
 		Find(&results).Error
 
@@ -133,7 +140,9 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 	err := db.Table("searchview").
 		Where("nametsv @@ plainto_tsquery(?)", searchString).
 		Or("? % ANY(STRING_TO_ARRAY(name,' '))", searchString).
-		Order(gorm.Expr("Similarity(name, ?) DESC", searchString)).
+		Clauses(clause.OrderBy{
+			Expression: clause.Expr{SQL: "similarity(name, ?) DESC", Vars: []interface{}{searchString}, WithoutParentheses: true},
+		}).
 		Limit(25).
 		Find(&results).Error
 
@@ -150,16 +159,25 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 }
 
 func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
-
+	start := time.Now()
 	params := mux.Vars(r)
 	searchString := params["searchString"]
 	fmt.Print(searchString)
 
 	var results []SearchView
+	m1 := regexp.MustCompile(` `)
+	phrasesearch := m1.ReplaceAllString(searchString, " <-> ")
+	generalsearch := m1.ReplaceAllString(searchString, " | ")
 
-	//"quotetsv" is a column containing the tsvector of the "quote" column -> makes the query much much faster
-	err := db.Table("searchview").
-		Where("quotetsv @@ plainto_tsquery(?)", searchString).
+	err := db.Table("searchview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq,to_tsquery(?) as generalq ",
+		searchString, phrasesearch, generalsearch).
+		Where("quotetsv @@ plainq").
+		Or("quotetsv @@ phraseq").
+		Select("*, ts_rank(quotetsv, plainq) as plainrank, ts_rank(quotetsv, phraseq) as phraserank, ts_rank(quotetsv, generalq) as generalrank").
+		Clauses(clause.OrderBy{
+			Expression: clause.Expr{SQL: "plainrank DESC, phraserank DESC, generalrank DESC", Vars: []interface{}{}, WithoutParentheses: true},
+		}).
+		Or("quotetsv @@ generalq").
 		Limit(25).
 		Find(&results).Error
 
@@ -170,5 +188,8 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(rw).Encode(&results)
+	t := time.Now()
+	elapsed := t.Sub(start)
+	fmt.Printf("Time: %d", elapsed.Milliseconds())
 
 }
