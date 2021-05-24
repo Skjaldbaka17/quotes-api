@@ -108,9 +108,9 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 		searchString, phrasesearch, generalsearch).
 		Where("tsv @@ plainq").
 		Or("tsv @@ phraseq").
-		Select("*, ts_rank(tsv, plainq || generalq || phraseq) as plainrank").
+		Select("*, ts_rank(quotetsv, plainq) as plainrank, ts_rank(quotetsv, phraseq) as phraserank, ts_rank(quotetsv, generalq) as generalrank").
 		Clauses(clause.OrderBy{
-			Expression: clause.Expr{SQL: "plainrank DESC, similarity(name, ?) DESC", Vars: []interface{}{searchString}, WithoutParentheses: true},
+			Expression: clause.Expr{SQL: "phraserank DESC,similarity(name, ?) DESC, plainrank DESC, generalrank DESC ", Vars: []interface{}{searchString}, WithoutParentheses: true},
 		}).
 		Or("tsv @@ generalq").
 		Limit(25).
