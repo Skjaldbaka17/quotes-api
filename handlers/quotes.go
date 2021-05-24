@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"regexp"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
@@ -95,6 +95,7 @@ func GetQuotesById(rw http.ResponseWriter, r *http.Request) {
 }
 
 func SearchByString(rw http.ResponseWriter, r *http.Request) {
+	start := time.Now()
 	params := mux.Vars(r)
 	searchString := params["searchString"]
 	fmt.Print(searchString)
@@ -102,9 +103,35 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 	var results []SearchView
 
 	err := db.Table("searchview").
-		Where("quote @@ plainto_tsquery(?)", searchString).
-		Select("*, ts_rank(to_tsvector(name), plainto_tsquery(?)) as rank", searchString).
-		Or("name @@ plainto_tsquery(?)", searchString).
+		Where("tsv @@ q").
+		Select("*, plainto_tsquery(?) as q, ts_rank(tsv, q) as rank", searchString, searchString).
+		Order("rank DESC").
+		Limit(25).
+		Find(&results).Error
+
+	if err != nil {
+		log.Printf("Got error when decoding: %s", err)
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	json.NewEncoder(rw).Encode(&results)
+	t := time.Now()
+	elapsed := t.Sub(start)
+	fmt.Printf("Time: %d", elapsed.Milliseconds())
+}
+
+func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	params := mux.Vars(r)
+	searchString := params["searchString"]
+	fmt.Print(searchString)
+
+	var results []SearchView
+
+	//% is same as SIMILARITY but with default threshold 0.3
+	err := db.Table("searchview").
+		Where("nametsv @@ plainto_tsquery(?)", searchString).
 		Or("? % ANY(STRING_TO_ARRAY(name,' '))", searchString).
 		Order(gorm.Expr("Similarity(name, ?) DESC", searchString)).
 		Limit(25).
@@ -117,46 +144,22 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(rw).Encode(&results)
-}
-
-func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	searchString := params["searchString"]
-	fmt.Print(searchString)
-
-	var results []SearchView
-
-	m1 := regexp.MustCompile(` `)
-	search := m1.ReplaceAllString(searchString, " <-> ")
-
-	//% is same as SIMILARITY but with default threshold 0.3
-	err := db.Table("searchview").
-		Where("name @@ to_tsquery(?)", search).
-		Or("? % ANY(STRING_TO_ARRAY(name,' '))", search).
-		Order(gorm.Expr("Similarity(name, ?) DESC", searchString)).
-		Limit(25).
-		Find(&results).Error
-
-	if err != nil {
-		log.Printf("Got error when decoding: %s", err)
-		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	json.NewEncoder(rw).Encode(&results)
+	t := time.Now()
+	elapsed := t.Sub(start)
+	fmt.Printf("Time: %d", elapsed.Milliseconds())
 }
 
 func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
+
 	params := mux.Vars(r)
 	searchString := params["searchString"]
 	fmt.Print(searchString)
 
 	var results []SearchView
 
+	//"quotetsv" is a column containing the tsvector of the "quote" column -> makes the query much much faster
 	err := db.Table("searchview").
-		Select("*, ts_rank(to_tsvector(quote), plainto_tsquery(?)) as rank", searchString).
-		Where("quote @@ plainto_tsquery(?)", searchString).
-		Order("rank DESC").
+		Where("quotetsv @@ plainto_tsquery(?)", searchString).
 		Limit(25).
 		Find(&results).Error
 
@@ -167,4 +170,5 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(rw).Encode(&results)
+
 }
