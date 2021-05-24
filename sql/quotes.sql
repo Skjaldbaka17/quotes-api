@@ -7,5 +7,6 @@ CREATE TABLE quotes(
    createdat timestamptz,
    updatedat timestamptz,
    deletedat timestamptz,
+   tsv tsvector,
    FOREIGN KEY (authorid) REFERENCES authors(id) ON DELETE CASCADE
 );

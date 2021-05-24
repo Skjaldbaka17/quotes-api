@@ -4,5 +4,6 @@ CREATE TABLE authors(
    count integer default 0,
    createdat timestamptz,
    updatedat timestamptz,
-   deletedat timestamptz
+   deletedat timestamptz,
+   tsv tsvector
 );
