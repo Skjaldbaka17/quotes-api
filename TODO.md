@@ -1,10 +1,10 @@
 # TODOS
 
-- [ ] Implement GetQuotesById (multiple quotes route) and GetAuthorsById (Multiple authors route)
 - [ ] Add icelandic / English Support
-- [ ] Validate RequestBody
-- [ ] Error handling
-- [ ] Clean-up test files (Move some lines into their own functions etc.)
+- [ ] Validate RequestBody + Tests
+- [ ] Error handling + Tests
+- [ ] Make error tests (i.e. made-to-fail-tests)
+- [ ] Make function for building the SQL query (general for all?)
 - [ ] Setup Swagger for api-docs 
       * https://github.com/go-swagger/go-swagger
       * https://github.com/nicholasjackson/building-microservices-youtube/blob/episode_7/product-api/main.go
@@ -12,8 +12,11 @@
 - [ ] Add categories-search (Motivational etc)
 - [ ] Setup AWS server
 - [ ] Make Authors Search more efficient (create a similarity-based index ?)
+- [ ] Look into and maybe Change into GraphQL
 - [x] Add Search-"scroll", User is searching and is scrolling through her search and wants next batch of results matching her search i.e. PAGINATION
 - [x] setup testing (unit)
+- [x] Implement GetQuotesById (multiple quotes route)
+- [x] Clean-up test files (Move some lines into their own functions etc.)
 
 
 

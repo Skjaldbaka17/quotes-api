@@ -8,7 +8,6 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -49,42 +48,54 @@ type Request struct {
 const defaultPageSize = 25
 const maxPageSize = 200
 
-func GetAuthorById(rw http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	var author SearchView
-	err := db.Table("searchview").
-		Select("*, authorid").
-		Where("authorid = ?", params["id"]).
-		First(&author).
-		Error
+func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
+	requestBody, err := validateRequestBody(r)
 
+	if err != nil {
+		http.Error(rw, "Could not finish", 404)
+		return
+	}
+	var authors []SearchView
+	err = db.Table("searchview").
+		Select("*").
+		Where("authorid in (?)", requestBody.Ids).
+		First(&authors).
+		Error
+	log.Println(authors)
 	if err != nil {
 		log.Printf("Got error when decoding: %s", err)
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	json.NewEncoder(rw).Encode(&author)
+	json.NewEncoder(rw).Encode(&authors)
 }
 
-func GetQuoteById(rw http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	var quote SearchView
+// func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
+// 	var requestBody Request
+// 	err := json.NewDecoder(r.Body).Decode(&requestBody)
 
-	err := db.
-		Table("searchview").
-		Where("quoteid = ?", params["id"]).
-		First(&quote).
-		Error
+// 	if err != nil {
+// 		log.Printf("Got error when decoding: %s", err)
+// 		http.Error(rw, err.Error(), http.StatusBadRequest)
+// 		return
+// 	}
+// 	var quotes []SearchView
+// 	err = db.Table("searchview").
+// 		Select("*").
+// 		Where("authorid in ?", requestBody.Ids).
+// 		Order("quoteid ASC").
+// 		Find(&quotes).
+// 		Error
 
-	if err != nil {
-		log.Printf("Got error when decoding: %s", err)
-		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
-	}
+// 	if err != nil {
+// 		log.Printf("Got error when decoding: %s", err)
+// 		http.Error(rw, err.Error(), http.StatusBadRequest)
+// 		return
+// 	}
 
-	json.NewEncoder(rw).Encode(&quote)
-}
+// 	json.NewEncoder(rw).Encode(&quotes)
+// }
 
 func GetQuotesById(rw http.ResponseWriter, r *http.Request) {
 	var requestBody Request

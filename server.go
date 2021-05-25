@@ -16,10 +16,7 @@ func main() {
 	posts.HandleFunc("/api/search", handlers.SearchByString)
 	posts.HandleFunc("/api/search/authors", handlers.SearchAuthorsByString)
 	posts.HandleFunc("/api/search/quotes", handlers.SearchQuotesByString)
-
-	gets := r.Methods(http.MethodGet).Subrouter()
-	gets.HandleFunc("/api/authors/{id}", handlers.GetAuthorById)
-	gets.HandleFunc("/api/quotes/{id}", handlers.GetQuoteById)
+	posts.HandleFunc("/api/authors", handlers.GetAuthorsById)
 
 	http.ListenAndServe(":8080", r)
 }
