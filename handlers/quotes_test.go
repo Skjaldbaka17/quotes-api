@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -25,7 +24,27 @@ func TestSearchQuotesByString(t *testing.T) {
 		got := json.Unmarshal(response.Body.Bytes(), &respObj)
 		firstAuthor := respObj[0].Name
 		want := "Muhammad Ali"
-		log.Println("responÞ", got)
+		if firstAuthor != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+}
+
+func TestSearchAuthorsByString(t *testing.T) {
+	t.Run("should Return list of quotes with Joseph Stalin as first author", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/api/search/authors", nil)
+		response := httptest.NewRecorder()
+
+		request = mux.SetURLVars(request, map[string]string{
+			"searchString": "Stalin jseph",
+		})
+
+		SearchAuthorsByString(response, request)
+
+		var respObj []SearchView
+		got := json.Unmarshal(response.Body.Bytes(), &respObj)
+		firstAuthor := respObj[0].Name
+		want := "Joseph Stalin"
 		if firstAuthor != want {
 			t.Errorf("got %q, want %q", got, want)
 		}
