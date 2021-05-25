@@ -30,7 +30,28 @@ func TestSearchQuotesByString(t *testing.T) {
 	})
 }
 
-func TestSearchAuthorsByString(t *testing.T) {
+func TestEasySearchAuthorsByString(t *testing.T) {
+	t.Run("should Return list of quotes with Friedrich Nietzsche as first author", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/api/search/authors", nil)
+		response := httptest.NewRecorder()
+
+		request = mux.SetURLVars(request, map[string]string{
+			"searchString": "Friedrich Nietzsche",
+		})
+
+		SearchAuthorsByString(response, request)
+
+		var respObj []SearchView
+		got := json.Unmarshal(response.Body.Bytes(), &respObj)
+		firstAuthor := respObj[0].Name
+		want := "Friedrich Nietzsche"
+		if firstAuthor != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+}
+
+func TestIntermediateSearchAuthorsByString(t *testing.T) {
 	t.Run("should Return list of quotes with Joseph Stalin as first author", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/api/search/authors", nil)
 		response := httptest.NewRecorder()
@@ -45,6 +66,27 @@ func TestSearchAuthorsByString(t *testing.T) {
 		got := json.Unmarshal(response.Body.Bytes(), &respObj)
 		firstAuthor := respObj[0].Name
 		want := "Joseph Stalin"
+		if firstAuthor != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+}
+
+func TestHardSearchAuthorsByString(t *testing.T) {
+	t.Run("should Return list of quotes with Friedrich Nietzsche as first author", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/api/search/authors", nil)
+		response := httptest.NewRecorder()
+
+		request = mux.SetURLVars(request, map[string]string{
+			"searchString": "Niet Friedric",
+		})
+
+		SearchAuthorsByString(response, request)
+
+		var respObj []SearchView
+		got := json.Unmarshal(response.Body.Bytes(), &respObj)
+		firstAuthor := respObj[0].Name
+		want := "Friedrich Nietzsche"
 		if firstAuthor != want {
 			t.Errorf("got %q, want %q", got, want)
 		}
