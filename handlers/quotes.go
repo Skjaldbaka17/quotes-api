@@ -38,9 +38,14 @@ type SearchView struct {
 	Isicelandic bool   `json:"isicelandic"`
 }
 
-type QuotesRequest struct {
-	Ids []int `json:"ids"`
+type Request struct {
+	Ids          []int  `json:"ids,omitempty"`
+	Id           int    `json:"id,omitempty"`
+	Page         int    `json:"page,omitempty"`
+	SearchString string `json:"searchString,omitempty"`
 }
+
+const pageSize = 25
 
 func GetAuthorById(rw http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -80,7 +85,7 @@ func GetQuoteById(rw http.ResponseWriter, r *http.Request) {
 }
 
 func GetQuotesById(rw http.ResponseWriter, r *http.Request) {
-	var requestBody QuotesRequest
+	var requestBody Request
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
 
 	if err != nil {
@@ -96,15 +101,24 @@ func GetQuotesById(rw http.ResponseWriter, r *http.Request) {
 
 func SearchByString(rw http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	params := mux.Vars(r)
-	searchString := params["searchString"]
+	var requestBody Request
+	err := json.NewDecoder(r.Body).Decode(&requestBody)
+
+	if err != nil {
+		log.Printf("Got error when decoding: %s", err)
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	searchString := requestBody.SearchString
+	page := requestBody.Page
 	log.Println("SearchString", searchString)
 	var results []SearchView
 	m1 := regexp.MustCompile(` `)
 	phrasesearch := m1.ReplaceAllString(searchString, " <-> ")
 	generalsearch := m1.ReplaceAllString(searchString, " | ")
 
-	err := db.Table("searchview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq,to_tsquery(?) as generalq ",
+	err = db.Table("searchview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq,to_tsquery(?) as generalq ",
 		searchString, phrasesearch, generalsearch).
 		Where("tsv @@ plainq").
 		Or("tsv @@ phraseq").
@@ -114,7 +128,8 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 			Expression: clause.Expr{SQL: "phraserank DESC,similarity(name, ?) DESC, plainrank DESC, generalrank DESC ", Vars: []interface{}{searchString}, WithoutParentheses: true},
 		}).
 		Or("tsv @@ generalq").
-		Limit(25).
+		Limit(pageSize).
+		Offset(page * pageSize).
 		Find(&results).Error
 
 	if err != nil {
@@ -144,7 +159,7 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 		Clauses(clause.OrderBy{
 			Expression: clause.Expr{SQL: "similarity(name, ?) DESC", Vars: []interface{}{searchString}, WithoutParentheses: true},
 		}).
-		Limit(25).
+		Limit(pageSize).
 		Find(&results).Error
 
 	if err != nil {
@@ -178,7 +193,7 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 			Expression: clause.Expr{SQL: "plainrank DESC, phraserank DESC, generalrank DESC", Vars: []interface{}{}, WithoutParentheses: true},
 		}).
 		Or("quotetsv @@ generalq").
-		Limit(25).
+		Limit(pageSize).
 		Find(&results).Error
 
 	if err != nil {

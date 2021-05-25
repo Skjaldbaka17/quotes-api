@@ -1,7 +1,6 @@
 # TODOS
 
 * Add icelandic / English Support
-* Setup Testing (Unit, remember test-driven dev!)
 * Add Search-"scroll", User is searching and is scrolling through her search and wants next batch of results matching her search.
 * Implement GetQuotesById (multiple quotes route) and GetAuthorsById (Multiple authors route)
 * Clean-up test files

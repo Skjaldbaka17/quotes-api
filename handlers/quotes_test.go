@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -140,18 +141,14 @@ func TestHardSearchAuthorsByString(t *testing.T) {
 
 func TestEasySearchByStringForAuthor(t *testing.T) {
 	t.Run("should Return list of quotes with Friedrich Nietzsche as first author", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/api/search", nil)
+		var jsonStr = []byte(`{"searchString": "Friedrich Nietzsche"}`)
+		request, _ := http.NewRequest(http.MethodPost, "/api/search", bytes.NewBuffer(jsonStr))
 		response := httptest.NewRecorder()
-
-		request = mux.SetURLVars(request, map[string]string{
-			"searchString": "Friedrich Nietzsche",
-		})
 
 		SearchByString(response, request)
 
 		var respObj []SearchView
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
-		log.Println(respObj)
 		firstAuthor := respObj[1].Name //Use index 1 because in index 0 there is an author talking extensively about Nietzsche
 		want := "Friedrich Nietzsche"
 		if firstAuthor != want {
@@ -162,18 +159,14 @@ func TestEasySearchByStringForAuthor(t *testing.T) {
 
 func TestHardSearchByStringForAuthor(t *testing.T) {
 	t.Run("should Return list of quotes with Friedrich Nietzsche as first author", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/api/search", nil)
+		var jsonStr = []byte(`{"searchString": "Nietshe Friedr"}`)
+		request, _ := http.NewRequest(http.MethodGet, "/api/search", bytes.NewBuffer(jsonStr))
 		response := httptest.NewRecorder()
-
-		request = mux.SetURLVars(request, map[string]string{
-			"searchString": "Nietshe Friedr",
-		})
 
 		SearchByString(response, request)
 
 		var respObj []SearchView
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
-		log.Println(respObj)
 		firstAuthor := respObj[1].Name //Use index 1 because in index 0 there is an author talking extensively about Nietzsche
 		want := "Friedrich Nietzsche"
 		if firstAuthor != want {
@@ -184,12 +177,9 @@ func TestHardSearchByStringForAuthor(t *testing.T) {
 
 func TestEasySearchByStringForQuote(t *testing.T) {
 	t.Run("should Return list of quotes with Martin Luther as first author", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/api/search", nil)
+		var jsonStr = []byte(`{"searchString": "If you are not allowed to Laugh in Heaven"}`)
+		request, _ := http.NewRequest(http.MethodGet, "/api/search", bytes.NewBuffer(jsonStr))
 		response := httptest.NewRecorder()
-
-		request = mux.SetURLVars(request, map[string]string{
-			"searchString": "If you are not allowed to Laugh in Heaven",
-		})
 
 		SearchByString(response, request)
 
