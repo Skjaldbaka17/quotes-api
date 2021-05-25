@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"regexp"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/gorilla/mux"
@@ -314,6 +315,39 @@ func TestGetQuoteById(t *testing.T) {
 			t.Errorf("got %q, want %q", got, want)
 		}
 	})
+
+	t.Run("should return Quotes with id 1, 2 and 3...", func(t *testing.T) {
+		var quoteIds = Set{1, 2, 3}
+		var jsonStr = []byte(fmt.Sprintf(`{"ids":  [%s]}`, quoteIds.toString()))
+		request, _ := http.NewRequest(http.MethodPost, "/api/quotes", bytes.NewBuffer(jsonStr))
+		response := httptest.NewRecorder()
+
+		GetQuotesById(response, request)
+
+		var respObj []SearchView
+		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
+
+		if len(respObj) != len(quoteIds) {
+			t.Errorf("got list of length %d but expected list of length %d", len(respObj), len(quoteIds))
+		}
+
+		for idx, quote := range respObj {
+			if quote.Quoteid != quoteIds[idx] {
+				t.Errorf("got %d, expected %d", quote.Quoteid, quoteIds[idx])
+			}
+		}
+	})
+}
+
+type Set []int
+
+func (set *Set) toString() string {
+	var IDs []string
+	for _, i := range *set {
+		IDs = append(IDs, strconv.Itoa(i))
+	}
+
+	return strings.Join(IDs, ", ")
 }
 
 func getAuthor(searchString string) SearchView {

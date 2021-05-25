@@ -90,15 +90,27 @@ func GetQuotesById(rw http.ResponseWriter, r *http.Request) {
 	var requestBody Request
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
 
+	log.Println(requestBody)
+	if err != nil {
+		log.Printf("Got error when decoding: %s", err)
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+	var quotes []SearchView
+	err = db.Table("searchview").
+		Select("*").
+		Where("quoteid in ?", requestBody.Ids).
+		Order("quoteid ASC").
+		Find(&quotes).
+		Error
+
 	if err != nil {
 		log.Printf("Got error when decoding: %s", err)
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	requestBody.Ids = append(requestBody.Ids, 10)
-	out, _ := json.Marshal(requestBody)
-	rw.Write(out)
+	json.NewEncoder(rw).Encode(&quotes)
 }
 
 func validateRequestBody(r *http.Request) (Request, error) {

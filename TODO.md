@@ -1,8 +1,9 @@
 # TODOS
 
-- [ ] Add icelandic / English Support
-- [ ] Add Search-"scroll", User is searching and is scrolling through her search and wants next batch of results matching her search.
 - [ ] Implement GetQuotesById (multiple quotes route) and GetAuthorsById (Multiple authors route)
+- [ ] Add icelandic / English Support
+- [ ] Validate RequestBody
+- [ ] Error handling
 - [ ] Clean-up test files (Move some lines into their own functions etc.)
 - [ ] Setup Swagger for api-docs 
       * https://github.com/go-swagger/go-swagger
@@ -11,6 +12,7 @@
 - [ ] Add categories-search (Motivational etc)
 - [ ] Setup AWS server
 - [ ] Make Authors Search more efficient (create a similarity-based index ?)
+- [x] Add Search-"scroll", User is searching and is scrolling through her search and wants next batch of results matching her search i.e. PAGINATION
 - [x] setup testing (unit)
 
 
