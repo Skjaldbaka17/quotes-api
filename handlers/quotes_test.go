@@ -244,6 +244,10 @@ func TestGetQuoteById(t *testing.T) {
 	})
 }
 
+func TestSearchStringPagination(t *testing.T)  {}
+func TestSearchQuotesPagination(t *testing.T)  {}
+func TestSearchAuthorsPagination(t *testing.T) {}
+
 func getAuthor(searchString string) SearchView {
 	request, _ := http.NewRequest(http.MethodGet, "/api/search/authors", nil)
 	response := httptest.NewRecorder()

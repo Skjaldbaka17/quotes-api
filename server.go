@@ -11,13 +11,15 @@ import (
 func main() {
 
 	r := mux.NewRouter()
-	gets := r.Methods(http.MethodGet).Subrouter()
 	posts := r.Methods(http.MethodPost).Subrouter()
 	posts.HandleFunc("/api/quotes", handlers.GetQuotesById)
+	posts.HandleFunc("/api/search", handlers.SearchByString)
+	posts.HandleFunc("/api/search/authors", handlers.SearchAuthorsByString)
+	posts.HandleFunc("/api/search/quotes", handlers.SearchQuotesByString)
+
+	gets := r.Methods(http.MethodGet).Subrouter()
 	gets.HandleFunc("/api/authors/{id}", handlers.GetAuthorById)
 	gets.HandleFunc("/api/quotes/{id}", handlers.GetQuoteById)
-	gets.HandleFunc("/api/search/{searchString}", handlers.SearchByString)
-	gets.HandleFunc("/api/search/authors/{searchString}", handlers.SearchAuthorsByString)
-	gets.HandleFunc("/api/search/quotes/{searchString}", handlers.SearchQuotesByString)
+
 	http.ListenAndServe(":8080", r)
 }
