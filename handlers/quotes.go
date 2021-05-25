@@ -112,7 +112,7 @@ func validateRequestBody(r *http.Request) (Request, error) {
 
 	//TODO: add validation for searchString and page etc.
 
-	if requestBody.PageSize != 0 || requestBody.PageSize > maxPageSize {
+	if requestBody.PageSize == 0 || requestBody.PageSize > maxPageSize {
 		requestBody.PageSize = defaultPageSize
 	}
 	return requestBody, nil
@@ -141,7 +141,7 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 		Or("? % ANY(STRING_TO_ARRAY(name,' '))", requestBody.SearchString).
 		Select("*, ts_rank(quotetsv, plainq) as plainrank, ts_rank(quotetsv, phraseq) as phraserank, ts_rank(quotetsv, generalq) as generalrank").
 		Clauses(clause.OrderBy{
-			Expression: clause.Expr{SQL: "phraserank DESC,similarity(name, ?) DESC, plainrank DESC, generalrank DESC, authorid DESC", Vars: []interface{}{searchString}, WithoutParentheses: true},
+			Expression: clause.Expr{SQL: "phraserank DESC,similarity(name, ?) DESC, plainrank DESC, generalrank DESC, authorid DESC", Vars: []interface{}{requestBody.SearchString}, WithoutParentheses: true},
 		}).
 		Or("tsv @@ generalq").
 		Limit(requestBody.PageSize).
@@ -172,13 +172,13 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 
 	var results []SearchView
 
-	//Order by authorid to have definitive order (when for examplke some names rank the same for similarity)
+	//Order by authorid to have definitive order (when for examplke some names rank the same for similarity), same for why quoteid
 	//% is same as SIMILARITY but with default threshold 0.3
 	err = db.Table("searchview").
 		Where("nametsv @@ plainto_tsquery(?)", requestBody.SearchString).
 		Or("? % ANY(STRING_TO_ARRAY(name,' '))", requestBody.SearchString).
 		Clauses(clause.OrderBy{
-			Expression: clause.Expr{SQL: "similarity(name, ?) DESC, authorid DESC", Vars: []interface{}{requestBody.SearchString}, WithoutParentheses: true},
+			Expression: clause.Expr{SQL: "similarity(name, ?) DESC, authorid DESC, quoteid DESC", Vars: []interface{}{requestBody.SearchString}, WithoutParentheses: true},
 		}).
 		Limit(requestBody.PageSize).
 		Offset(requestBody.Page * requestBody.PageSize).

@@ -3,7 +3,7 @@
 * Add icelandic / English Support
 * Add Search-"scroll", User is searching and is scrolling through her search and wants next batch of results matching her search.
 * Implement GetQuotesById (multiple quotes route) and GetAuthorsById (Multiple authors route)
-* Clean-up test files
+* Clean-up test files (Move some lines into their own functions etc.)
 * Setup Swagger for api-docs 
    * https://github.com/go-swagger/go-swagger
    * https://github.com/nicholasjackson/building-microservices-youtube/blob/episode_7/product-api/main.go

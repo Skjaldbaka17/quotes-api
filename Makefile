@@ -1,4 +1,4 @@
-TEST_TO_RUN?=
+TEST_FUNCTION?=
 server:
 	source .env; \
 	go run server.go
@@ -7,4 +7,4 @@ test:
 test-verbose:
 	go test ./... -v
 test-specific:
-	go test ./... -v -run $(TEST_TO_RUN)
+	go test ./... -v -run $(TEST_FUNCTION)
