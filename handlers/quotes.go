@@ -44,11 +44,11 @@ type QuotesRequest struct {
 
 func GetAuthorById(rw http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	var author []SearchView
+	var author SearchView
 	err := db.Table("searchview").
 		Select("*, authorid").
 		Where("authorid = ?", params["id"]).
-		Find(&author).
+		First(&author).
 		Error
 
 	if err != nil {

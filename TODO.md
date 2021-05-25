@@ -4,6 +4,7 @@
 * Setup Testing (Unit, remember test-driven dev!)
 * Add Search-"scroll", User is searching and is scrolling through her search and wants next batch of results matching her search.
 * Implement GetQuotesById (multiple quotes route) and GetAuthorsById (Multiple authors route)
+* Clean-up test files
 * Setup Swagger for api-docs 
    * https://github.com/go-swagger/go-swagger
    * https://github.com/nicholasjackson/building-microservices-youtube/blob/episode_7/product-api/main.go

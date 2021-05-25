@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/gorilla/mux"
@@ -133,4 +134,42 @@ func TestHardSearchAuthorsByString(t *testing.T) {
 			t.Errorf("got %q, want %q", got, want)
 		}
 	})
+}
+
+func TestGetAuthorById(t *testing.T) {
+	t.Run("should return Muhammad Ali", func(t *testing.T) {
+		//Need to get the authorid first, because the id can be different depending on DB.
+		author := getAuthor("Muhammad Ali")
+		request, _ := http.NewRequest(http.MethodGet, "/api/authors/", nil)
+		response := httptest.NewRecorder()
+
+		request = mux.SetURLVars(request, map[string]string{
+			"id": strconv.Itoa(author.Authorid),
+		})
+
+		GetAuthorById(response, request)
+
+		var respObj SearchView
+		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
+		got := respObj.Name
+		want := "Muhammad Ali"
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+}
+
+func getAuthor(searchString string) SearchView {
+	request, _ := http.NewRequest(http.MethodGet, "/api/search/authors", nil)
+	response := httptest.NewRecorder()
+
+	request = mux.SetURLVars(request, map[string]string{
+		"searchString": searchString,
+	})
+
+	SearchAuthorsByString(response, request)
+
+	var respObj []SearchView
+	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
+	return respObj[0]
 }
