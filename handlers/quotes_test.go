@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"strconv"
 	"testing"
 
@@ -22,11 +24,11 @@ func TestEasySearchQuotesByString(t *testing.T) {
 		SearchQuotesByString(response, request)
 
 		var respObj []SearchView
-		got := json.Unmarshal(response.Body.Bytes(), &respObj)
+		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 		firstAuthor := respObj[0].Name
 		want := "Muhammad Ali"
 		if firstAuthor != want {
-			t.Errorf("got %q, want %q", got, want)
+			t.Errorf("got %q, want %q", firstAuthor, want)
 		}
 	})
 }
@@ -43,11 +45,11 @@ func TestIntermediateSearchQuotesByString(t *testing.T) {
 		SearchQuotesByString(response, request)
 
 		var respObj []SearchView
-		got := json.Unmarshal(response.Body.Bytes(), &respObj)
+		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 		firstAuthor := respObj[0].Name
 		want := "Muhammad Ali"
 		if firstAuthor != want {
-			t.Errorf("got %q, want %q", got, want)
+			t.Errorf("got %q, want %q", firstAuthor, want)
 		}
 	})
 }
@@ -64,11 +66,11 @@ func TestHardSearchQuotesByString(t *testing.T) {
 		SearchQuotesByString(response, request)
 
 		var respObj []SearchView
-		got := json.Unmarshal(response.Body.Bytes(), &respObj)
+		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 		firstAuthor := respObj[0].Name
 		want := "Muhammad Ali"
 		if firstAuthor != want {
-			t.Errorf("got %q, want %q", got, want)
+			t.Errorf("got %q, want %q", firstAuthor, want)
 		}
 	})
 }
@@ -85,11 +87,11 @@ func TestEasySearchAuthorsByString(t *testing.T) {
 		SearchAuthorsByString(response, request)
 
 		var respObj []SearchView
-		got := json.Unmarshal(response.Body.Bytes(), &respObj)
+		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 		firstAuthor := respObj[0].Name
 		want := "Friedrich Nietzsche"
 		if firstAuthor != want {
-			t.Errorf("got %q, want %q", got, want)
+			t.Errorf("got %q, want %q", firstAuthor, want)
 		}
 	})
 }
@@ -106,11 +108,11 @@ func TestIntermediateSearchAuthorsByString(t *testing.T) {
 		SearchAuthorsByString(response, request)
 
 		var respObj []SearchView
-		got := json.Unmarshal(response.Body.Bytes(), &respObj)
+		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 		firstAuthor := respObj[0].Name
 		want := "Joseph Stalin"
 		if firstAuthor != want {
-			t.Errorf("got %q, want %q", got, want)
+			t.Errorf("got %q, want %q", firstAuthor, want)
 		}
 	})
 }
@@ -127,11 +129,77 @@ func TestHardSearchAuthorsByString(t *testing.T) {
 		SearchAuthorsByString(response, request)
 
 		var respObj []SearchView
-		got := json.Unmarshal(response.Body.Bytes(), &respObj)
+		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 		firstAuthor := respObj[0].Name
 		want := "Friedrich Nietzsche"
 		if firstAuthor != want {
-			t.Errorf("got %q, want %q", got, want)
+			t.Errorf("got %q, want %q", firstAuthor, want)
+		}
+	})
+}
+
+func TestEasySearchByStringForAuthor(t *testing.T) {
+	t.Run("should Return list of quotes with Friedrich Nietzsche as first author", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/api/search", nil)
+		response := httptest.NewRecorder()
+
+		request = mux.SetURLVars(request, map[string]string{
+			"searchString": "Friedrich Nietzsche",
+		})
+
+		SearchByString(response, request)
+
+		var respObj []SearchView
+		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
+		log.Println(respObj)
+		firstAuthor := respObj[1].Name //Use index 1 because in index 0 there is an author talking extensively about Nietzsche
+		want := "Friedrich Nietzsche"
+		if firstAuthor != want {
+			t.Errorf("got %q, want %q", firstAuthor, want)
+		}
+	})
+}
+
+func TestHardSearchByStringForAuthor(t *testing.T) {
+	t.Run("should Return list of quotes with Friedrich Nietzsche as first author", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/api/search", nil)
+		response := httptest.NewRecorder()
+
+		request = mux.SetURLVars(request, map[string]string{
+			"searchString": "Nietshe Friedr",
+		})
+
+		SearchByString(response, request)
+
+		var respObj []SearchView
+		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
+		log.Println(respObj)
+		firstAuthor := respObj[1].Name //Use index 1 because in index 0 there is an author talking extensively about Nietzsche
+		want := "Friedrich Nietzsche"
+		if firstAuthor != want {
+			t.Errorf("got %q, want %q", firstAuthor, want)
+		}
+	})
+}
+
+func TestEasySearchByStringForQuote(t *testing.T) {
+	t.Run("should Return list of quotes with Martin Luther as first author", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/api/search", nil)
+		response := httptest.NewRecorder()
+
+		request = mux.SetURLVars(request, map[string]string{
+			"searchString": "If you are not allowed to Laugh in Heaven",
+		})
+
+		SearchByString(response, request)
+
+		var respObj []SearchView
+		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
+		log.Println(respObj)
+		firstAuthor := respObj[1].Name //Use index 1 because in index 0 there is an author talking extensively about Nietzsche
+		want := "Martin Luther"
+		if firstAuthor != want {
+			t.Errorf("got %q, want %q", firstAuthor, want)
 		}
 	})
 }
@@ -159,6 +227,33 @@ func TestGetAuthorById(t *testing.T) {
 	})
 }
 
+func TestGetQuoteById(t *testing.T) {
+	t.Run("should return muhammad alis quote float like a butterfly...", func(t *testing.T) {
+		want := "Float like a butterfly, sting like a bee."
+		quote := getQuotes(want)
+		request, _ := http.NewRequest(http.MethodGet, "/api/authors/", nil)
+		response := httptest.NewRecorder()
+
+		request = mux.SetURLVars(request, map[string]string{
+			"id": strconv.Itoa(quote[0].Quoteid),
+		})
+
+		GetQuoteById(response, request)
+
+		var respObj SearchView
+		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
+		got := respObj.Quote
+
+		//Because Muhammad Ali has two quotes with "Float like a butterfly, sting like a bee.", the returned quotes
+		// from getQuotes have in index 0 the quote where he is talking about the butterfly quote, and the real quote
+		// is in index 1 therefore we test the got-quote with regexp
+		m1 := regexp.MustCompile(want)
+		if m1.MatchString(got) {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+}
+
 func getAuthor(searchString string) SearchView {
 	request, _ := http.NewRequest(http.MethodGet, "/api/search/authors", nil)
 	response := httptest.NewRecorder()
@@ -172,4 +267,19 @@ func getAuthor(searchString string) SearchView {
 	var respObj []SearchView
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	return respObj[0]
+}
+
+func getQuotes(searchString string) []SearchView {
+	request, _ := http.NewRequest(http.MethodGet, "/api/search/quotes", nil)
+	response := httptest.NewRecorder()
+
+	request = mux.SetURLVars(request, map[string]string{
+		"searchString": searchString,
+	})
+
+	SearchQuotesByString(response, request)
+
+	var respObj []SearchView
+	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
+	return respObj
 }

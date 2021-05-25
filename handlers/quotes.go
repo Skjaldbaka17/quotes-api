@@ -98,7 +98,7 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	params := mux.Vars(r)
 	searchString := params["searchString"]
-
+	log.Println("SearchString", searchString)
 	var results []SearchView
 	m1 := regexp.MustCompile(` `)
 	phrasesearch := m1.ReplaceAllString(searchString, " <-> ")
@@ -108,6 +108,7 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 		searchString, phrasesearch, generalsearch).
 		Where("tsv @@ plainq").
 		Or("tsv @@ phraseq").
+		Or("? % ANY(STRING_TO_ARRAY(name,' '))", searchString).
 		Select("*, ts_rank(quotetsv, plainq) as plainrank, ts_rank(quotetsv, phraseq) as phraserank, ts_rank(quotetsv, generalq) as generalrank").
 		Clauses(clause.OrderBy{
 			Expression: clause.Expr{SQL: "phraserank DESC,similarity(name, ?) DESC, plainrank DESC, generalrank DESC ", Vars: []interface{}{searchString}, WithoutParentheses: true},
@@ -159,11 +160,9 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 }
 
 func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
-	log.Println("HERE", r.URL)
 	start := time.Now()
 	params := mux.Vars(r)
 	searchString := params["searchString"]
-	log.Println("SEARCH:", searchString)
 
 	var results []SearchView
 	m1 := regexp.MustCompile(` `)
