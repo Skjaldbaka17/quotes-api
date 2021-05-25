@@ -159,10 +159,11 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 }
 
 func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
+	log.Println("HERE", r.URL)
 	start := time.Now()
 	params := mux.Vars(r)
 	searchString := params["searchString"]
-	fmt.Print(searchString)
+	log.Println("SEARCH:", searchString)
 
 	var results []SearchView
 	m1 := regexp.MustCompile(` `)
