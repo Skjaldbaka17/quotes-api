@@ -9,13 +9,55 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func TestSearchQuotesByString(t *testing.T) {
+func TestEasySearchQuotesByString(t *testing.T) {
 	t.Run("should Return list of quotes with Muhammad Ali as first author", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/api/search/quotes", nil)
 		response := httptest.NewRecorder()
 
 		request = mux.SetURLVars(request, map[string]string{
-			"searchString": "butterfly sting bee",
+			"searchString": "Float like a butterfly sting like a bee",
+		})
+
+		SearchQuotesByString(response, request)
+
+		var respObj []SearchView
+		got := json.Unmarshal(response.Body.Bytes(), &respObj)
+		firstAuthor := respObj[0].Name
+		want := "Muhammad Ali"
+		if firstAuthor != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+}
+
+func TestIntermediateSearchQuotesByString(t *testing.T) {
+	t.Run("should Return list of quotes with Muhammad Ali as first author", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/api/search/quotes", nil)
+		response := httptest.NewRecorder()
+
+		request = mux.SetURLVars(request, map[string]string{
+			"searchString": "bee sting like a butterfly",
+		})
+
+		SearchQuotesByString(response, request)
+
+		var respObj []SearchView
+		got := json.Unmarshal(response.Body.Bytes(), &respObj)
+		firstAuthor := respObj[0].Name
+		want := "Muhammad Ali"
+		if firstAuthor != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+}
+
+func TestHardSearchQuotesByString(t *testing.T) {
+	t.Run("should Return list of quotes with Muhammad Ali as first author", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/api/search/quotes", nil)
+		response := httptest.NewRecorder()
+
+		request = mux.SetURLVars(request, map[string]string{
+			"searchString": "bee butterfly float",
 		})
 
 		SearchQuotesByString(response, request)
