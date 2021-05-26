@@ -1,0 +1,20 @@
+basePath: /
+consumes:
+- application/json
+host: quotel-api.com
+info:
+  contact:
+    email: skjaldbaka17@gmail.com
+    name: Þórður Ágústsson
+  description: Documentation of our quotes API.
+  title: quotes-api.
+  version: 1.0.0
+paths: {}
+produces:
+- application/json
+schemes:
+- http
+securityDefinitions:
+  basic:
+    type: basic
+swagger: "2.0"
