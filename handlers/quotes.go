@@ -8,50 +8,25 @@ import (
 	"regexp"
 	"time"
 
-	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
-
-type Quotes struct {
-	gorm.Model
-	Id          int    `json:"id"`
-	Authorid    int    `json:"authorid"`
-	Quote       string `json:"quote"`
-	Count       int    `json:"count"`
-	IsIcelandic bool   `json:"isicelandic"`
-}
-
-type Authors struct {
-	gorm.Model
-	Name   string   `json:"name"`
-	Count  int      `json:"count"`
-	Quotes []Quotes `json:"quotes" gorm:"foreignKey:authorid"`
-}
-
-type SearchView struct {
-	//if AuthorId then gorm cant map the values correctly, but works with Authorid and Quoteid etc. Why? TODO
-	Authorid    int    `json:"authorid"`
-	Name        string `json:"name"`
-	Quoteid     int    `json:"quoteid" `
-	Quote       string `json:"quote"`
-	Isicelandic bool   `json:"isicelandic"`
-}
-
-type Request struct {
-	Ids          []int  `json:"ids,omitempty"`
-	Id           int    `json:"id,omitempty"`
-	Page         int    `json:"page,omitempty"`
-	SearchString string `json:"searchString,omitempty"`
-	PageSize     int    `json:"pageSize,omitempty"`
-}
 
 const defaultPageSize = 25
 const maxPageSize = 200
 
+// swagger:route POST /authors AUTHORS getAuthorsByIds
+//
+// Get authors by their ids
+//
+// responses:
+//	200: multipleQuotesResponse
+
+// Get Authors handles POST requests to get the authors, and their quotes, that have the given ids
 func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
 	requestBody, err := validateRequestBody(r)
 
 	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
 		http.Error(rw, "Could not finish", 404)
 		return
 	}
@@ -59,10 +34,11 @@ func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
 	err = db.Table("searchview").
 		Select("*").
 		Where("authorid in (?)", requestBody.Ids).
-		First(&authors).
+		Find(&authors).
 		Error
-	log.Println(authors)
+
 	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
 		log.Printf("Got error when decoding: %s", err)
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
@@ -71,38 +47,20 @@ func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(&authors)
 }
 
-// func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
-// 	var requestBody Request
-// 	err := json.NewDecoder(r.Body).Decode(&requestBody)
+// swagger:route POST /quotes QUOTES getQuotesByIds
+// Get quotes by their ids
+//
+// responses:
+//	200: multipleQuotesResponse
 
-// 	if err != nil {
-// 		log.Printf("Got error when decoding: %s", err)
-// 		http.Error(rw, err.Error(), http.StatusBadRequest)
-// 		return
-// 	}
-// 	var quotes []SearchView
-// 	err = db.Table("searchview").
-// 		Select("*").
-// 		Where("authorid in ?", requestBody.Ids).
-// 		Order("quoteid ASC").
-// 		Find(&quotes).
-// 		Error
-
-// 	if err != nil {
-// 		log.Printf("Got error when decoding: %s", err)
-// 		http.Error(rw, err.Error(), http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	json.NewEncoder(rw).Encode(&quotes)
-// }
-
+// GetQuotesById handles POST requests to get the quotes, and their authors, that have the given ids
 func GetQuotesById(rw http.ResponseWriter, r *http.Request) {
 	var requestBody Request
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
 
 	log.Println(requestBody)
 	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
 		log.Printf("Got error when decoding: %s", err)
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
@@ -116,6 +74,7 @@ func GetQuotesById(rw http.ResponseWriter, r *http.Request) {
 		Error
 
 	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
 		log.Printf("Got error when decoding: %s", err)
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
@@ -124,11 +83,15 @@ func GetQuotesById(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(&quotes)
 }
 
+//ValidateRequestBody takes in the request and validates all the input fields, returns an error with reason for validation-failure
+//if validation fails.
+//TODO: Make validation better! i.e. make it "real"
 func validateRequestBody(r *http.Request) (Request, error) {
 	var requestBody Request
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
 
 	if err != nil {
+		//TODO: Respond with better error -- and add tests
 		log.Printf("Got error when decoding: %s", err)
 		return Request{}, err
 	}
@@ -141,12 +104,20 @@ func validateRequestBody(r *http.Request) (Request, error) {
 	return requestBody, nil
 }
 
+// swagger:route POST /search SEARCH generalSearchByString
+// Search for quotes / authors by a general string-search that searches both in the names of the authors and the quotes themselves
+//
+// responses:
+//	200: multipleQuotesResponse
+
+// SearchByString handles POST requests to search for quotes / authors by a search-string
 func SearchByString(rw http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 
 	requestBody, err := validateRequestBody(r)
 
 	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -172,6 +143,7 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 		Find(&results).Error
 
 	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
 		log.Printf("Got error when decoding: %s", err)
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
@@ -183,12 +155,21 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Time: %d", elapsed.Milliseconds())
 }
 
+// swagger:route POST /search/authors SEARCH searchAuthorsByString
+//
+// Authors search. Searching authors by a given search string
+//
+// responses:
+//	200: multipleQuotesResponse
+
+// SearchAuthorsByString handles POST requests to search for authors by a search-string
 func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 
 	requestBody, err := validateRequestBody(r)
 
 	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -208,6 +189,7 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 		Find(&results).Error
 
 	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
 		log.Printf("Got error when decoding: %s", err)
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
@@ -219,6 +201,12 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Time: %d", elapsed.Milliseconds())
 }
 
+// swagger:route POST /search/quotes SEARCH searchQuotesByString
+// Quotes search. Searching quotes by a given search string
+// responses:
+//	200: multipleQuotesResponse
+
+// SearchQuotesByString handles POST requests to search for quotes by a search-string
 func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	requestBody, err := validateRequestBody(r)

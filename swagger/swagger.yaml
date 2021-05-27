@@ -1,20 +1,246 @@
-basePath: /
+basePath: /api/
 consumes:
 - application/json
+definitions:
+  SearchView:
+    properties:
+      authorid:
+        description: The author's id
+        example: 24952
+        format: int64
+        type: integer
+        uniqueItems: true
+        x-go-name: Authorid
+      name:
+        description: Name of author
+        example: Muhammad Ali
+        type: string
+        x-go-name: Name
+      quote:
+        description: The quote
+        example: Float like a butterfly, sting like a bee.
+        type: string
+        x-go-name: Quote
+      quoteid:
+        description: The quote's id
+        example: 582676
+        format: int64
+        type: integer
+        uniqueItems: true
+        x-go-name: Quoteid
+    type: object
+    x-go-package: github.com/Skjaldbaka17/quotes-api/handlers
 host: quotel-api.com
 info:
   contact:
     email: skjaldbaka17@gmail.com
     name: Þórður Ágústsson
-  description: Documentation of our quotes API.
+  description: |-
+    Documentation of our quotes API.
+    tags:
+    name: QUOTES
+    description: Access random quote service. Use this to get random quotes , quotes filtered by authors or tags etc.
   title: quotes-api.
   version: 1.0.0
-paths: {}
+paths:
+  /authors:
+    post:
+      description: Get authors by their ids
+      operationId: getAuthorsByIds
+      parameters:
+      - description: The structure of the request for authors by their ids
+        in: body
+        name: Body
+        required: true
+        schema:
+          properties:
+            ids:
+              description: The list of author's ids you want
+              example:
+              - 24952
+              - 19161
+              items:
+                format: int64
+                type: integer
+              type: array
+              x-go-name: Ids
+          required:
+          - ids
+          type: object
+      responses:
+        "200":
+          $ref: '#/responses/multipleQuotesResponse'
+      tags:
+      - AUTHORS
+  /quotes:
+    post:
+      description: Get quotes by their ids
+      operationId: getQuotesByIds
+      parameters:
+      - description: The structure of the request for quotes by their ids
+        in: body
+        name: Body
+        required: true
+        schema:
+          properties:
+            ids:
+              description: The list of quotes's ids you want
+              example:
+              - 582676
+              - 443976
+              items:
+                format: int64
+                type: integer
+              type: array
+              x-go-name: Ids
+          required:
+          - ids
+          type: object
+      responses:
+        "200":
+          $ref: '#/responses/multipleQuotesResponse'
+      tags:
+      - QUOTES
+  /search:
+    post:
+      description: Search for quotes / authors by a general string-search that searches
+        both in the names of the authors and the quotes themselves
+      operationId: generalSearchByString
+      parameters:
+      - description: The structure of the request for searching quotes/authors
+        in: body
+        name: Body
+        required: true
+        schema:
+          properties:
+            page:
+              description: The page you are asking for, starts with 0.
+              example: 0
+              format: int64
+              minimum: 0
+              type: integer
+              x-go-name: Page
+            pageSize:
+              default: 25
+              description: The number of quotes to be returned on each "page"
+              example: 30
+              format: int64
+              maximum: 200
+              minimum: 1
+              type: integer
+              x-go-name: PageSize
+            searchString:
+              description: The string to be used in the search
+              example: sting like butterfly
+              type: string
+              x-go-name: SearchString
+          required:
+          - searchString
+          type: object
+      responses:
+        "200":
+          $ref: '#/responses/multipleQuotesResponse'
+      tags:
+      - SEARCH
+  /search/authors:
+    post:
+      description: Authors search. Searching authors by a given search string
+      operationId: searchAuthorsByString
+      parameters:
+      - description: The structure of the request for searching authors
+        in: body
+        name: Body
+        required: true
+        schema:
+          properties:
+            page:
+              description: The page you are asking for, starts with 0.
+              example: 0
+              format: int64
+              minimum: 0
+              type: integer
+              x-go-name: Page
+            pageSize:
+              default: 25
+              description: The number of quotes to be returned on each "page"
+              example: 30
+              format: int64
+              maximum: 200
+              minimum: 1
+              type: integer
+              x-go-name: PageSize
+            searchString:
+              description: The string to be used in the search
+              example: Ali Muhammad
+              type: string
+              x-go-name: SearchString
+          required:
+          - searchString
+          type: object
+      responses:
+        "200":
+          $ref: '#/responses/multipleQuotesResponse'
+      tags:
+      - SEARCH
+  /search/quotes:
+    post:
+      description: Quotes search. Searching quotes by a given search string
+      operationId: searchQuotesByString
+      parameters:
+      - description: The structure of the request for searching quotes/authors
+        in: body
+        name: Body
+        required: true
+        schema:
+          properties:
+            page:
+              description: The page you are asking for, starts with 0.
+              example: 0
+              format: int64
+              minimum: 0
+              type: integer
+              x-go-name: Page
+            pageSize:
+              default: 25
+              description: The number of quotes to be returned on each "page"
+              example: 30
+              format: int64
+              maximum: 200
+              minimum: 1
+              type: integer
+              x-go-name: PageSize
+            searchString:
+              description: The string to be used in the search
+              example: sting like butterfly
+              type: string
+              x-go-name: SearchString
+          required:
+          - searchString
+          type: object
+      responses:
+        "200":
+          $ref: '#/responses/multipleQuotesResponse'
+      tags:
+      - SEARCH
 produces:
 - application/json
+responses:
+  multipleQuotesResponse:
+    description: Data structure representing a single product
+    schema:
+      items:
+        $ref: '#/definitions/SearchView'
+      type: array
 schemes:
 - http
 securityDefinitions:
   basic:
     type: basic
 swagger: "2.0"
+tags:
+- description: Using text search for finding authors and quotes.
+  name: SEARCH
+- description: Everthing with quotes.
+  name: QUOTES
+- description: Everything with authors.
+  name: AUTHORS
