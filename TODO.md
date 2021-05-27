@@ -1,11 +1,15 @@
 # TODOS
 
 - [ ] Validate RequestBody + Tests
+- [ ] add search for topics and searching in topics (maybe just have a single search endpoint with parameters? i.e. want to search for authors / quotes / language inside a specific topic?)
 - [ ] Clean up quotes.go
 - [ ] Error handling + Tests
 - [ ] Make error tests (i.e. made-to-fail-tests)
+- [ ] English and Icelandic Authors with same name have same author id
+- [ ] Add get random Quotes / Quote of The Day
 - [ ] Add icelandic / English Support
 - [ ] Make function for building the SQL query (general for all?)
+- [ ] Add categories
 - [ ] Add categories-search (Motivational etc)
 - [ ] Setup AWS server
 - [ ] Make Authors Search more efficient (create a similarity-based index ?)
@@ -18,6 +22,10 @@
       * https://github.com/go-swagger/go-swagger
       * https://github.com/nicholasjackson/building-microservices-youtube/blob/episode_7/product-api/main.go
       * https://www.youtube.com/watch?v=07XhTqE-j8k&t=374s
+      * https://github.com/nicholasjackson/building-microservices-youtube/blob/episode_7/product-api/handlers/docs.go
+
+
+Author api: https://quotes.rest
 
 
 
