@@ -334,7 +334,7 @@ func GetTopic(rw http.ResponseWriter, r *http.Request) {
 // responses:
 //	200: listOfStrings
 
-// GetTopic handles POST requests for getting quotes from a particular topic
+// ListLanguages handles GET requests for getting the languages supported by the api
 func ListLanguagesSupported(rw http.ResponseWriter, r *http.Request) {
 
 	type response = struct {
