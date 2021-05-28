@@ -212,6 +212,7 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 	requestBody, err := validateRequestBody(r)
 
 	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -236,6 +237,7 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 		Find(&results).Error
 
 	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
 		log.Printf("Got error when decoding: %s", err)
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
@@ -245,5 +247,35 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 	t := time.Now()
 	elapsed := t.Sub(start)
 	fmt.Printf("Time: %d", elapsed.Milliseconds())
+}
 
+func GetTopics(rw http.ResponseWriter, r *http.Request) {
+	requestBody, err := validateRequestBody(r)
+	log.Println("HERE")
+	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var results []ListItem
+
+	pointer := db.Table("topics")
+
+	if requestBody.Language == "English" {
+		pointer = pointer.Where("not isicelandic")
+	} else if requestBody.Language == "Icelandic" {
+		pointer = pointer.Where("isicelandic")
+	}
+
+	err = pointer.Find(&results).Error
+	log.Println(results)
+	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
+		log.Printf("Got error when decoding: %s", err)
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	json.NewEncoder(rw).Encode(&results)
 }

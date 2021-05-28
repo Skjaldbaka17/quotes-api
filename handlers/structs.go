@@ -38,10 +38,17 @@ type SearchView struct {
 	Isicelandic bool   `json:"-"`
 }
 
+type ListItem struct {
+	Id          int    `json:"id"`
+	Name        string `json:"name"`
+	Isicelandic string `json:"isicelandic"`
+}
+
 type Request struct {
 	Ids          []int  `json:"ids,omitempty"`
 	Id           int    `json:"id,omitempty"`
 	Page         int    `json:"page,omitempty"`
 	SearchString string `json:"searchString,omitempty"`
 	PageSize     int    `json:"pageSize,omitempty"`
+	Language     string `json:"language,omitempty"`
 }

@@ -249,6 +249,38 @@ func TestGetQuotesById(t *testing.T) {
 	})
 }
 
+func TestGetTopic(t *testing.T) {
+	t.Run("Should return the possible English topics as a list of objects", func(t *testing.T) {
+		var nrOfEnglishTopics int = 13
+		var language string = "English"
+		var jsonStr = []byte(fmt.Sprintf(`{"language": "%s"}`, language))
+		request, _ := http.NewRequest(http.MethodPost, "/api", bytes.NewBuffer(jsonStr))
+		response := httptest.NewRecorder()
+		GetTopics(response, request)
+		var respObj []ListItem
+		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
+
+		if len(respObj) != nrOfEnglishTopics {
+			t.Errorf("got %d number of topics, expected %d", len(respObj), nrOfEnglishTopics)
+		}
+	})
+
+	t.Run("Should return the possible Icelandic topics as a list of objects", func(t *testing.T) {
+		var nrOfIcelandicTopics int = 7
+		var language string = "Icelandic"
+		var jsonStr = []byte(fmt.Sprintf(`{"language": "%s"}`, language))
+		request, _ := http.NewRequest(http.MethodPost, "/api", bytes.NewBuffer(jsonStr))
+		response := httptest.NewRecorder()
+		GetTopics(response, request)
+		var respObj []ListItem
+		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
+
+		if len(respObj) != nrOfIcelandicTopics {
+			t.Errorf("got %d number of topics, expected %d", len(respObj), nrOfIcelandicTopics)
+		}
+	})
+}
+
 type Set []int
 
 func (set *Set) toString() string {

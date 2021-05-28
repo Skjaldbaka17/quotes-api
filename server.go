@@ -19,6 +19,7 @@ func main() {
 	posts.HandleFunc("/api/search/authors", handlers.SearchAuthorsByString)
 	posts.HandleFunc("/api/search/quotes", handlers.SearchQuotesByString)
 	posts.HandleFunc("/api/authors", handlers.GetAuthorsById)
+	posts.HandleFunc("/api/topics", handlers.GetTopics)
 
 	// handler for documentation
 	opts := middleware.RedocOpts{SpecURL: "/swagger/swagger.yaml"}
