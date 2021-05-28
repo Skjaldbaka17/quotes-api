@@ -222,11 +222,56 @@ paths:
           $ref: '#/responses/multipleQuotesResponse'
       tags:
       - SEARCH
+  /topics:
+    post:
+      description: List the available topics, english / icelandic or both
+      operationId: getTopics
+      parameters:
+      - description: The structure of the request for listing topics
+        in: body
+        name: Body
+        schema:
+          properties:
+            language:
+              description: The language of the topics. If left empty all topics from
+                all languages are returned
+              example: English
+              type: string
+              x-go-name: Language
+          type: object
+      responses:
+        "200":
+          $ref: '#/responses/listTopicsResponse'
+      tags:
+      - TOPICS
 produces:
 - application/json
 responses:
+  listTopicsResponse:
+    description: Data structure representing a list response for topics
+    schema:
+      items:
+        properties:
+          id:
+            description: The id of the topic
+            example: 10
+            format: int64
+            type: integer
+            x-go-name: Id
+          isicelandic:
+            description: Boolean whether or not this quote is in icelandic
+            example: true
+            type: boolean
+            x-go-name: Isicelandic
+          name:
+            description: Name of the topics
+            example: inspirational
+            type: string
+            x-go-name: Name
+        type: object
+      type: array
   multipleQuotesResponse:
-    description: Data structure representing a single product
+    description: Data structure representing most responses
     schema:
       items:
         $ref: '#/definitions/SearchView'

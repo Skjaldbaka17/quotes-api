@@ -249,6 +249,12 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Time: %d", elapsed.Milliseconds())
 }
 
+// swagger:route POST /topics TOPICS getTopics
+// List the available topics, english / icelandic or both
+// responses:
+//	200: listTopicsResponse
+
+// GetTopics handles POST requests for listing the available quote-topics
 func GetTopics(rw http.ResponseWriter, r *http.Request) {
 	requestBody, err := validateRequestBody(r)
 	log.Println("HERE")

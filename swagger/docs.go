@@ -29,12 +29,30 @@ package docs
 
 import "github.com/Skjaldbaka17/quotes-api/handlers"
 
-// Data structure representing a single product
+// Data structure representing most responses
 // swagger:response multipleQuotesResponse
 type authorsResponseWrapper struct {
-	// Newly created product
+	// List of authors / quotes
 	// in: body
 	Body []handlers.SearchView
+}
+
+// Data structure representing a list response for topics
+// swagger:response listTopicsResponse
+type listTopicsResponseWrapper struct {
+	// List of topics
+	// in: body
+	Body []struct {
+		// The id of the topic
+		// example: 10
+		Id int `json:"id"`
+		// Name of the topics
+		// example: inspirational
+		Name string `json:"name"`
+		// Boolean whether or not this quote is in icelandic
+		// example: true
+		Isicelandic bool `json:"isicelandic"`
+	}
 }
 
 // swagger:parameters getAuthorsByIds
@@ -114,5 +132,17 @@ type getSearchAuthorsByStringWrapper struct {
 		// Minimum: 0
 		// Example: 0
 		Page int `json:"page"`
+	}
+}
+
+// swagger:parameters getTopics
+type listTopicsWrapper struct {
+	// The structure of the request for listing topics
+	// in: body
+	Body struct {
+		// The language of the topics. If left empty all topics from all languages are returned
+		//
+		// Example: English
+		Language string `json:"language"`
 	}
 }
