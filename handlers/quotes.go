@@ -285,3 +285,63 @@ func GetTopics(rw http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(rw).Encode(&results)
 }
+
+// swagger:route POST /topic TOPICS getTopic
+// Get quotes from a particular topic
+// responses:
+//	200: multipleQuotesTopicResponse
+
+// GetTopic handles POST requests for getting quotes from a particular topic
+func GetTopic(rw http.ResponseWriter, r *http.Request) {
+	requestBody, err := validateRequestBody(r)
+
+	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var results []TopicsView
+
+	//Order by quoteid to have definitive order (when for examplke some quotes rank the same for plain, phrase and general)
+	dbPoint := db.Table("topicsview")
+
+	if requestBody.Topic != "" {
+		dbPoint = dbPoint.Where("lower(topicname) = lower(?)", requestBody.Topic)
+	} else {
+		dbPoint = dbPoint.Where("topicid = ?", requestBody.Id)
+	}
+
+	err = dbPoint.Clauses(clause.OrderBy{
+		Expression: clause.Expr{SQL: "quoteid DESC", Vars: []interface{}{}, WithoutParentheses: true},
+	}).
+		Limit(requestBody.PageSize).
+		Offset(requestBody.Page * requestBody.PageSize).
+		Find(&results).Error
+
+	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
+		log.Printf("Got error when decoding: %s", err)
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	json.NewEncoder(rw).Encode(&results)
+}
+
+// swagger:route GET /languages META getLanguages
+// Get languages supported by the api
+// responses:
+//	200: listOfStrings
+
+// GetTopic handles POST requests for getting quotes from a particular topic
+func ListLanguagesSupported(rw http.ResponseWriter, r *http.Request) {
+
+	type response = struct {
+		Languages []string `json:"languages"`
+	}
+
+	json.NewEncoder(rw).Encode(&response{
+		Languages: []string{"English", "Icelandic"},
+	})
+}

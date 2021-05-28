@@ -72,6 +72,15 @@ paths:
           $ref: '#/responses/multipleQuotesResponse'
       tags:
       - AUTHORS
+  /languages:
+    get:
+      description: Get languages supported by the api
+      operationId: getLanguages
+      responses:
+        "200":
+          $ref: '#/responses/listOfStrings'
+      tags:
+      - META
   /quotes:
     post:
       description: Get quotes by their ids
@@ -222,6 +231,48 @@ paths:
           $ref: '#/responses/multipleQuotesResponse'
       tags:
       - SEARCH
+  /topic:
+    post:
+      description: Get quotes from a particular topic
+      operationId: getTopic
+      parameters:
+      - description: The structure of the request for listing topics
+        in: body
+        name: Body
+        schema:
+          properties:
+            id:
+              description: The topic's id, if left empty then the topic name is used
+              example: Motivational
+              type: string
+              x-go-name: Id
+            page:
+              description: The page you are asking for, starts with 0.
+              example: 0
+              format: int64
+              minimum: 0
+              type: integer
+              x-go-name: Page
+            pageSize:
+              default: 25
+              description: The number of quotes to be returned on each "page"
+              example: 30
+              format: int64
+              maximum: 200
+              minimum: 1
+              type: integer
+              x-go-name: PageSize
+            topic:
+              description: Name of the topic, if left empty then the id is used
+              example: Motivational
+              type: string
+              x-go-name: Topic
+          type: object
+      responses:
+        "200":
+          $ref: '#/responses/multipleQuotesTopicResponse'
+      tags:
+      - TOPICS
   /topics:
     post:
       description: List the available topics, english / icelandic or both
@@ -247,6 +298,22 @@ paths:
 produces:
 - application/json
 responses:
+  listOfStrings:
+    description: Data structure for a list of strings
+    schema:
+      items:
+        properties:
+          languages:
+            description: The languages supported
+            example:
+            - English
+            - Icelandic
+            items:
+              type: string
+            type: array
+            x-go-name: Languages
+        type: object
+      type: array
   listTopicsResponse:
     description: Data structure representing a list response for topics
     schema:
@@ -275,6 +342,51 @@ responses:
     schema:
       items:
         $ref: '#/definitions/SearchView'
+      type: array
+  multipleQuotesTopicResponse:
+    description: Data structure representing topic quotes response
+    schema:
+      items:
+        properties:
+          authorid:
+            description: The author's id
+            example: 26214
+            format: int64
+            type: integer
+            uniqueItems: true
+            x-go-name: Authorid
+          name:
+            description: Name of author
+            example: John D. Rockefeller
+            type: string
+            x-go-name: Name
+          quote:
+            description: The quote
+            example: If you want to succeed you should strike out on new paths, rather
+              than travel the worn paths of accepted success.
+            type: string
+            x-go-name: Quote
+          quoteid:
+            description: The quote's id
+            example: 625402
+            format: int64
+            type: integer
+            uniqueItems: true
+            x-go-name: Quoteid
+          topicid:
+            description: The topic's id
+            example: 6
+            format: int64
+            type: integer
+            uniqueItems: true
+            x-go-name: Topicid
+          topicname:
+            description: The topic's name
+            example: motivational
+            type: string
+            uniqueItems: true
+            x-go-name: Topicname
+        type: object
       type: array
 schemes:
 - http

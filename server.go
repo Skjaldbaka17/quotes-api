@@ -13,18 +13,20 @@ func main() {
 
 	r := mux.NewRouter()
 	posts := r.Methods(http.MethodPost).Subrouter()
-	gets := r.Methods(http.MethodGet).Subrouter()
 	posts.HandleFunc("/api/quotes", handlers.GetQuotesById)
 	posts.HandleFunc("/api/search", handlers.SearchByString)
 	posts.HandleFunc("/api/search/authors", handlers.SearchAuthorsByString)
 	posts.HandleFunc("/api/search/quotes", handlers.SearchQuotesByString)
 	posts.HandleFunc("/api/authors", handlers.GetAuthorsById)
 	posts.HandleFunc("/api/topics", handlers.GetTopics)
+	posts.HandleFunc("/api/topic", handlers.GetTopic)
 
 	// handler for documentation
 	opts := middleware.RedocOpts{SpecURL: "/swagger/swagger.yaml"}
 	sh := middleware.Redoc(opts, nil)
 
+	gets := r.Methods(http.MethodGet).Subrouter()
+	gets.HandleFunc("/api/languages", handlers.ListLanguagesSupported)
 	gets.Handle("/docs", sh)
 	gets.Handle("/swagger/swagger.yaml", http.FileServer(http.Dir("./")))
 

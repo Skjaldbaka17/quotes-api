@@ -51,4 +51,31 @@ type Request struct {
 	SearchString string `json:"searchString,omitempty"`
 	PageSize     int    `json:"pageSize,omitempty"`
 	Language     string `json:"language,omitempty"`
+	Topic        string `json:"topic,omitempty"`
+}
+
+type TopicsView struct {
+	// The author's id
+	//Unique: true
+	//example: 24952
+	Authorid int `json:"authorid"`
+	// Name of author
+	//example: Muhammad Ali
+	Name string `json:"name"`
+	// The quote's id
+	//Unique: true
+	//example: 582676
+	Quoteid int `json:"quoteid" `
+	// The topic's id
+	//Unique: true
+	//example: 582676
+	Topicid int `json:"topicid" `
+	// The topic's name
+	//Unique: true
+	//example: inspirational
+	Topicname string `json:"topicname" `
+	// The quote
+	//example: Float like a butterfly, sting like a bee.
+	Quote       string `json:"quote"`
+	Isicelandic bool   `json:"-"`
 }
