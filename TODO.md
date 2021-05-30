@@ -7,10 +7,11 @@
 - [ ] Make error tests (i.e. made-to-fail-tests)
 - [ ] Add get random Quotes / Quote of The Day
 - [ ] Make function for building the SQL query (general for all?)
-- [ ] Add categories-search (Motivational etc)
 - [ ] Setup AWS server
+- [ ] Draw up DB-Graph (i.e. how tables are connected to view etc)
 - [ ] Make Authors Search more efficient (create a similarity-based index ?)
 - [ ] Look into and maybe Change rest into GraphQL
+- [x] Use TopicsView instead of QuoteView (and change name to something more general)
 - [x] Add Icelandic / English Support
 - [x] Add categories
 - [x] English and Icelandic Authors with same name have same author id

@@ -1,4 +1,4 @@
-create or replace view searchview as 
+create or replace view searchView as 
 select authors.id as authorid,
        authors.name,
        quotes.id as quoteid,

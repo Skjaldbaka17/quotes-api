@@ -14,6 +14,7 @@ func main() {
 	r := mux.NewRouter()
 	posts := r.Methods(http.MethodPost).Subrouter()
 	posts.HandleFunc("/api/quotes", handlers.GetQuotesById)
+	posts.HandleFunc("/api/quotes/random", handlers.GetRandomQuote)
 	posts.HandleFunc("/api/search", handlers.SearchByString)
 	posts.HandleFunc("/api/search/authors", handlers.SearchAuthorsByString)
 	posts.HandleFunc("/api/search/quotes", handlers.SearchQuotesByString)

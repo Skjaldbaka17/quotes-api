@@ -13,11 +13,16 @@ import (
 
 type httpRequest func(http.ResponseWriter, *http.Request)
 
-func SimpleRequestAndResponseTest(jsonStr []byte, fn httpRequest) []SearchView {
+func getRequestAndResponseForTest(jsonStr []byte) (*httptest.ResponseRecorder, *http.Request) {
 	request, _ := http.NewRequest(http.MethodPost, "/api", bytes.NewBuffer(jsonStr))
 	response := httptest.NewRecorder()
+	return response, request
+}
+
+func SimpleRequestAndResponseTest(jsonStr []byte, fn httpRequest) []QuoteView {
+	response, request := getRequestAndResponseForTest(jsonStr)
 	fn(response, request)
-	var respObj []SearchView
+	var respObj []QuoteView
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	return respObj
 }
@@ -122,7 +127,7 @@ func TestSearchByString(t *testing.T) {
 }
 
 //TODO: Give a better name,more intuitive
-func getObjNr26(searchString string, fn httpRequest) (SearchView, error) {
+func getObjNr26(searchString string, fn httpRequest) (QuoteView, error) {
 	pageSize := 100
 	var jsonStr = []byte(fmt.Sprintf(`{"searchString": "%s", "pageSize":%d}`, searchString, pageSize))
 	request, _ := http.NewRequest(http.MethodPost, "/api/search", bytes.NewBuffer(jsonStr))
@@ -130,11 +135,11 @@ func getObjNr26(searchString string, fn httpRequest) (SearchView, error) {
 
 	fn(response, request)
 
-	var respObj []SearchView
+	var respObj []QuoteView
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 	if pageSize != len(respObj) {
-		return SearchView{}, fmt.Errorf("got list of length %d but expected %d", len(respObj), pageSize)
+		return QuoteView{}, fmt.Errorf("got list of length %d but expected %d", len(respObj), pageSize)
 	}
 
 	return respObj[25], nil
@@ -154,7 +159,7 @@ func TestPagination(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		SearchByString(response, request)
-		var respObj []SearchView
+		var respObj []QuoteView
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		if pageSize != len(respObj) {
@@ -180,7 +185,7 @@ func TestPagination(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		SearchAuthorsByString(response, request)
-		var respObj []SearchView
+		var respObj []QuoteView
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		if pageSize != len(respObj) {
@@ -206,7 +211,7 @@ func TestPagination(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		SearchQuotesByString(response, request)
-		var respObj []SearchView
+		var respObj []QuoteView
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		if pageSize != len(respObj) {
@@ -288,7 +293,7 @@ func TestGetTopic(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodPost, "/api", bytes.NewBuffer(jsonStr))
 		response := httptest.NewRecorder()
 		GetTopic(response, request)
-		var respObj []TopicsView
+		var respObj []QuoteView
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		if len(respObj) != pageSize {
@@ -311,7 +316,7 @@ func TestGetTopic(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodPost, "/api", bytes.NewBuffer(jsonStr))
 		response := httptest.NewRecorder()
 		GetTopic(response, request)
-		var respObj []TopicsView
+		var respObj []QuoteView
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		if len(respObj) != pageSize {
@@ -335,7 +340,7 @@ func TestGetTopic(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodPost, "/api", bytes.NewBuffer(jsonStr))
 		response := httptest.NewRecorder()
 		GetTopic(response, request)
-		var respObj []TopicsView
+		var respObj []QuoteView
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		obj26 := respObj[0]
@@ -362,12 +367,46 @@ func TestGetTopic(t *testing.T) {
 
 }
 
+func TestGetRandomQuote(t *testing.T) {
+	//The test calls the function twice to test if the function returns two different quotes
+	t.Run("Should return a random quote", func(t *testing.T) {
+		var jsonStr = []byte(`{}`)
+		response, request := getRequestAndResponseForTest(jsonStr)
+		GetRandomQuote(response, request)
+		var firstRespObj QuoteView
+		_ = json.Unmarshal(response.Body.Bytes(), &firstRespObj)
+
+		if firstRespObj.Quote == "" {
+			t.Errorf("Expected a random quote but got an empty quote")
+		}
+
+		var secondRespObj QuoteView
+		GetRandomQuote(response, request)
+		_ = json.Unmarshal(response.Body.Bytes(), &secondRespObj)
+
+		if secondRespObj.Quoteid == firstRespObj.Quoteid {
+			t.Errorf("Expected two different quotes but got the same quote twice which is higly improbable")
+		}
+	})
+
+	t.Run("Should return a random quote from Teddy Roosevelt (given authorId)", func(t *testing.T) { t.Skip() })
+	t.Run("Should return a random quote from topic 'motivational' (given topicId)", func(t *testing.T) { t.Skip() })
+	t.Run("Should return a random English quote", func(t *testing.T) { t.Skip() })
+	t.Run("Should return a random Icelandic quote", func(t *testing.T) { t.Skip() })
+	t.Run("Should return a random English quote from topic 'inspirational' (given topicId)", func(t *testing.T) { t.Skip() })
+	t.Run("Should return a random Icelandic quote from topic 'orðtök' (given topicId)", func(t *testing.T) { t.Skip() })
+	t.Run("Should return a random quote containing the searchString 'love'", func(t *testing.T) { t.Skip() })
+	t.Run("Should return a random Icelandic quote containing the searchString 'beltið þitt'", func(t *testing.T) { t.Skip() })
+	t.Run("Should return a random quote containing the searchString 'strength' from the topic 'inspirational' (given topicId)", func(t *testing.T) { t.Skip() })
+
+}
+
 func getTopicId(topicName string) int {
 	var jsonStr = []byte(fmt.Sprintf(`{"topic": "%s"}`, topicName))
 	request, _ := http.NewRequest(http.MethodPost, "/api", bytes.NewBuffer(jsonStr))
 	response := httptest.NewRecorder()
 	GetTopic(response, request)
-	var respObj []TopicsView
+	var respObj []QuoteView
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	return respObj[0].Topicid
 }
@@ -383,26 +422,26 @@ func (set *Set) toString() string {
 	return strings.Join(IDs, ", ")
 }
 
-func getAuthor(searchString string) SearchView {
+func getAuthor(searchString string) QuoteView {
 	var jsonStr = []byte(fmt.Sprintf(`{"searchString": "%s"}`, searchString))
 	request, _ := http.NewRequest(http.MethodGet, "/api/search/authors", bytes.NewBuffer(jsonStr))
 	response := httptest.NewRecorder()
 
 	SearchAuthorsByString(response, request)
 
-	var respObj []SearchView
+	var respObj []QuoteView
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	return respObj[0]
 }
 
-func getQuotes(searchString string) []SearchView {
+func getQuotes(searchString string) []QuoteView {
 	var jsonStr = []byte(fmt.Sprintf(`{"searchString": "%s"}`, searchString))
 	request, _ := http.NewRequest(http.MethodGet, "/api/search/quotes", bytes.NewBuffer(jsonStr))
 	response := httptest.NewRecorder()
 
 	SearchQuotesByString(response, request)
 
-	var respObj []SearchView
+	var respObj []QuoteView
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	return respObj
 }

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -33,7 +34,7 @@ func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, "Could not finish", 404)
 		return
 	}
-	var authors []SearchView
+	var authors []QuoteView
 	err = db.Table("searchview").
 		Select("*").
 		Where("authorid in (?)", requestBody.Ids).
@@ -68,7 +69,7 @@ func GetQuotesById(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
-	var quotes []SearchView
+	var quotes []QuoteView
 	err = db.Table("searchview").
 		Select("*").
 		Where("quoteid in ?", requestBody.Ids).
@@ -125,7 +126,7 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var results []SearchView
+	var results []QuoteView
 	m1 := regexp.MustCompile(` `)
 	phrasesearch := m1.ReplaceAllString(requestBody.SearchString, " <-> ")
 	generalsearch := m1.ReplaceAllString(requestBody.SearchString, " | ")
@@ -183,7 +184,7 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var results []SearchView
+	var results []QuoteView
 
 	//Order by authorid to have definitive order (when for examplke some names rank the same for similarity), same for why quoteid
 	//% is same as SIMILARITY but with default threshold 0.3
@@ -233,7 +234,7 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var results []SearchView
+	var results []QuoteView
 	m1 := regexp.MustCompile(` `)
 	phrasesearch := m1.ReplaceAllString(requestBody.SearchString, " <-> ")
 	generalsearch := m1.ReplaceAllString(requestBody.SearchString, " | ")
@@ -324,7 +325,7 @@ func GetTopic(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var results []TopicsView
+	var results []QuoteView
 
 	//Order by quoteid to have definitive order (when for examplke some quotes rank the same for plain, phrase and general)
 	dbPoint := db.Table("topicsview")
@@ -352,7 +353,38 @@ func GetTopic(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(&results)
 }
 
-func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {}
+func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
+	// random() < 0.0005
+
+	requestBody, err := validateRequestBody(r)
+
+	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var dbPointer *gorm.DB
+	var result QuoteView
+
+	if requestBody.TopicId != 0 {
+
+	} else {
+		dbPointer = db.Table("searchview").
+			Where("random() < 0.0005") //Randomized, O(n)
+	}
+
+	err = dbPointer.Find(&result).Error
+
+	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	json.NewEncoder(rw).Encode(result)
+
+}
 
 func GetRandomQuotes(rw http.ResponseWriter, r *http.Request) {}
 

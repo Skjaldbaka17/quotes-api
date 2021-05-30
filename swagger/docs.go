@@ -34,7 +34,7 @@ import "github.com/Skjaldbaka17/quotes-api/handlers"
 type authorsResponseWrapper struct {
 	// List of authors / quotes
 	// in: body
-	Body []handlers.SearchView
+	Body []handlers.QuoteView
 }
 
 // Data structure representing topic quotes response

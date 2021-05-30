@@ -2,7 +2,7 @@ basePath: /api/
 consumes:
 - application/json
 definitions:
-  SearchView:
+  QuoteView:
     properties:
       authorid:
         description: The author's id
@@ -359,7 +359,7 @@ responses:
     description: Data structure representing most responses
     schema:
       items:
-        $ref: '#/definitions/SearchView'
+        $ref: '#/definitions/QuoteView'
       type: array
   multipleQuotesTopicResponse:
     description: Data structure representing topic quotes response
