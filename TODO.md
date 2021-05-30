@@ -6,8 +6,8 @@
 - [ ] Make error tests (i.e. made-to-fail-tests)
 - [ ] Get random Author
 - [ ] Get list of authors (with parameters for pagination and alphabet and languages)
-- [ ] Get Author of the day + Set Author of the day (plust points for available to set authors for multiple days in one request)
 - [ ] Add get and set Quote of The Day (plus points for available to set quotes for multiple days in one request)
+- [ ] Get Author of the day + Set Author of the day (plust points for available to set authors for multiple days in one request)
 - [ ] Add authentication for access to the api + Creating apiKeys + Documenting usage + admin access vs normal access
 - [ ] Add Counting each time a quote is accessed / sent from Api (also for topics) - i.e. stats
 - [ ] add search for topics and searching in topics (maybe just have a single search endpoint with parameters? i.e. want to search for authors / quotes / language inside a specific topic?)
