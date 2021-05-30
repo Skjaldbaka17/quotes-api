@@ -5,15 +5,15 @@
 - [ ] Clean up quotes.go
 - [ ] Error handling + Tests
 - [ ] Make error tests (i.e. made-to-fail-tests)
-- [ ] English and Icelandic Authors with same name have same author id
 - [ ] Add get random Quotes / Quote of The Day
-- [ ] Add icelandic / English Support
 - [ ] Make function for building the SQL query (general for all?)
-- [ ] Add categories
 - [ ] Add categories-search (Motivational etc)
 - [ ] Setup AWS server
 - [ ] Make Authors Search more efficient (create a similarity-based index ?)
 - [ ] Look into and maybe Change rest into GraphQL
+- [x] Add Icelandic / English Support
+- [x] Add categories
+- [x] English and Icelandic Authors with same name have same author id
 - [x] Add Search-"scroll", User is searching and is scrolling through her search and wants next batch of results matching her search i.e. PAGINATION
 - [x] setup testing (unit)
 - [x] Implement GetQuotesById (multiple quotes route)

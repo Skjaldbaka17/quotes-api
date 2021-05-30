@@ -11,6 +11,9 @@ definitions:
         type: integer
         uniqueItems: true
         x-go-name: Authorid
+      isicelandic:
+        type: boolean
+        x-go-name: Isicelandic
       name:
         description: Name of author
         example: Muhammad Ali
@@ -122,6 +125,11 @@ paths:
         required: true
         schema:
           properties:
+            language:
+              description: The particular language that the quote should be in
+              example: English
+              type: string
+              x-go-name: Language
             page:
               description: The page you are asking for, starts with 0.
               example: 0
@@ -162,6 +170,11 @@ paths:
         required: true
         schema:
           properties:
+            language:
+              description: The particular language that the quote should be in
+              example: English
+              type: string
+              x-go-name: Language
             page:
               description: The page you are asking for, starts with 0.
               example: 0
@@ -202,6 +215,11 @@ paths:
         required: true
         schema:
           properties:
+            language:
+              description: The particular language that the quote should be in
+              example: English
+              type: string
+              x-go-name: Language
             page:
               description: The page you are asking for, starts with 0.
               example: 0

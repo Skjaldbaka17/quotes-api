@@ -150,6 +150,9 @@ type getSearchByStringWrapper struct {
 		// Minimum: 0
 		// Example: 0
 		Page int `json:"page"`
+		// The particular language that the quote should be in
+		// example: English
+		Language string `json:"language"`
 	}
 }
 
@@ -176,6 +179,9 @@ type getSearchAuthorsByStringWrapper struct {
 		// Minimum: 0
 		// Example: 0
 		Page int `json:"page"`
+		// The particular language that the quote should be in
+		// example: English
+		Language string `json:"language"`
 	}
 }
 

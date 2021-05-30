@@ -35,7 +35,7 @@ type SearchView struct {
 	// The quote
 	//example: Float like a butterfly, sting like a bee.
 	Quote       string `json:"quote"`
-	Isicelandic bool   `json:"-"`
+	Isicelandic bool   `json:"isicelandic"`
 }
 
 type ListItem struct {

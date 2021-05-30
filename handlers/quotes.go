@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
 
 	"gorm.io/gorm/clause"
@@ -13,6 +14,8 @@ import (
 
 const defaultPageSize = 25
 const maxPageSize = 200
+
+var languages = []string{"English", "Icelandic"}
 
 // swagger:route POST /authors AUTHORS getAuthorsByIds
 //
@@ -128,17 +131,23 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 	generalsearch := m1.ReplaceAllString(requestBody.SearchString, " | ")
 
 	//Order by authorid to have definitive order (when for examplke some quotes rank the same for plain, phrase, general and similarity)
-	err = db.Table("searchview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq,to_tsquery(?) as generalq ",
+	dbPointer := db.Table("searchview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq,to_tsquery(?) as generalq ",
 		requestBody.SearchString, phrasesearch, generalsearch).
-		Where("tsv @@ plainq").
-		Or("tsv @@ phraseq").
-		Or("? % ANY(STRING_TO_ARRAY(name,' '))", requestBody.SearchString).
 		Select("*, ts_rank(quotetsv, plainq) as plainrank, ts_rank(quotetsv, phraseq) as phraserank, ts_rank(quotetsv, generalq) as generalrank").
+		Where("( tsv @@ plainq OR tsv @@ phraseq OR ? % ANY(STRING_TO_ARRAY(name,' ')) OR tsv @@ generalq)", requestBody.SearchString).
 		Clauses(clause.OrderBy{
 			Expression: clause.Expr{SQL: "phraserank DESC,similarity(name, ?) DESC, plainrank DESC, generalrank DESC, authorid DESC", Vars: []interface{}{requestBody.SearchString}, WithoutParentheses: true},
-		}).
-		Or("tsv @@ generalq").
-		Limit(requestBody.PageSize).
+		})
+
+		//Particular language search
+	switch strings.ToLower(requestBody.Language) {
+	case "english":
+		dbPointer = dbPointer.Not("isicelandic")
+	case "icelandic":
+		dbPointer = dbPointer.Where("isicelandic")
+	}
+
+	err = dbPointer.Limit(requestBody.PageSize).
 		Offset(requestBody.Page * requestBody.PageSize).
 		Find(&results).Error
 
@@ -178,16 +187,23 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 
 	//Order by authorid to have definitive order (when for examplke some names rank the same for similarity), same for why quoteid
 	//% is same as SIMILARITY but with default threshold 0.3
-	err = db.Table("searchview").
-		Where("nametsv @@ plainto_tsquery(?)", requestBody.SearchString).
-		Or("? % ANY(STRING_TO_ARRAY(name,' '))", requestBody.SearchString).
+	dbPointer := db.Table("searchview").
+		Where("( nametsv @@ plainto_tsquery(?) OR ? % ANY(STRING_TO_ARRAY(name,' ')) )", requestBody.SearchString, requestBody.SearchString).
 		Clauses(clause.OrderBy{
 			Expression: clause.Expr{SQL: "similarity(name, ?) DESC, authorid DESC, quoteid DESC", Vars: []interface{}{requestBody.SearchString}, WithoutParentheses: true},
-		}).
-		Limit(requestBody.PageSize).
+		})
+
+		//Particular language search
+	switch strings.ToLower(requestBody.Language) {
+	case "english":
+		dbPointer = dbPointer.Not("isicelandic")
+	case "icelandic":
+		dbPointer = dbPointer.Where("isicelandic")
+	}
+
+	err = dbPointer.Limit(requestBody.PageSize).
 		Offset(requestBody.Page * requestBody.PageSize).
 		Find(&results).Error
-
 	if err != nil {
 		//TODO: Respond with better error -- and put into swagger -- and add tests
 		log.Printf("Got error when decoding: %s", err)
@@ -223,16 +239,23 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 	generalsearch := m1.ReplaceAllString(requestBody.SearchString, " | ")
 
 	//Order by quoteid to have definitive order (when for examplke some quotes rank the same for plain, phrase and general)
-	err = db.Table("searchview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq,to_tsquery(?) as generalq ",
+	dbPointer := db.Table("searchview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq,to_tsquery(?) as generalq ",
 		requestBody.SearchString, phrasesearch, generalsearch).
-		Where("quotetsv @@ plainq").
-		Or("quotetsv @@ phraseq").
 		Select("*, ts_rank(quotetsv, plainq) as plainrank, ts_rank(quotetsv, phraseq) as phraserank, ts_rank(quotetsv, generalq) as generalrank").
+		Where("( quotetsv @@ plainq OR quotetsv @@ phraseq OR quotetsv @@ generalq)").
 		Clauses(clause.OrderBy{
 			Expression: clause.Expr{SQL: "plainrank DESC, phraserank DESC, generalrank DESC, quoteid DESC", Vars: []interface{}{}, WithoutParentheses: true},
-		}).
-		Or("quotetsv @@ generalq").
-		Limit(requestBody.PageSize).
+		})
+
+		//Particular language search
+	switch strings.ToLower(requestBody.Language) {
+	case "english":
+		dbPointer = dbPointer.Not("isicelandic")
+	case "icelandic":
+		dbPointer = dbPointer.Where("isicelandic")
+	}
+
+	err = dbPointer.Limit(requestBody.PageSize).
 		Offset(requestBody.Page * requestBody.PageSize).
 		Find(&results).Error
 
@@ -257,7 +280,6 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 // GetTopics handles POST requests for listing the available quote-topics
 func GetTopics(rw http.ResponseWriter, r *http.Request) {
 	requestBody, err := validateRequestBody(r)
-	log.Println("HERE")
 	if err != nil {
 		//TODO: Respond with better error -- and put into swagger -- and add tests
 		http.Error(rw, err.Error(), http.StatusBadRequest)
@@ -268,9 +290,10 @@ func GetTopics(rw http.ResponseWriter, r *http.Request) {
 
 	pointer := db.Table("topics")
 
-	if requestBody.Language == "English" {
-		pointer = pointer.Where("not isicelandic")
-	} else if requestBody.Language == "Icelandic" {
+	switch strings.ToLower(requestBody.Language) {
+	case "english":
+		pointer = pointer.Not("isicelandic")
+	case "icelandic":
 		pointer = pointer.Where("isicelandic")
 	}
 
@@ -329,6 +352,10 @@ func GetTopic(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(&results)
 }
 
+func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {}
+
+func GetRandomQuotes(rw http.ResponseWriter, r *http.Request) {}
+
 // swagger:route GET /languages META getLanguages
 // Get languages supported by the api
 // responses:
@@ -342,6 +369,6 @@ func ListLanguagesSupported(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(rw).Encode(&response{
-		Languages: []string{"English", "Icelandic"},
+		Languages: languages,
 	})
 }
