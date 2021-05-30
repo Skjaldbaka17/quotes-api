@@ -5,13 +5,16 @@
 - [ ] Clean up quotes.go
 - [ ] Error handling + Tests
 - [ ] Make error tests (i.e. made-to-fail-tests)
-- [ ] Add get random Quotes / Quote of The Day
+- [ ] Add get and set Quote of The Day (plus points for available to set quotes for multiple days in one request)
+- [ ] Add authentication for access to the api + Creating apiKeys + Documenting usage
+- [ ] Add Counting each time a quote is accessed / sent from Api (also for topics) - i.e. stats
 - [ ] Make function for building the SQL query (general for all?)
 - [ ] Setup AWS server
 - [ ] Draw up DB-Graph (i.e. how tables are connected to view etc)
 - [ ] Make Authors Search more efficient (create a similarity-based index ?)
 - [ ] Look into and maybe Change rest into GraphQL
-- [x] Use TopicsView instead of QuoteView (and change name to something more general)
+- [x] Add get random Quote
+- [x] Use TopicsView instead of searchview (and change name to something more general)
 - [x] Add Icelandic / English Support
 - [x] Add categories
 - [x] English and Icelandic Authors with same name have same author id

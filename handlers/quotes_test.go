@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -19,7 +20,17 @@ func getRequestAndResponseForTest(jsonStr []byte) (*httptest.ResponseRecorder, *
 	return response, request
 }
 
-func SimpleRequestAndResponseTest(jsonStr []byte, fn httpRequest) []QuoteView {
+func RequestAndReturnSingle(jsonStr []byte, fn httpRequest) QuoteView {
+	response, request := getRequestAndResponseForTest(jsonStr)
+	fn(response, request)
+
+	var respObj QuoteView
+
+	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
+	return respObj
+}
+
+func RequestAndReturnArray(jsonStr []byte, fn httpRequest) []QuoteView {
 	response, request := getRequestAndResponseForTest(jsonStr)
 	fn(response, request)
 	var respObj []QuoteView
@@ -30,7 +41,7 @@ func SimpleRequestAndResponseTest(jsonStr []byte, fn httpRequest) []QuoteView {
 func TestSearchQuotesByString(t *testing.T) {
 	t.Run("easy search should return list of quotes with Muhammad Ali as first author", func(t *testing.T) {
 		var jsonStr = []byte(`{"searchString": "Float like a butterfly sting like a bee"}`)
-		respObj := SimpleRequestAndResponseTest(jsonStr, SearchQuotesByString)
+		respObj := RequestAndReturnArray(jsonStr, SearchQuotesByString)
 		firstAuthor := respObj[0].Name
 		want := "Muhammad Ali"
 		if firstAuthor != want {
@@ -40,7 +51,7 @@ func TestSearchQuotesByString(t *testing.T) {
 
 	t.Run("intermediate search should return list of quotes with Muhammad Ali as first author", func(t *testing.T) {
 		var jsonStr = []byte(`{"searchString": "bee sting like a butterfly"}`)
-		respObj := SimpleRequestAndResponseTest(jsonStr, SearchQuotesByString)
+		respObj := RequestAndReturnArray(jsonStr, SearchQuotesByString)
 		firstAuthor := respObj[0].Name
 		want := "Muhammad Ali"
 		if firstAuthor != want {
@@ -50,7 +61,7 @@ func TestSearchQuotesByString(t *testing.T) {
 
 	t.Run("hard search should return list of quotes with Muhammad Ali as first author", func(t *testing.T) {
 		var jsonStr = []byte(`{"searchString": "bee butterfly float"}`)
-		respObj := SimpleRequestAndResponseTest(jsonStr, SearchQuotesByString)
+		respObj := RequestAndReturnArray(jsonStr, SearchQuotesByString)
 		firstAuthor := respObj[0].Name
 		want := "Muhammad Ali"
 		if firstAuthor != want {
@@ -62,7 +73,7 @@ func TestSearchQuotesByString(t *testing.T) {
 func TestSearchAuthorsByString(t *testing.T) {
 	t.Run("easy search should return list of quotes with Friedrich Nietzsche as first author", func(t *testing.T) {
 		var jsonStr = []byte(`{"searchString": "Friedrich Nietzsche"}`)
-		respObj := SimpleRequestAndResponseTest(jsonStr, SearchAuthorsByString)
+		respObj := RequestAndReturnArray(jsonStr, SearchAuthorsByString)
 		firstAuthor := respObj[0].Name
 		want := "Friedrich Nietzsche"
 		if firstAuthor != want {
@@ -72,7 +83,7 @@ func TestSearchAuthorsByString(t *testing.T) {
 
 	t.Run("intermediate search should Return list of quotes with Joseph Stalin as first author", func(t *testing.T) {
 		var jsonStr = []byte(`{"searchString": "Stalin jseph"}`)
-		respObj := SimpleRequestAndResponseTest(jsonStr, SearchAuthorsByString)
+		respObj := RequestAndReturnArray(jsonStr, SearchAuthorsByString)
 		firstAuthor := respObj[0].Name
 		want := "Joseph Stalin"
 		if firstAuthor != want {
@@ -82,7 +93,7 @@ func TestSearchAuthorsByString(t *testing.T) {
 
 	t.Run("hard search should return list of quotes with Friedrich Nietzsche as first author", func(t *testing.T) {
 		var jsonStr = []byte(`{"searchString": "Niet Friedric"}`)
-		respObj := SimpleRequestAndResponseTest(jsonStr, SearchAuthorsByString)
+		respObj := RequestAndReturnArray(jsonStr, SearchAuthorsByString)
 		firstAuthor := respObj[0].Name
 		want := "Friedrich Nietzsche"
 		if firstAuthor != want {
@@ -95,7 +106,7 @@ func TestSearchByString(t *testing.T) {
 	t.Run("searching for author", func(t *testing.T) {
 		t.Run("easy search should return list of quotes with Friedrich Nietzsche as first author", func(t *testing.T) {
 			var jsonStr = []byte(`{"searchString": "Friedrich Nietzsche"}`)
-			respObj := SimpleRequestAndResponseTest(jsonStr, SearchByString)
+			respObj := RequestAndReturnArray(jsonStr, SearchByString)
 			firstAuthor := respObj[1].Name //Use index 1 because in index 0 there is an author talking extensively about Nietzsche
 			want := "Friedrich Nietzsche"
 			if firstAuthor != want {
@@ -105,7 +116,7 @@ func TestSearchByString(t *testing.T) {
 
 		t.Run("hard search should return list of quotes with Friedrich Nietzsche as first author", func(t *testing.T) {
 			var jsonStr = []byte(`{"searchString": "Nietshe Friedr"}`)
-			respObj := SimpleRequestAndResponseTest(jsonStr, SearchByString)
+			respObj := RequestAndReturnArray(jsonStr, SearchByString)
 			firstAuthor := respObj[1].Name //Use index 1 because in index 0 there is an author talking extensively about Nietzsche
 			want := "Friedrich Nietzsche"
 			if firstAuthor != want {
@@ -116,7 +127,7 @@ func TestSearchByString(t *testing.T) {
 	t.Run("searching for quote", func(t *testing.T) {
 		t.Run("easy search should return list of quotes with Martin Luther as first author", func(t *testing.T) {
 			var jsonStr = []byte(`{"searchString": "If you are not allowed to Laugh in Heaven"}`)
-			respObj := SimpleRequestAndResponseTest(jsonStr, SearchByString)
+			respObj := RequestAndReturnArray(jsonStr, SearchByString)
 			firstAuthor := respObj[1].Name //Use index 1 because in index 0 there is an author talking extensively about Nietzsche
 			want := "Martin Luther"
 			if firstAuthor != want {
@@ -228,7 +239,7 @@ func TestGetAuthorById(t *testing.T) {
 	t.Run("should return Author with id 1", func(t *testing.T) {
 		authorId := Set{1}
 		var jsonStr = []byte(fmt.Sprintf(`{"ids": [%s]}`, authorId.toString()))
-		respObj := SimpleRequestAndResponseTest(jsonStr, GetAuthorsById)
+		respObj := RequestAndReturnArray(jsonStr, GetAuthorsById)
 		firstAuthor := respObj[0] //Use index 1 because in index 0 there is an author talking extensively about Nietzsche
 		if firstAuthor.Authorid != authorId[0] {
 			t.Errorf("got %q, want %q", firstAuthor.Authorid, authorId)
@@ -240,7 +251,7 @@ func TestGetQuotesById(t *testing.T) {
 	t.Run("should return Quotes with id 1, 2 and 3...", func(t *testing.T) {
 		var quoteIds = Set{1, 2, 3}
 		var jsonStr = []byte(fmt.Sprintf(`{"ids":  [%s]}`, quoteIds.toString()))
-		respObj := SimpleRequestAndResponseTest(jsonStr, GetQuotesById)
+		respObj := RequestAndReturnArray(jsonStr, GetQuotesById)
 
 		if len(respObj) != len(quoteIds) {
 			t.Errorf("got list of length %d but expected list of length %d", len(respObj), len(quoteIds))
@@ -371,33 +382,166 @@ func TestGetRandomQuote(t *testing.T) {
 	//The test calls the function twice to test if the function returns two different quotes
 	t.Run("Should return a random quote", func(t *testing.T) {
 		var jsonStr = []byte(`{}`)
-		response, request := getRequestAndResponseForTest(jsonStr)
-		GetRandomQuote(response, request)
-		var firstRespObj QuoteView
-		_ = json.Unmarshal(response.Body.Bytes(), &firstRespObj)
+		firstRespObj := RequestAndReturnSingle(jsonStr, GetRandomQuote)
 
 		if firstRespObj.Quote == "" {
 			t.Errorf("Expected a random quote but got an empty quote")
 		}
 
-		var secondRespObj QuoteView
-		GetRandomQuote(response, request)
-		_ = json.Unmarshal(response.Body.Bytes(), &secondRespObj)
+		secondRespObj := RequestAndReturnSingle(jsonStr, GetRandomQuote)
 
 		if secondRespObj.Quoteid == firstRespObj.Quoteid {
 			t.Errorf("Expected two different quotes but got the same quote twice which is higly improbable")
 		}
 	})
 
-	t.Run("Should return a random quote from Teddy Roosevelt (given authorId)", func(t *testing.T) { t.Skip() })
-	t.Run("Should return a random quote from topic 'motivational' (given topicId)", func(t *testing.T) { t.Skip() })
-	t.Run("Should return a random English quote", func(t *testing.T) { t.Skip() })
-	t.Run("Should return a random Icelandic quote", func(t *testing.T) { t.Skip() })
-	t.Run("Should return a random English quote from topic 'inspirational' (given topicId)", func(t *testing.T) { t.Skip() })
-	t.Run("Should return a random Icelandic quote from topic 'orðtök' (given topicId)", func(t *testing.T) { t.Skip() })
-	t.Run("Should return a random quote containing the searchString 'love'", func(t *testing.T) { t.Skip() })
-	t.Run("Should return a random Icelandic quote containing the searchString 'beltið þitt'", func(t *testing.T) { t.Skip() })
-	t.Run("Should return a random quote containing the searchString 'strength' from the topic 'inspirational' (given topicId)", func(t *testing.T) { t.Skip() })
+	t.Run("Should return a random quote from Teddy Roosevelt (given authorId)", func(t *testing.T) {
+		teddyName := "Theodore Roosevelt"
+		teddyAuthor := getAuthor(teddyName)
+		var jsonStr = []byte(fmt.Sprintf(`{"authorId": %d}`, teddyAuthor.Authorid))
+		firstRespObj := RequestAndReturnSingle(jsonStr, GetRandomQuote)
+
+		if firstRespObj.Name != teddyName {
+			t.Errorf("got %s, expected %s", firstRespObj.Name, teddyName)
+		}
+
+		secondRespObj := RequestAndReturnSingle(jsonStr, GetRandomQuote)
+
+		if secondRespObj.Authorid != firstRespObj.Authorid {
+			t.Errorf("got author with id %d, expected author with id %d", secondRespObj.Authorid, firstRespObj.Authorid)
+		}
+
+		if secondRespObj.Quoteid == firstRespObj.Quoteid {
+			t.Errorf("got quote %s, expected a random different quote", secondRespObj.Quote)
+		}
+
+	})
+
+	t.Run("Should return a random quote from topic 'motivational' (given topicId)", func(t *testing.T) {
+		topicName := "motivational"
+		topicId := getTopicId(topicName)
+		var jsonStr = []byte(fmt.Sprintf(`{"topicId": %d}`, topicId))
+		firstRespObj := RequestAndReturnSingle(jsonStr, GetRandomQuote)
+		if firstRespObj.Topicname != topicName {
+			t.Errorf("got %s, expected %s", firstRespObj.Topicname, topicName)
+		}
+		secondRespObj := RequestAndReturnSingle(jsonStr, GetRandomQuote)
+		if secondRespObj.Topicid != firstRespObj.Topicid {
+			t.Errorf("got topic with id %d, expected topic with id %d", secondRespObj.Topicid, firstRespObj.Topicid)
+		}
+
+		if secondRespObj.Quoteid == firstRespObj.Quoteid {
+			t.Errorf("got quote %s, expected a random different quote", secondRespObj.Quote)
+		}
+	})
+
+	t.Run("Should return a random English quote", func(t *testing.T) {
+		language := "english"
+		var jsonStr = []byte(fmt.Sprintf(`{"language": "%s"}`, language))
+		firstRespObj := RequestAndReturnSingle(jsonStr, GetRandomQuote)
+		if firstRespObj.Isicelandic {
+			t.Errorf("first response, got an IcelandicQuote but expected an English quote")
+		}
+		secondRespObj := RequestAndReturnSingle(jsonStr, GetRandomQuote)
+		if secondRespObj.Isicelandic {
+			t.Errorf("second response, got an IcelandicQuote but expected an English quote")
+		}
+
+		if secondRespObj.Quoteid == firstRespObj.Quoteid {
+			t.Errorf("got quote %s, expected a random different quote", secondRespObj.Quote)
+		}
+	})
+
+	t.Run("Should return a random Icelandic quote", func(t *testing.T) {
+		language := "Icelandic"
+		var jsonStr = []byte(fmt.Sprintf(`{"language": "%s"}`, language))
+		firstRespObj := RequestAndReturnSingle(jsonStr, GetRandomQuote)
+		if !firstRespObj.Isicelandic {
+			t.Errorf("first response, got an EnglishQuote but expected an Icelandic quote")
+		}
+		secondRespObj := RequestAndReturnSingle(jsonStr, GetRandomQuote)
+		if !secondRespObj.Isicelandic {
+			t.Errorf("second response, got an EnglishQuote, %+v, but expected an Icelandic quote", secondRespObj)
+		}
+
+		if secondRespObj.Quoteid == firstRespObj.Quoteid {
+			t.Errorf("got quote %s, expected a random different quote", secondRespObj.Quote)
+		}
+	})
+
+	t.Run("Should return a random quote containing the searchString 'love'", func(t *testing.T) {
+
+		searchString := "love"
+		var jsonStr = []byte(fmt.Sprintf(`{"searchString":"%s"}`, searchString))
+		firstRespObj := RequestAndReturnSingle(jsonStr, GetRandomQuote)
+		m1 := regexp.MustCompile(searchString)
+		if !m1.Match([]byte(firstRespObj.Quote)) {
+			t.Errorf("first response, got the quote %+v that does not contain the searchString %s", firstRespObj, searchString)
+		}
+
+		secondRespObj := RequestAndReturnSingle(jsonStr, GetRandomQuote)
+		if !m1.Match([]byte(secondRespObj.Quote)) {
+			t.Errorf("second response, got the quote %+v that does not contain the searchString %s", secondRespObj, searchString)
+		}
+
+		if secondRespObj.Quoteid == firstRespObj.Quoteid {
+			t.Errorf("got quote %s, expected a random different quote", secondRespObj.Quote)
+		}
+
+	})
+
+	t.Run("Should return a random Icelandic quote containing the searchString 'þitt'", func(t *testing.T) {
+		searchString := "þitt"
+		var jsonStr = []byte(fmt.Sprintf(`{"searchString":"%s"}`, searchString))
+		firstRespObj := RequestAndReturnSingle(jsonStr, GetRandomQuote)
+		m1 := regexp.MustCompile(searchString)
+		if !m1.Match([]byte(firstRespObj.Quote)) {
+			t.Errorf("first response, got the quote %+v that does not contain the searchString %s", firstRespObj, searchString)
+		}
+
+		if !firstRespObj.Isicelandic {
+			t.Errorf("first response, got the quote %+v which is in English but expected it to be in icelandic", firstRespObj)
+		}
+
+		secondRespObj := RequestAndReturnSingle(jsonStr, GetRandomQuote)
+		if !m1.Match([]byte(secondRespObj.Quote)) {
+			t.Errorf("second response, got the quote %+v that does not contain the searchString %s", secondRespObj, searchString)
+		}
+
+		if secondRespObj.Quoteid == firstRespObj.Quoteid {
+			t.Errorf("got quote %s, expected a random different quote", secondRespObj.Quote)
+		}
+	})
+
+	t.Run("Should return a random quote containing the searchString 'strength' from the topic 'inspirational' (given topicId)", func(t *testing.T) {
+		topicName := "inspirational"
+		topicId := getTopicId(topicName)
+		searchString := "strong"
+		var jsonStr = []byte(fmt.Sprintf(`{"searchString":"%s","topicId": %d}`, searchString, topicId))
+		firstRespObj := RequestAndReturnSingle(jsonStr, GetRandomQuote)
+
+		if firstRespObj.Topicname != topicName {
+			t.Errorf("got %s, expected %s", firstRespObj.Topicname, topicName)
+		}
+
+		m1 := regexp.MustCompile(searchString)
+		if !m1.Match([]byte(firstRespObj.Quote)) {
+			t.Errorf("first response, got the quote %+v that does not contain the searchString %s", firstRespObj, searchString)
+		}
+
+		secondRespObj := RequestAndReturnSingle(jsonStr, GetRandomQuote)
+		if !m1.Match([]byte(secondRespObj.Quote)) {
+			t.Errorf("second response, got the quote %+v that does not contain the searchString %s", secondRespObj, searchString)
+		}
+
+		if secondRespObj.Topicid != firstRespObj.Topicid {
+			t.Errorf("got topic with id %d, expected topic with id %d", secondRespObj.Topicid, firstRespObj.Topicid)
+		}
+
+		if secondRespObj.Quoteid == firstRespObj.Quoteid {
+			t.Errorf("got quote %s, expected a random different quote", secondRespObj.Quote)
+		}
+	})
 
 }
 

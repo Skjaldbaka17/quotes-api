@@ -37,6 +37,14 @@ type authorsResponseWrapper struct {
 	Body []handlers.QuoteView
 }
 
+// Data structure representing the response for a random quote
+// swagger:response randomQuoteResponse
+type randomQuoteResponseWrapper struct {
+	// A quote struct
+	// in: body
+	Body handlers.QuoteView
+}
+
 // Data structure representing topic quotes response
 // swagger:response multipleQuotesTopicResponse
 type multipleQuotesTopicResponseWrapper struct {
@@ -209,7 +217,7 @@ type quotesFromTopicWrapper struct {
 		Topic string `json:"topic"`
 		// The topic's id, if left empty then the topic name is used
 		//
-		// Example: Motivational
+		// Example: 10
 		Id string `json:"id"`
 		// The number of quotes to be returned on each "page"
 		//
@@ -223,5 +231,29 @@ type quotesFromTopicWrapper struct {
 		// Minimum: 0
 		// Example: 0
 		Page int `json:"page"`
+	}
+}
+
+// swagger:parameters getRandomQuote
+type getRandomQuoteResponseWrapper struct {
+	// The structure of the response to random Quote post request
+	// in: body
+	Body struct {
+		// The random quote returned must be in the given language
+		//
+		// Example: English
+		Language string `json:"language"`
+		// The random quote returned must contain a match with the searchstring
+		//
+		// Example: float
+		SearchString string `json:"searchString"`
+		// The random quote returned must be a part of the topic with the given topicId
+		//
+		// Example: 10
+		TopicId string `json:"topicId"`
+		// The random quote returned must be from the author with the given authorId
+		//
+		//example: 24952
+		Authorid int `json:"authorid"`
 	}
 }

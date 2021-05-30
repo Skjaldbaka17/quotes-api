@@ -12,6 +12,8 @@ definitions:
         uniqueItems: true
         x-go-name: Authorid
       isicelandic:
+        description: Whether or not this quote is in Icelandic or not
+        example: false
         type: boolean
         x-go-name: Isicelandic
       name:
@@ -31,6 +33,19 @@ definitions:
         type: integer
         uniqueItems: true
         x-go-name: Quoteid
+      topicid:
+        description: The topic's id
+        example: 10
+        format: int64
+        type: integer
+        uniqueItems: true
+        x-go-name: Topicid
+      topicname:
+        description: The topic's name
+        example: inspirational
+        type: string
+        uniqueItems: true
+        x-go-name: Topicname
     type: object
     x-go-package: github.com/Skjaldbaka17/quotes-api/handlers
 host: quotel-api.com
@@ -111,6 +126,46 @@ paths:
       responses:
         "200":
           $ref: '#/responses/multipleQuotesResponse'
+      tags:
+      - QUOTES
+  /quotes/random:
+    post:
+      description: Get a random quote according to the given parameters
+      operationId: getRandomQuote
+      parameters:
+      - description: The structure of the response to random Quote post request
+        in: body
+        name: Body
+        schema:
+          properties:
+            authorid:
+              description: The random quote returned must be from the author with
+                the given authorId
+              example: 24952
+              format: int64
+              type: integer
+              x-go-name: Authorid
+            language:
+              description: The random quote returned must be in the given language
+              example: English
+              type: string
+              x-go-name: Language
+            searchString:
+              description: The random quote returned must contain a match with the
+                searchstring
+              example: float
+              type: string
+              x-go-name: SearchString
+            topicId:
+              description: The random quote returned must be a part of the topic with
+                the given topicId
+              example: "10"
+              type: string
+              x-go-name: TopicId
+          type: object
+      responses:
+        "200":
+          $ref: '#/responses/randomQuoteResponse'
       tags:
       - QUOTES
   /search:
@@ -261,7 +316,7 @@ paths:
           properties:
             id:
               description: The topic's id, if left empty then the topic name is used
-              example: Motivational
+              example: "10"
               type: string
               x-go-name: Id
             page:
@@ -406,6 +461,10 @@ responses:
             x-go-name: Topicname
         type: object
       type: array
+  randomQuoteResponse:
+    description: Data structure representing the response for a random quote
+    schema:
+      $ref: '#/definitions/QuoteView'
 schemes:
 - http
 securityDefinitions:

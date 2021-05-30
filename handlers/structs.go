@@ -32,7 +32,7 @@ type QuoteView struct {
 	Quoteid int `json:"quoteid" `
 	// The topic's id
 	//Unique: true
-	//example: 582676
+	//example: 10
 	Topicid int `json:"topicid" `
 	// The topic's name
 	//Unique: true
@@ -40,8 +40,10 @@ type QuoteView struct {
 	Topicname string `json:"topicname" `
 	// The quote
 	//example: Float like a butterfly, sting like a bee.
-	Quote       string `json:"quote"`
-	Isicelandic bool   `json:"-"`
+	Quote string `json:"quote"`
+	// Whether or not this quote is in Icelandic or not
+	// example: false
+	Isicelandic bool `json:"isicelandic"`
 }
 
 type ListItem struct {

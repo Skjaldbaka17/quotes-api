@@ -13,4 +13,4 @@ test:
 test-verbose:
 	go test ./... -v
 test-specific:
-	go test ./... -v -run $(TEST_FUNCTION)
+	go test ./... -run $(TEST_FUNCTION) -v

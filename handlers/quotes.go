@@ -105,6 +105,10 @@ func validateRequestBody(r *http.Request) (Request, error) {
 	if requestBody.PageSize == 0 || requestBody.PageSize > maxPageSize {
 		requestBody.PageSize = defaultPageSize
 	}
+
+	// if requestBody.TopicId < 1 {
+	// 	requestBody.TopicId = 0
+	// }
 	return requestBody, nil
 }
 
@@ -353,8 +357,13 @@ func GetTopic(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(&results)
 }
 
+// swagger:route POST /quotes/random QUOTES getRandomQuote
+// Get a random quote according to the given parameters
+// responses:
+//	200: randomQuoteResponse
+
+// GetRandomQuote handles POST requests for getting a random quote
 func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
-	// random() < 0.0005
 
 	requestBody, err := validateRequestBody(r)
 
@@ -365,28 +374,62 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	var dbPointer *gorm.DB
-	var result QuoteView
+	var result []QuoteView
+	shouldOrderBy := false //Used when there are few rows to choose from and therefore higher probability that random() < 0.005 returns no rows
 
-	if requestBody.TopicId != 0 {
+	m1 := regexp.MustCompile(` `)
+	phrasesearch := m1.ReplaceAllString(requestBody.SearchString, " <-> ")
 
+	//Random quote from a particular topic
+	if requestBody.TopicId > 0 {
+		dbPointer = db.Table("topicsview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq", requestBody.SearchString, phrasesearch).Where("topicid = ?", requestBody.TopicId)
+		shouldOrderBy = true
 	} else {
-		dbPointer = db.Table("searchview").
-			Where("random() < 0.0005") //Randomized, O(n)
+		dbPointer = db.Table("searchview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq", requestBody.SearchString, phrasesearch)
+	}
+
+	//Random quote from a particular author
+	if requestBody.AuthorId > 0 {
+		dbPointer.Where("authorid = ?", requestBody.AuthorId)
+		shouldOrderBy = true
+	}
+
+	//Random quote from a particular language
+	if requestBody.Language != "" {
+		switch strings.ToLower(requestBody.Language) {
+		case "english":
+			dbPointer.Not("isicelandic")
+		case "icelandic":
+			dbPointer.Where("isicelandic")
+		}
+	}
+
+	if requestBody.SearchString != "" {
+		dbPointer = dbPointer.Where("( quotetsv @@ plainq OR quotetsv @@ phraseq)")
+		shouldOrderBy = true
+	}
+
+	//Order by used to get random quote if there are "few" rows returned
+	if shouldOrderBy {
+		dbPointer = dbPointer.Order("random()") //Randomized, O( n*log(n) )
+	} else {
+		dbPointer = dbPointer.
+			Where("random() < 0.005") //Randomized, O(n)
 	}
 
 	err = dbPointer.Find(&result).Error
-
 	if err != nil {
 		//TODO: Respond with better error -- and put into swagger -- and add tests
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	json.NewEncoder(rw).Encode(result)
+	if len(result) == 0 {
+		json.NewEncoder(rw).Encode(result)
+	} else {
+		json.NewEncoder(rw).Encode(result[0])
+	}
 
 }
-
-func GetRandomQuotes(rw http.ResponseWriter, r *http.Request) {}
 
 // swagger:route GET /languages META getLanguages
 // Get languages supported by the api
