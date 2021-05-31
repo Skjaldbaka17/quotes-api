@@ -64,3 +64,7 @@ type Request struct {
 	QuoteId      int    `json:"quoteId"`
 	TopicId      int    `json:"topicId"`
 }
+
+type ErrorResponse struct {
+	Message string `json:"message"`
+}

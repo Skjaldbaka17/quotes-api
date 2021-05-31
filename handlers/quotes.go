@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -18,6 +19,55 @@ const maxPageSize = 200
 
 var languages = []string{"English", "Icelandic"}
 
+func (requestBody *Request) BodyValidationHandler(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		log.Println("Executing middlewareOne")
+		_, err := requestBody.getRequestBody(r)
+		log.Println("SERARCH:", requestBody)
+		if err != nil {
+			rw.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(rw).Encode(ErrorResponse{err.Error()})
+			return
+		}
+		next.ServeHTTP(rw, r)
+	})
+}
+
+//ValidateRequestBody takes in the request and validates all the input fields, returns an error with reason for validation-failure
+//if validation fails.
+//TODO: Make validation better! i.e. make it "real"
+func (requestBody *Request) getRequestBody(r *http.Request) (Request, error) {
+	err := json.NewDecoder(r.Body).Decode(&requestBody)
+
+	if err != nil {
+		//TODO: Respond with better error -- and add tests
+		log.Printf("Got error when decoding: %s", err)
+		return Request{}, errors.New("request body is not structured correctly. Please refer to the /docs page for information on how to structure the request body")
+	}
+
+	//TODO: add validation for searchString
+
+	if requestBody.PageSize < 1 || requestBody.PageSize > maxPageSize {
+		requestBody.PageSize = defaultPageSize
+	}
+
+	if requestBody.Page < 0 {
+		requestBody.Page = 0
+	}
+
+	return *requestBody, nil
+}
+
+// type Request struct {
+// 	Id           int    `json:"id,omitempty"`
+// 	SearchString string `json:"searchString,omitempty"`
+// 	Language     string `json:"language,omitempty"`
+// 	Topic        string `json:"topic,omitempty"`
+// 	AuthorId     int    `json:"authorId"`
+// 	QuoteId      int    `json:"quoteId"`
+// 	TopicId      int    `json:"topicId"`
+// }
+
 // swagger:route POST /authors AUTHORS getAuthorsByIds
 //
 // Get authors by their ids
@@ -26,17 +76,10 @@ var languages = []string{"English", "Icelandic"}
 //	200: multipleQuotesResponse
 
 // Get Authors handles POST requests to get the authors, and their quotes, that have the given ids
-func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
-	requestBody, err := validateRequestBody(r)
+func (requestBody *Request) GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
 
-	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		http.Error(rw, "Could not finish", 404)
-		return
-	}
 	var authors []QuoteView
-	err = db.Table("searchview").
-		Select("*").
+	err := db.Table("searchview").
 		Where("authorid in (?)", requestBody.Ids).
 		Find(&authors).
 		Error
@@ -58,19 +101,10 @@ func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
 //	200: multipleQuotesResponse
 
 // GetQuotesById handles POST requests to get the quotes, and their authors, that have the given ids
-func GetQuotesById(rw http.ResponseWriter, r *http.Request) {
-	var requestBody Request
-	err := json.NewDecoder(r.Body).Decode(&requestBody)
+func (requestBody *Request) GetQuotesById(rw http.ResponseWriter, r *http.Request) {
 
-	log.Println(requestBody)
-	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		log.Printf("Got error when decoding: %s", err)
-		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
-	}
 	var quotes []QuoteView
-	err = db.Table("searchview").
+	err := db.Table("searchview").
 		Select("*").
 		Where("quoteid in ?", requestBody.Ids).
 		Order("quoteid ASC").
@@ -87,31 +121,6 @@ func GetQuotesById(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(&quotes)
 }
 
-//ValidateRequestBody takes in the request and validates all the input fields, returns an error with reason for validation-failure
-//if validation fails.
-//TODO: Make validation better! i.e. make it "real"
-func validateRequestBody(r *http.Request) (Request, error) {
-	var requestBody Request
-	err := json.NewDecoder(r.Body).Decode(&requestBody)
-
-	if err != nil {
-		//TODO: Respond with better error -- and add tests
-		log.Printf("Got error when decoding: %s", err)
-		return Request{}, err
-	}
-
-	//TODO: add validation for searchString and page etc.
-
-	if requestBody.PageSize == 0 || requestBody.PageSize > maxPageSize {
-		requestBody.PageSize = defaultPageSize
-	}
-
-	// if requestBody.TopicId < 1 {
-	// 	requestBody.TopicId = 0
-	// }
-	return requestBody, nil
-}
-
 // swagger:route POST /search SEARCH generalSearchByString
 // Search for quotes / authors by a general string-search that searches both in the names of the authors and the quotes themselves
 //
@@ -119,16 +128,8 @@ func validateRequestBody(r *http.Request) (Request, error) {
 //	200: multipleQuotesResponse
 
 // SearchByString handles POST requests to search for quotes / authors by a search-string
-func SearchByString(rw http.ResponseWriter, r *http.Request) {
+func (requestBody *Request) SearchByString(rw http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-
-	requestBody, err := validateRequestBody(r)
-
-	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
-	}
 
 	var results []QuoteView
 	m1 := regexp.MustCompile(` `)
@@ -152,7 +153,7 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 		dbPointer = dbPointer.Where("isicelandic")
 	}
 
-	err = dbPointer.Limit(requestBody.PageSize).
+	err := dbPointer.Limit(requestBody.PageSize).
 		Offset(requestBody.Page * requestBody.PageSize).
 		Find(&results).Error
 
@@ -177,16 +178,8 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 //	200: multipleQuotesResponse
 
 // SearchAuthorsByString handles POST requests to search for authors by a search-string
-func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
+func (requestBody *Request) SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-
-	requestBody, err := validateRequestBody(r)
-
-	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
-	}
 
 	var results []QuoteView
 
@@ -206,7 +199,7 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 		dbPointer = dbPointer.Where("isicelandic")
 	}
 
-	err = dbPointer.Limit(requestBody.PageSize).
+	err := dbPointer.Limit(requestBody.PageSize).
 		Offset(requestBody.Page * requestBody.PageSize).
 		Find(&results).Error
 	if err != nil {
@@ -228,15 +221,8 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 //	200: multipleQuotesResponse
 
 // SearchQuotesByString handles POST requests to search for quotes by a search-string
-func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
+func (requestBody *Request) SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	requestBody, err := validateRequestBody(r)
-
-	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
-	}
 
 	var results []QuoteView
 	m1 := regexp.MustCompile(` `)
@@ -260,7 +246,7 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 		dbPointer = dbPointer.Where("isicelandic")
 	}
 
-	err = dbPointer.Limit(requestBody.PageSize).
+	err := dbPointer.Limit(requestBody.PageSize).
 		Offset(requestBody.Page * requestBody.PageSize).
 		Find(&results).Error
 
@@ -283,13 +269,7 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 //	200: listTopicsResponse
 
 // GetTopics handles POST requests for listing the available quote-topics
-func GetTopics(rw http.ResponseWriter, r *http.Request) {
-	requestBody, err := validateRequestBody(r)
-	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
-	}
+func (requestBody *Request) GetTopics(rw http.ResponseWriter, r *http.Request) {
 
 	var results []ListItem
 
@@ -302,7 +282,7 @@ func GetTopics(rw http.ResponseWriter, r *http.Request) {
 		pointer = pointer.Where("isicelandic")
 	}
 
-	err = pointer.Find(&results).Error
+	err := pointer.Find(&results).Error
 	log.Println(results)
 	if err != nil {
 		//TODO: Respond with better error -- and put into swagger -- and add tests
@@ -320,14 +300,7 @@ func GetTopics(rw http.ResponseWriter, r *http.Request) {
 //	200: multipleQuotesTopicResponse
 
 // GetTopic handles POST requests for getting quotes from a particular topic
-func GetTopic(rw http.ResponseWriter, r *http.Request) {
-	requestBody, err := validateRequestBody(r)
-
-	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
-	}
+func (requestBody *Request) GetTopic(rw http.ResponseWriter, r *http.Request) {
 
 	var results []QuoteView
 
@@ -340,7 +313,7 @@ func GetTopic(rw http.ResponseWriter, r *http.Request) {
 		dbPoint = dbPoint.Where("topicid = ?", requestBody.Id)
 	}
 
-	err = dbPoint.Clauses(clause.OrderBy{
+	err := dbPoint.Clauses(clause.OrderBy{
 		Expression: clause.Expr{SQL: "quoteid DESC", Vars: []interface{}{}, WithoutParentheses: true},
 	}).
 		Limit(requestBody.PageSize).
@@ -363,15 +336,7 @@ func GetTopic(rw http.ResponseWriter, r *http.Request) {
 //	200: randomQuoteResponse
 
 // GetRandomQuote handles POST requests for getting a random quote
-func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
-
-	requestBody, err := validateRequestBody(r)
-
-	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
-	}
+func (requestBody *Request) GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 
 	var dbPointer *gorm.DB
 	var result []QuoteView
@@ -417,7 +382,7 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 			Where("random() < 0.005") //Randomized, O(n)
 	}
 
-	err = dbPointer.Find(&result).Error
+	err := dbPointer.Find(&result).Error
 	if err != nil {
 		//TODO: Respond with better error -- and put into swagger -- and add tests
 		http.Error(rw, err.Error(), http.StatusBadRequest)

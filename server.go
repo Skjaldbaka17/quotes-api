@@ -7,20 +7,23 @@ import (
 	"github.com/Skjaldbaka17/quotes-api/handlers"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/gorilla/mux"
+	"github.com/justinas/alice"
 )
 
 func main() {
+	requestHandler := handlers.Request{}
+	validationChain := alice.New(requestHandler.BodyValidationHandler)
 
 	r := mux.NewRouter()
 	posts := r.Methods(http.MethodPost).Subrouter()
-	posts.HandleFunc("/api/quotes", handlers.GetQuotesById)
-	posts.HandleFunc("/api/quotes/random", handlers.GetRandomQuote)
-	posts.HandleFunc("/api/search", handlers.SearchByString)
-	posts.HandleFunc("/api/search/authors", handlers.SearchAuthorsByString)
-	posts.HandleFunc("/api/search/quotes", handlers.SearchQuotesByString)
-	posts.HandleFunc("/api/authors", handlers.GetAuthorsById)
-	posts.HandleFunc("/api/topics", handlers.GetTopics)
-	posts.HandleFunc("/api/topic", handlers.GetTopic)
+	posts.Handle("/api/quotes", validationChain.ThenFunc(requestHandler.GetQuotesById))
+	posts.Handle("/api/quotes/random", validationChain.ThenFunc(requestHandler.GetRandomQuote))
+	posts.Handle("/api/search", validationChain.ThenFunc(requestHandler.SearchByString))
+	posts.Handle("/api/search/authors", validationChain.ThenFunc(requestHandler.SearchAuthorsByString))
+	posts.Handle("/api/search/quotes", validationChain.ThenFunc(requestHandler.SearchQuotesByString))
+	posts.Handle("/api/authors", validationChain.ThenFunc(requestHandler.GetAuthorsById))
+	posts.Handle("/api/topics", validationChain.ThenFunc(requestHandler.GetTopics))
+	posts.Handle("/api/topic", validationChain.ThenFunc(requestHandler.GetTopic))
 
 	// handler for documentation
 	opts := middleware.RedocOpts{SpecURL: "/swagger/swagger.yaml"}
