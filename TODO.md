@@ -2,7 +2,6 @@
 
 - [ ] Clean up quotes.go
 - [ ] Error handling + Tests
-- [ ] Validate RequestBody + Tests
 - [ ] Make error tests (i.e. made-to-fail-tests)
 - [ ] Get random Author
 - [ ] Get list of authors (with parameters for pagination and alphabet and languages)
@@ -16,6 +15,7 @@
 - [ ] Draw up DB-Graph (i.e. how tables are connected to view etc)
 - [ ] Make Authors Search more efficient (create a similarity-based index ?)
 - [ ] Look into and maybe Change rest into GraphQL
+- [x] Validate RequestBody + Tests
 - [x] Add get random Quote
 - [x] Use TopicsView instead of searchview (and change name to something more general)
 - [x] Add Icelandic / English Support

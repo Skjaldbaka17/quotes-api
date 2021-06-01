@@ -21,14 +21,15 @@ var languages = []string{"English", "Icelandic"}
 
 func (requestBody *Request) BodyValidationHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		log.Println("Executing middlewareOne")
+		log.Println("HANDLER:", requestBody)
 		_, err := requestBody.getRequestBody(r)
-		log.Println("SERARCH:", requestBody)
+
 		if err != nil {
 			rw.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(rw).Encode(ErrorResponse{err.Error()})
 			return
 		}
+
 		next.ServeHTTP(rw, r)
 	})
 }
@@ -77,7 +78,6 @@ func (requestBody *Request) getRequestBody(r *http.Request) (Request, error) {
 
 // Get Authors handles POST requests to get the authors, and their quotes, that have the given ids
 func (requestBody *Request) GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
-
 	var authors []QuoteView
 	err := db.Table("searchview").
 		Where("authorid in (?)", requestBody.Ids).

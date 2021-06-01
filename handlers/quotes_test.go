@@ -558,12 +558,6 @@ func TestTopics(t *testing.T) {
 
 }
 
-func TestValidation(t *testing.T) {
-
-	t.Run("Should return vald Request object and error nil", func(t *testing.T) { t.Skip() })
-
-}
-
 type Set []int
 
 type httpRequest func(http.ResponseWriter, *http.Request)
