@@ -222,18 +222,96 @@ func TestAuthors(t *testing.T) {
 
 		authorId := Set{1}
 		var jsonStr = []byte(fmt.Sprintf(`{"ids": [%s]}`, authorId.toString()))
+
 		respObj := requestAndReturnArray(jsonStr, GetAuthorsById)
 		firstAuthor := respObj[0]
-		if firstAuthor.Authorid != authorId[0] {
+		if firstAuthor.Id != authorId[0] {
 			t.Errorf("got %d, want %d", firstAuthor.Authorid, authorId[0])
 		}
 
 	})
 
 	t.Run("Random author", func(t *testing.T) {
-		t.Run("Should return a random author", func(t *testing.T) { t.Skip() })
-		t.Run("Should return a random Icelandic author", func(t *testing.T) { t.Skip() })
-		t.Run("Should return a random English Author", func(t *testing.T) { t.Skip() })
+		t.Run("Should return a random author with only a single quote (i.e. default)", func(t *testing.T) {
+
+			var jsonStr = []byte(`{}`)
+			firstRespObj := requestAndReturnArray(jsonStr, GetRandomAuthor)
+
+			if len(firstRespObj) != 1 {
+				t.Errorf("Expected only a single quote from the random author but got %d", len(firstRespObj))
+			}
+
+			firstAuthor := firstRespObj[0]
+			if firstAuthor.Name == "" {
+				t.Errorf("Expected a random author but got an empty name for author")
+			}
+
+			secondRespObj := requestAndReturnArray(jsonStr, GetRandomAuthor)
+			secondAuthor := secondRespObj[0]
+			if firstAuthor.Authorid == secondAuthor.Authorid {
+				t.Errorf("Expected two different authors but got the same author twice which is higly improbable, got author with id %d and name %s", firstAuthor.Authorid, firstAuthor.Name)
+			}
+
+		})
+
+		t.Run("Should return a random Author with only quotes from him in Icelandic", func(t *testing.T) {
+			language := "icelandic"
+			var jsonStr = []byte(fmt.Sprintf(`{"language":"%s"}`, language))
+			firstRespObj := requestAndReturnArray(jsonStr, GetRandomAuthor)
+
+			firstAuthor := firstRespObj[0]
+			if firstAuthor.Name == "" {
+				t.Errorf("Expected a random author but got an empty name for author")
+			}
+
+			if !firstAuthor.Isicelandic {
+				t.Errorf("Expected the quotes returned to be in icelandic")
+			}
+
+			secondRespObj := requestAndReturnArray(jsonStr, GetRandomAuthor)
+			secondAuthor := secondRespObj[0]
+			if firstAuthor.Authorid == secondAuthor.Authorid {
+				t.Errorf("Expected two different authors but got the same author twice which is higly improbable, got author with id %d and name %s", firstAuthor.Authorid, firstAuthor.Name)
+			}
+		})
+
+		t.Run("Should return a random Author with only quotes from him in English", func(t *testing.T) {
+
+			language := "english"
+			var jsonStr = []byte(fmt.Sprintf(`{"language":"%s"}`, language))
+			firstRespObj := requestAndReturnArray(jsonStr, GetRandomAuthor)
+
+			firstAuthor := firstRespObj[0]
+			if firstAuthor.Name == "" {
+				t.Errorf("Expected a random author but got an empty name for author")
+			}
+
+			if firstAuthor.Isicelandic {
+				t.Errorf("Expected the quotes returned to be in English")
+			}
+
+			secondRespObj := requestAndReturnArray(jsonStr, GetRandomAuthor)
+			secondAuthor := secondRespObj[0]
+			if firstAuthor.Authorid == secondAuthor.Authorid {
+				t.Errorf("Expected two different authors but got the same author twice which is higly improbable, got author with id %d and name %s", firstAuthor.Authorid, firstAuthor.Name)
+			}
+
+		})
+
+		t.Run("Should return author with a maximum of 2 of his quotes", func(t *testing.T) {
+			maxQuotes := 2
+			var jsonStr = []byte(fmt.Sprintf(`{"maxQuotes":%d}`, maxQuotes))
+			firstRespObj := requestAndReturnArray(jsonStr, GetRandomAuthor)
+
+			firstAuthor := firstRespObj[0]
+			if firstAuthor.Name == "" {
+				t.Errorf("Expected a random author but got an empty name for author")
+			}
+
+			if len(firstRespObj) != 2 {
+				t.Errorf("Expected 2 quotes but got %d", len(firstRespObj))
+			}
+		})
 	})
 
 }

@@ -146,44 +146,32 @@ paths:
       - QUOTES
   /quotes/random:
     post:
-      description: Get a random quote according to the given parameters
-      operationId: getRandomQuote
+      description: Get a random Author, and some of his quotes, according to the given
+        parameters
+      operationId: getRandomAuthor
       parameters:
-      - description: The structure of the response to random Quote post request
+      - description: The structure of the request for getting a random author
         in: body
         name: Body
         schema:
           properties:
-            authorid:
-              description: The random quote returned must be from the author with
-                the given authorId
-              example: 24952
-              format: int64
-              type: integer
-              x-go-name: Authorid
             language:
-              description: The random quote returned must be in the given language
+              description: The random author must have quotes in the given language
               example: English
               type: string
               x-go-name: Language
-            searchString:
-              description: The random quote returned must contain a match with the
-                searchstring
-              example: float
-              type: string
-              x-go-name: SearchString
-            topicId:
-              description: The random quote returned must be a part of the topic with
-                the given topicId
-              example: "10"
-              type: string
-              x-go-name: TopicId
+            maxQuotes:
+              description: How many quotes, maximum, to be returned from this author
+              example: 10
+              format: int64
+              type: integer
+              x-go-name: MaxQuotes
           type: object
       responses:
         "200":
-          $ref: '#/responses/randomQuoteResponse'
+          $ref: '#/responses/randomAuthorResponse'
       tags:
-      - QUOTES
+      - AUTHORS
   /search:
     post:
       description: Search for quotes / authors by a general string-search that searches
@@ -482,6 +470,12 @@ responses:
             uniqueItems: true
             x-go-name: Topicname
         type: object
+      type: array
+  randomAuthorResponse:
+    description: Data structure representing the response for a random author
+    schema:
+      items:
+        $ref: '#/definitions/QuoteView'
       type: array
   randomQuoteResponse:
     description: Data structure representing the response for a random quote

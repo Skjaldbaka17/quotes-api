@@ -55,6 +55,8 @@ type QuoteView struct {
 	// Whether or not this quote is in Icelandic or not
 	// example: false
 	Isicelandic bool `json:"isicelandic"`
+	//swagger:ignore
+	Id int `json:"id"`
 }
 
 type ListItem struct {
@@ -74,6 +76,7 @@ type Request struct {
 	AuthorId     int    `json:"authorId"`
 	QuoteId      int    `json:"quoteId"`
 	TopicId      int    `json:"topicId"`
+	MaxQuotes    int    `json:"maxQuotes"`
 }
 
 type ErrorResponse struct {

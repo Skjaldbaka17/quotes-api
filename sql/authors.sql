@@ -5,5 +5,6 @@ CREATE TABLE authors(
    createdat timestamptz,
    updatedat timestamptz,
    deletedat timestamptz,
+   hasIcelandicQuotes boolean default false,
    tsv tsvector
 );

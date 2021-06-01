@@ -16,6 +16,8 @@ import (
 
 const defaultPageSize = 25
 const maxPageSize = 200
+const maxQuotes = 50
+const defaultMaxQuotes = 1
 
 var languages = []string{"English", "Icelandic"}
 
@@ -33,14 +35,20 @@ func getRequestBody(rw http.ResponseWriter, r *http.Request, requestBody *Reques
 		return err
 	}
 
-	//TODO: add validation for searchString
-
 	if requestBody.PageSize < 1 || requestBody.PageSize > maxPageSize {
 		requestBody.PageSize = defaultPageSize
 	}
 
 	if requestBody.Page < 0 {
 		requestBody.Page = 0
+	}
+
+	if requestBody.MaxQuotes < 0 || requestBody.MaxQuotes > maxQuotes {
+		requestBody.MaxQuotes = maxQuotes
+	}
+
+	if requestBody.MaxQuotes <= 0 {
+		requestBody.MaxQuotes = defaultMaxQuotes
 	}
 
 	return nil
@@ -371,7 +379,7 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 
 	//Random quote from a particular author
 	if requestBody.AuthorId > 0 {
-		dbPointer.Where("authorid = ?", requestBody.AuthorId)
+		dbPointer = dbPointer.Where("authorid = ?", requestBody.AuthorId)
 		shouldOrderBy = true
 	}
 
@@ -379,9 +387,9 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 	if requestBody.Language != "" {
 		switch strings.ToLower(requestBody.Language) {
 		case "english":
-			dbPointer.Not("isicelandic")
+			dbPointer = dbPointer.Not("isicelandic")
 		case "icelandic":
-			dbPointer.Where("isicelandic")
+			dbPointer = dbPointer.Where("isicelandic")
 		}
 	}
 
@@ -409,6 +417,64 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 	} else {
 		json.NewEncoder(rw).Encode(result[0])
 	}
+
+}
+
+// swagger:route POST /quotes/random AUTHORS getRandomAuthor
+// Get a random Author, and some of his quotes, according to the given parameters
+// responses:
+//	200: randomAuthorResponse
+
+// GetRandomAuthor handles POST requests for getting a random author
+func GetRandomAuthor(rw http.ResponseWriter, r *http.Request) {
+	var requestBody Request
+	if err := getRequestBody(rw, r, &requestBody); err != nil {
+		return
+	}
+
+	var result []QuoteView
+	var author AuthorsView
+	dbPointer := db.Table("authors").Where("random() < 0.01")
+
+	//Random author from a particular language
+	if requestBody.Language != "" {
+		switch strings.ToLower(requestBody.Language) {
+		case "english":
+			dbPointer = dbPointer.Not("hasicelandicquotes")
+		case "icelandic":
+			dbPointer = dbPointer.Where("hasicelandicquotes")
+		}
+	}
+
+	err := dbPointer.First(&author).Error
+
+	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	dbPointer = db.Table("searchview").Where("authorid = ?", author.Id)
+
+	//An icelandic quote from the particular/random author
+	if requestBody.Language != "" {
+		switch strings.ToLower(requestBody.Language) {
+		case "english":
+			dbPointer = dbPointer.Not("isicelandic")
+		case "icelandic":
+			dbPointer = dbPointer.Where("isicelandic")
+		}
+	}
+
+	err = dbPointer.Limit(requestBody.MaxQuotes).Find(&result).Error
+
+	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	json.NewEncoder(rw).Encode(result)
 
 }
 

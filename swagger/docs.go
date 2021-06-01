@@ -45,6 +45,14 @@ type randomQuoteResponseWrapper struct {
 	Body handlers.QuoteView
 }
 
+// Data structure representing the response for a random author
+// swagger:response randomAuthorResponse
+type randomAuthorResponseWrapper struct {
+	// A quote struct
+	// in: body
+	Body []handlers.QuoteView
+}
+
 // Data structure representing the response for a authors
 // swagger:response authorsResponse
 type authorsResponseWrapper struct {
@@ -263,5 +271,21 @@ type getRandomQuoteResponseWrapper struct {
 		//
 		//example: 24952
 		Authorid int `json:"authorid"`
+	}
+}
+
+// swagger:parameters getRandomAuthor
+type randomAuthorWrapper struct {
+	// The structure of the request for getting a random author
+	// in: body
+	Body struct {
+		// The random author must have quotes in the given language
+		//
+		// Example: English
+		Language string `json:"language"`
+		// How many quotes, maximum, to be returned from this author
+		//
+		// Example: 10
+		MaxQuotes int `json:"maxQuotes"`
 	}
 }
