@@ -19,31 +19,18 @@ const maxPageSize = 200
 
 var languages = []string{"English", "Icelandic"}
 
-func (requestBody *Request) BodyValidationHandler(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		log.Println("HANDLER:", requestBody)
-		_, err := requestBody.getRequestBody(r)
-
-		if err != nil {
-			rw.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(rw).Encode(ErrorResponse{err.Error()})
-			return
-		}
-
-		next.ServeHTTP(rw, r)
-	})
-}
-
 //ValidateRequestBody takes in the request and validates all the input fields, returns an error with reason for validation-failure
 //if validation fails.
 //TODO: Make validation better! i.e. make it "real"
-func (requestBody *Request) getRequestBody(r *http.Request) (Request, error) {
+func getRequestBody(rw http.ResponseWriter, r *http.Request, requestBody *Request) error {
 	err := json.NewDecoder(r.Body).Decode(&requestBody)
 
 	if err != nil {
-		//TODO: Respond with better error -- and add tests
 		log.Printf("Got error when decoding: %s", err)
-		return Request{}, errors.New("request body is not structured correctly. Please refer to the /docs page for information on how to structure the request body")
+		err = errors.New("request body is not structured correctly. Please refer to the /docs page for information on how to structure the request body")
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(ErrorResponse{err.Error()})
+		return err
 	}
 
 	//TODO: add validation for searchString
@@ -56,7 +43,7 @@ func (requestBody *Request) getRequestBody(r *http.Request) (Request, error) {
 		requestBody.Page = 0
 	}
 
-	return *requestBody, nil
+	return nil
 }
 
 // type Request struct {
@@ -77,7 +64,12 @@ func (requestBody *Request) getRequestBody(r *http.Request) (Request, error) {
 //	200: multipleQuotesResponse
 
 // Get Authors handles POST requests to get the authors, and their quotes, that have the given ids
-func (requestBody *Request) GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
+func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
+	var requestBody Request
+	if err := getRequestBody(rw, r, &requestBody); err != nil {
+		return
+	}
+
 	var authors []QuoteView
 	err := db.Table("searchview").
 		Where("authorid in (?)", requestBody.Ids).
@@ -101,8 +93,11 @@ func (requestBody *Request) GetAuthorsById(rw http.ResponseWriter, r *http.Reque
 //	200: multipleQuotesResponse
 
 // GetQuotesById handles POST requests to get the quotes, and their authors, that have the given ids
-func (requestBody *Request) GetQuotesById(rw http.ResponseWriter, r *http.Request) {
-
+func GetQuotesById(rw http.ResponseWriter, r *http.Request) {
+	var requestBody Request
+	if err := getRequestBody(rw, r, &requestBody); err != nil {
+		return
+	}
 	var quotes []QuoteView
 	err := db.Table("searchview").
 		Select("*").
@@ -128,7 +123,11 @@ func (requestBody *Request) GetQuotesById(rw http.ResponseWriter, r *http.Reques
 //	200: multipleQuotesResponse
 
 // SearchByString handles POST requests to search for quotes / authors by a search-string
-func (requestBody *Request) SearchByString(rw http.ResponseWriter, r *http.Request) {
+func SearchByString(rw http.ResponseWriter, r *http.Request) {
+	var requestBody Request
+	if err := getRequestBody(rw, r, &requestBody); err != nil {
+		return
+	}
 	start := time.Now()
 
 	var results []QuoteView
@@ -178,7 +177,11 @@ func (requestBody *Request) SearchByString(rw http.ResponseWriter, r *http.Reque
 //	200: multipleQuotesResponse
 
 // SearchAuthorsByString handles POST requests to search for authors by a search-string
-func (requestBody *Request) SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
+func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
+	var requestBody Request
+	if err := getRequestBody(rw, r, &requestBody); err != nil {
+		return
+	}
 	start := time.Now()
 
 	var results []QuoteView
@@ -221,7 +224,11 @@ func (requestBody *Request) SearchAuthorsByString(rw http.ResponseWriter, r *htt
 //	200: multipleQuotesResponse
 
 // SearchQuotesByString handles POST requests to search for quotes by a search-string
-func (requestBody *Request) SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
+func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
+	var requestBody Request
+	if err := getRequestBody(rw, r, &requestBody); err != nil {
+		return
+	}
 	start := time.Now()
 
 	var results []QuoteView
@@ -269,8 +276,11 @@ func (requestBody *Request) SearchQuotesByString(rw http.ResponseWriter, r *http
 //	200: listTopicsResponse
 
 // GetTopics handles POST requests for listing the available quote-topics
-func (requestBody *Request) GetTopics(rw http.ResponseWriter, r *http.Request) {
-
+func GetTopics(rw http.ResponseWriter, r *http.Request) {
+	var requestBody Request
+	if err := getRequestBody(rw, r, &requestBody); err != nil {
+		return
+	}
 	var results []ListItem
 
 	pointer := db.Table("topics")
@@ -300,8 +310,11 @@ func (requestBody *Request) GetTopics(rw http.ResponseWriter, r *http.Request) {
 //	200: multipleQuotesTopicResponse
 
 // GetTopic handles POST requests for getting quotes from a particular topic
-func (requestBody *Request) GetTopic(rw http.ResponseWriter, r *http.Request) {
-
+func GetTopic(rw http.ResponseWriter, r *http.Request) {
+	var requestBody Request
+	if err := getRequestBody(rw, r, &requestBody); err != nil {
+		return
+	}
 	var results []QuoteView
 
 	//Order by quoteid to have definitive order (when for examplke some quotes rank the same for plain, phrase and general)
@@ -336,8 +349,11 @@ func (requestBody *Request) GetTopic(rw http.ResponseWriter, r *http.Request) {
 //	200: randomQuoteResponse
 
 // GetRandomQuote handles POST requests for getting a random quote
-func (requestBody *Request) GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
-
+func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
+	var requestBody Request
+	if err := getRequestBody(rw, r, &requestBody); err != nil {
+		return
+	}
 	var dbPointer *gorm.DB
 	var result []QuoteView
 	shouldOrderBy := false //Used when there are few rows to choose from and therefore higher probability that random() < 0.005 returns no rows
