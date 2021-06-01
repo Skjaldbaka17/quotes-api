@@ -420,7 +420,7 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 
 }
 
-// swagger:route POST /quotes/random AUTHORS getRandomAuthor
+// swagger:route POST /authors/random AUTHORS getRandomAuthor
 // Get a random Author, and some of his quotes, according to the given parameters
 // responses:
 //	200: randomAuthorResponse

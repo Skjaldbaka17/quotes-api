@@ -1,9 +1,5 @@
 # TODOS
 
-- [ ] Clean up quotes.go
-- [ ] Error handling + Tests
-- [ ] Make error tests (i.e. made-to-fail-tests)
-- [ ] Get random Author
 - [ ] Get list of authors (with parameters for pagination and alphabet and languages)
 - [ ] Add get and set Quote of The Day (plus points for available to set quotes for multiple days in one request)
 - [ ] Get Author of the day + Set Author of the day (plust points for available to set authors for multiple days in one request)
@@ -17,6 +13,13 @@
 - [ ] Make Authors Search more efficient (create a similarity-based index ?)
 - [ ] Look into and maybe Change rest into GraphQL
 - [ ] Pagination Everywhere where needed
+- [ ] Clean up quotes.go
+- [ ] Error handling + Tests
+- [ ] Make error tests (i.e. made-to-fail-tests)
+
+ --------------
+ 
+- [x] Get random Author
 - [x] Validate RequestBody + Tests
 - [x] Add get random Quote
 - [x] Use TopicsView instead of searchview (and change name to something more general)
