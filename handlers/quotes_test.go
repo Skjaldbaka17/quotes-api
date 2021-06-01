@@ -223,10 +223,17 @@ func TestAuthors(t *testing.T) {
 		authorId := Set{1}
 		var jsonStr = []byte(fmt.Sprintf(`{"ids": [%s]}`, authorId.toString()))
 		respObj := requestAndReturnArray(jsonStr, GetAuthorsById)
-		firstAuthor := respObj[0] //Use index 1 because in index 0 there is an author talking extensively about Nietzsche
+		firstAuthor := respObj[0]
 		if firstAuthor.Authorid != authorId[0] {
-			t.Errorf("got %q, want %q", firstAuthor.Authorid, authorId)
+			t.Errorf("got %d, want %d", firstAuthor.Authorid, authorId[0])
 		}
+
+	})
+
+	t.Run("Random author", func(t *testing.T) {
+		t.Run("Should return a random author", func(t *testing.T) { t.Skip() })
+		t.Run("Should return a random Icelandic author", func(t *testing.T) { t.Skip() })
+		t.Run("Should return a random English Author", func(t *testing.T) { t.Skip() })
 	})
 
 }

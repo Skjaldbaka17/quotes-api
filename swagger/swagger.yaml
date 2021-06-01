@@ -2,6 +2,22 @@ basePath: /api/
 consumes:
 - application/json
 definitions:
+  AuthorsView:
+    properties:
+      id:
+        description: The author's id
+        example: 24952
+        format: int64
+        type: integer
+        uniqueItems: true
+        x-go-name: Id
+      name:
+        description: Name of author
+        example: Muhammad Ali
+        type: string
+        x-go-name: Name
+    type: object
+    x-go-package: github.com/Skjaldbaka17/quotes-api/handlers
   QuoteView:
     properties:
       authorid:
@@ -87,7 +103,7 @@ paths:
           type: object
       responses:
         "200":
-          $ref: '#/responses/multipleQuotesResponse'
+          $ref: '#/responses/authorsResponse'
       tags:
       - AUTHORS
   /languages:
@@ -371,6 +387,12 @@ paths:
 produces:
 - application/json
 responses:
+  authorsResponse:
+    description: Data structure representing the response for a authors
+    schema:
+      items:
+        $ref: '#/definitions/AuthorsView'
+      type: array
   listOfStrings:
     description: Data structure for a list of strings
     schema:

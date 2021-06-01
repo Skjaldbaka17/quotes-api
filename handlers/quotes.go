@@ -61,7 +61,7 @@ func getRequestBody(rw http.ResponseWriter, r *http.Request, requestBody *Reques
 // Get authors by their ids
 //
 // responses:
-//	200: multipleQuotesResponse
+//	200: authorsResponse
 
 // Get Authors handles POST requests to get the authors, and their quotes, that have the given ids
 func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
@@ -70,10 +70,10 @@ func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var authors []QuoteView
-	err := db.Table("searchview").
-		Where("authorid in (?)", requestBody.Ids).
-		Find(&authors).
+	var authors []AuthorsView
+	err := db.Table("authors").
+		Where("id in (?)", requestBody.Ids).
+		Scan(&authors).
 		Error
 
 	if err != nil {

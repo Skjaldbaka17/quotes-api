@@ -13,9 +13,20 @@ type Quotes struct {
 
 type Authors struct {
 	gorm.Model
+	Id     int      `json:"id"`
 	Name   string   `json:"name"`
 	Count  int      `json:"count"`
 	Quotes []Quotes `json:"quotes" gorm:"foreignKey:authorid"`
+}
+
+type AuthorsView struct {
+	// The author's id
+	//Unique: true
+	//example: 24952
+	Id int `json:"id"`
+	// Name of author
+	//example: Muhammad Ali
+	Name string `json:"name"`
 }
 
 type QuoteView struct {

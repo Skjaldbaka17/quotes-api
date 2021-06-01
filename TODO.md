@@ -7,6 +7,7 @@
 - [ ] Get list of authors (with parameters for pagination and alphabet and languages)
 - [ ] Add get and set Quote of The Day (plus points for available to set quotes for multiple days in one request)
 - [ ] Get Author of the day + Set Author of the day (plust points for available to set authors for multiple days in one request)
+- [ ] getQuotes route (combine with getQuotesById and add to it to get quotes from a specific author + add pagination)
 - [ ] Add authentication for access to the api + Creating apiKeys + Documenting usage + admin access vs normal access
 - [ ] Add Counting each time a quote is accessed / sent from Api (also for topics) - i.e. stats
 - [ ] add search for topics and searching in topics (maybe just have a single search endpoint with parameters? i.e. want to search for authors / quotes / language inside a specific topic?)
@@ -15,6 +16,7 @@
 - [ ] Draw up DB-Graph (i.e. how tables are connected to view etc)
 - [ ] Make Authors Search more efficient (create a similarity-based index ?)
 - [ ] Look into and maybe Change rest into GraphQL
+- [ ] Pagination Everywhere where needed
 - [x] Validate RequestBody + Tests
 - [x] Add get random Quote
 - [x] Use TopicsView instead of searchview (and change name to something more general)

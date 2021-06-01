@@ -31,7 +31,7 @@ import "github.com/Skjaldbaka17/quotes-api/handlers"
 
 // Data structure representing most responses
 // swagger:response multipleQuotesResponse
-type authorsResponseWrapper struct {
+type multipleResponseWrapper struct {
 	// List of authors / quotes
 	// in: body
 	Body []handlers.QuoteView
@@ -43,6 +43,14 @@ type randomQuoteResponseWrapper struct {
 	// A quote struct
 	// in: body
 	Body handlers.QuoteView
+}
+
+// Data structure representing the response for a authors
+// swagger:response authorsResponse
+type authorsResponseWrapper struct {
+	// A quote struct
+	// in: body
+	Body []handlers.AuthorsView
 }
 
 // Data structure representing topic quotes response
