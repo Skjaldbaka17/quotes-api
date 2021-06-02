@@ -17,7 +17,7 @@ func TestSearch(t *testing.T) {
 		t.Run("easy search should return list of quotes with Muhammad Ali as first author", func(t *testing.T) {
 
 			var jsonStr = []byte(`{"searchString": "Float like a butterfly sting like a bee"}`)
-			respObj := requestAndReturnArray(jsonStr, SearchQuotesByString)
+			respObj, _ := requestAndReturnArray(jsonStr, SearchQuotesByString)
 			firstAuthor := respObj[0].Name
 			want := "Muhammad Ali"
 			if firstAuthor != want {
@@ -28,7 +28,7 @@ func TestSearch(t *testing.T) {
 		t.Run("intermediate search should return list of quotes with Muhammad Ali as first author", func(t *testing.T) {
 
 			var jsonStr = []byte(`{"searchString": "bee sting like a butterfly"}`)
-			respObj := requestAndReturnArray(jsonStr, SearchQuotesByString)
+			respObj, _ := requestAndReturnArray(jsonStr, SearchQuotesByString)
 			firstAuthor := respObj[0].Name
 			want := "Muhammad Ali"
 			if firstAuthor != want {
@@ -39,7 +39,7 @@ func TestSearch(t *testing.T) {
 		t.Run("hard search should return list of quotes with Muhammad Ali as first author", func(t *testing.T) {
 
 			var jsonStr = []byte(`{"searchString": "bee butterfly float"}`)
-			respObj := requestAndReturnArray(jsonStr, SearchQuotesByString)
+			respObj, _ := requestAndReturnArray(jsonStr, SearchQuotesByString)
 			firstAuthor := respObj[0].Name
 			want := "Muhammad Ali"
 			if firstAuthor != want {
@@ -54,7 +54,7 @@ func TestSearch(t *testing.T) {
 		t.Run("easy search should return list of quotes with Friedrich Nietzsche as first author", func(t *testing.T) {
 
 			var jsonStr = []byte(`{"searchString": "Friedrich Nietzsche"}`)
-			respObj := requestAndReturnArray(jsonStr, SearchAuthorsByString)
+			respObj, _ := requestAndReturnArray(jsonStr, SearchAuthorsByString)
 			firstAuthor := respObj[0].Name
 			want := "Friedrich Nietzsche"
 			if firstAuthor != want {
@@ -65,7 +65,7 @@ func TestSearch(t *testing.T) {
 		t.Run("intermediate search should Return list of quotes with Joseph Stalin as first author", func(t *testing.T) {
 
 			var jsonStr = []byte(`{"searchString": "Stalin jseph"}`)
-			respObj := requestAndReturnArray(jsonStr, SearchAuthorsByString)
+			respObj, _ := requestAndReturnArray(jsonStr, SearchAuthorsByString)
 			firstAuthor := respObj[0].Name
 			want := "Joseph Stalin"
 			if firstAuthor != want {
@@ -76,7 +76,7 @@ func TestSearch(t *testing.T) {
 		t.Run("hard search should return list of quotes with Friedrich Nietzsche as first author", func(t *testing.T) {
 
 			var jsonStr = []byte(`{"searchString": "Niet Friedric"}`)
-			respObj := requestAndReturnArray(jsonStr, SearchAuthorsByString)
+			respObj, _ := requestAndReturnArray(jsonStr, SearchAuthorsByString)
 			firstAuthor := respObj[0].Name
 			want := "Friedrich Nietzsche"
 			if firstAuthor != want {
@@ -92,7 +92,7 @@ func TestSearch(t *testing.T) {
 			t.Run("easy search should return list of quotes with Friedrich Nietzsche as first author", func(t *testing.T) {
 
 				var jsonStr = []byte(`{"searchString": "Friedrich Nietzsche"}`)
-				respObj := requestAndReturnArray(jsonStr, SearchByString)
+				respObj, _ := requestAndReturnArray(jsonStr, SearchByString)
 				firstAuthor := respObj[1].Name //Use index 1 because in index 0 there is an author talking extensively about Nietzsche
 				want := "Friedrich Nietzsche"
 				if firstAuthor != want {
@@ -103,7 +103,7 @@ func TestSearch(t *testing.T) {
 			t.Run("hard search should return list of quotes with Friedrich Nietzsche as first author", func(t *testing.T) {
 
 				var jsonStr = []byte(`{"searchString": "Nietshe Friedr"}`)
-				respObj := requestAndReturnArray(jsonStr, SearchByString)
+				respObj, _ := requestAndReturnArray(jsonStr, SearchByString)
 				firstAuthor := respObj[1].Name //Use index 1 because in index 0 there is an author talking extensively about Nietzsche
 				want := "Friedrich Nietzsche"
 				if firstAuthor != want {
@@ -116,7 +116,7 @@ func TestSearch(t *testing.T) {
 			t.Run("easy search should return list of quotes with Martin Luther as first author", func(t *testing.T) {
 
 				var jsonStr = []byte(`{"searchString": "If you are not allowed to Laugh in Heaven"}`)
-				respObj := requestAndReturnArray(jsonStr, SearchByString)
+				respObj, _ := requestAndReturnArray(jsonStr, SearchByString)
 				firstAuthor := respObj[1].Name //Use index 1 because in index 0 there is an author talking extensively about Nietzsche
 				want := "Martin Luther"
 				if firstAuthor != want {
@@ -223,7 +223,7 @@ func TestAuthors(t *testing.T) {
 		authorId := Set{1}
 		var jsonStr = []byte(fmt.Sprintf(`{"ids": [%s]}`, authorId.toString()))
 
-		respObj := requestAndReturnArray(jsonStr, GetAuthorsById)
+		respObj, _ := requestAndReturnArray(jsonStr, GetAuthorsById)
 		firstAuthor := respObj[0]
 		if firstAuthor.Id != authorId[0] {
 			t.Errorf("got %d, want %d", firstAuthor.Authorid, authorId[0])
@@ -231,11 +231,78 @@ func TestAuthors(t *testing.T) {
 
 	})
 
+	t.Run("Authorlist Test", func(t *testing.T) {
+
+		t.Run("Should return first 50 authors (alphabetically)", func(t *testing.T) {
+
+			pageSize := 50
+			var jsonStr = []byte(fmt.Sprintf(`{"pageSize": %d}`, pageSize))
+
+			respObj, _ := requestAndReturnArray(jsonStr, GetAuthorsList)
+
+			if len(respObj) != 50 {
+				t.Errorf("got list of length %d, but expected list of length %d", len(respObj), pageSize)
+			}
+
+			firstAuthor := respObj[0]
+			if firstAuthor.Name[0] != 'A' {
+				t.Errorf("got %s, want name that starts with 'A'", firstAuthor.Name)
+			}
+
+		})
+
+		t.Run("Should return first authors, with only English quotes, (alphabetically)", func(t *testing.T) {
+
+			language := "english"
+			var jsonStr = []byte(fmt.Sprintf(`{"language": "%s"}`, language))
+
+			respObj, errResponse := requestAndReturnArray(jsonStr, GetAuthorsList)
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			firstAuthor := respObj[0]
+
+			if firstAuthor.Hasicelandicquotes {
+				t.Errorf("got and %+v, but expected an author that has no icelandic quotes", firstAuthor)
+			}
+
+			if firstAuthor.Name[0] != 'A' {
+				t.Errorf("got %s, want name that starts with 'A'", firstAuthor.Name)
+			}
+
+		})
+
+		t.Run("Should return first authors starting from 'F' (i.e. greater than or equal to 'F' alphabetically)", func(t *testing.T) {
+
+			start
+
+		})
+
+		t.Run("Should return first authors with less than 10 quotes (i.e. greater than or equal to 'F' alphabetically)", func(t *testing.T) {
+			t.Skip()
+		})
+
+		t.Run("Should return first 50 authors (order DESC by nr of quotes)", func(t *testing.T) { t.Skip() })
+
+		t.Run("Should return first 50 authors (ordered by most popular, i.e. DESC count)", func(t *testing.T) { t.Skip() })
+
+		t.Run("Should return first 50 authors in reverse alphabetical order", func(t *testing.T) { t.Skip() })
+
+		t.Run("Should return first 50 authors in reverse popularity order (i.e. least popular first i.e. ASC count)", func(t *testing.T) { t.Skip() })
+
+		t.Run("Should return first 100 authors", func(t *testing.T) { t.Skip() })
+
+		t.Run("Should return the next 50 authors (i.e. pagination, page 1, alphabetical order)", func(t *testing.T) { t.Skip() })
+
+	})
+
 	t.Run("Random author", func(t *testing.T) {
 		t.Run("Should return a random author with only a single quote (i.e. default)", func(t *testing.T) {
 
 			var jsonStr = []byte(`{}`)
-			firstRespObj := requestAndReturnArray(jsonStr, GetRandomAuthor)
+			firstRespObj, _ := requestAndReturnArray(jsonStr, GetRandomAuthor)
 
 			if len(firstRespObj) != 1 {
 				t.Errorf("Expected only a single quote from the random author but got %d", len(firstRespObj))
@@ -246,7 +313,7 @@ func TestAuthors(t *testing.T) {
 				t.Errorf("Expected a random author but got an empty name for author")
 			}
 
-			secondRespObj := requestAndReturnArray(jsonStr, GetRandomAuthor)
+			secondRespObj, _ := requestAndReturnArray(jsonStr, GetRandomAuthor)
 			secondAuthor := secondRespObj[0]
 			if firstAuthor.Authorid == secondAuthor.Authorid {
 				t.Errorf("Expected two different authors but got the same author twice which is higly improbable, got author with id %d and name %s", firstAuthor.Authorid, firstAuthor.Name)
@@ -257,7 +324,7 @@ func TestAuthors(t *testing.T) {
 		t.Run("Should return a random Author with only quotes from him in Icelandic", func(t *testing.T) {
 			language := "icelandic"
 			var jsonStr = []byte(fmt.Sprintf(`{"language":"%s"}`, language))
-			firstRespObj := requestAndReturnArray(jsonStr, GetRandomAuthor)
+			firstRespObj, _ := requestAndReturnArray(jsonStr, GetRandomAuthor)
 
 			firstAuthor := firstRespObj[0]
 			if firstAuthor.Name == "" {
@@ -268,7 +335,7 @@ func TestAuthors(t *testing.T) {
 				t.Errorf("Expected the quotes returned to be in icelandic")
 			}
 
-			secondRespObj := requestAndReturnArray(jsonStr, GetRandomAuthor)
+			secondRespObj, _ := requestAndReturnArray(jsonStr, GetRandomAuthor)
 			secondAuthor := secondRespObj[0]
 			if firstAuthor.Authorid == secondAuthor.Authorid {
 				t.Errorf("Expected two different authors but got the same author twice which is higly improbable, got author with id %d and name %s", firstAuthor.Authorid, firstAuthor.Name)
@@ -279,7 +346,7 @@ func TestAuthors(t *testing.T) {
 
 			language := "english"
 			var jsonStr = []byte(fmt.Sprintf(`{"language":"%s"}`, language))
-			firstRespObj := requestAndReturnArray(jsonStr, GetRandomAuthor)
+			firstRespObj, _ := requestAndReturnArray(jsonStr, GetRandomAuthor)
 
 			firstAuthor := firstRespObj[0]
 			if firstAuthor.Name == "" {
@@ -290,7 +357,7 @@ func TestAuthors(t *testing.T) {
 				t.Errorf("Expected the quotes returned to be in English")
 			}
 
-			secondRespObj := requestAndReturnArray(jsonStr, GetRandomAuthor)
+			secondRespObj, _ := requestAndReturnArray(jsonStr, GetRandomAuthor)
 			secondAuthor := secondRespObj[0]
 			if firstAuthor.Authorid == secondAuthor.Authorid {
 				t.Errorf("Expected two different authors but got the same author twice which is higly improbable, got author with id %d and name %s", firstAuthor.Authorid, firstAuthor.Name)
@@ -301,7 +368,7 @@ func TestAuthors(t *testing.T) {
 		t.Run("Should return author with a maximum of 2 of his quotes", func(t *testing.T) {
 			maxQuotes := 2
 			var jsonStr = []byte(fmt.Sprintf(`{"maxQuotes":%d}`, maxQuotes))
-			firstRespObj := requestAndReturnArray(jsonStr, GetRandomAuthor)
+			firstRespObj, _ := requestAndReturnArray(jsonStr, GetRandomAuthor)
 
 			firstAuthor := firstRespObj[0]
 			if firstAuthor.Name == "" {
@@ -312,6 +379,7 @@ func TestAuthors(t *testing.T) {
 				t.Errorf("Expected 2 quotes but got %d", len(firstRespObj))
 			}
 		})
+
 	})
 
 }
@@ -321,7 +389,7 @@ func TestQuotes(t *testing.T) {
 
 		var quoteIds = Set{1, 2, 3}
 		var jsonStr = []byte(fmt.Sprintf(`{"ids":  [%s]}`, quoteIds.toString()))
-		respObj := requestAndReturnArray(jsonStr, GetQuotesById)
+		respObj, _ := requestAndReturnArray(jsonStr, GetQuotesById)
 
 		if len(respObj) != len(quoteIds) {
 			t.Errorf("got list of length %d but expected list of length %d", len(respObj), len(quoteIds))
@@ -721,10 +789,13 @@ func requestAndReturnSingle(jsonStr []byte, fn httpRequest) QuoteView {
 	return respObj
 }
 
-func requestAndReturnArray(jsonStr []byte, fn httpRequest) []QuoteView {
+func requestAndReturnArray(jsonStr []byte, fn httpRequest) ([]QuoteView, ErrorResponse) {
 	response, request := getRequestAndResponseForTest(jsonStr)
 	fn(response, request)
 	var respObj []QuoteView
+	var errorResp ErrorResponse
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
-	return respObj
+	_ = json.Unmarshal(response.Body.Bytes(), &errorResp)
+	errorResp.StatusCode = response.Result().StatusCode
+	return respObj, errorResp
 }

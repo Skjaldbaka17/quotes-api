@@ -26,7 +26,8 @@ type AuthorsView struct {
 	Id int `json:"id"`
 	// Name of author
 	//example: Muhammad Ali
-	Name string `json:"name"`
+	Name               string `json:"name"`
+	Hasicelandicquotes bool   `json:"hasicelandicquotes"`
 }
 
 type QuoteView struct {
@@ -56,7 +57,8 @@ type QuoteView struct {
 	// example: false
 	Isicelandic bool `json:"isicelandic"`
 	//swagger:ignore
-	Id int `json:"id"`
+	Id                 int  `json:"id"`
+	Hasicelandicquotes bool `json:"hasicelandicquotes"`
 }
 
 type ListItem struct {
@@ -66,19 +68,33 @@ type ListItem struct {
 }
 
 type Request struct {
-	Ids          []int  `json:"ids,omitempty"`
-	Id           int    `json:"id,omitempty"`
-	Page         int    `json:"page,omitempty"`
-	SearchString string `json:"searchString,omitempty"`
-	PageSize     int    `json:"pageSize,omitempty"`
-	Language     string `json:"language,omitempty"`
-	Topic        string `json:"topic,omitempty"`
-	AuthorId     int    `json:"authorId"`
-	QuoteId      int    `json:"quoteId"`
-	TopicId      int    `json:"topicId"`
-	MaxQuotes    int    `json:"maxQuotes"`
+	Ids          []int       `json:"ids,omitempty"`
+	Id           int         `json:"id,omitempty"`
+	Page         int         `json:"page,omitempty"`
+	SearchString string      `json:"searchString,omitempty"`
+	PageSize     int         `json:"pageSize,omitempty"`
+	Language     string      `json:"language,omitempty"`
+	Topic        string      `json:"topic,omitempty"`
+	AuthorId     int         `json:"authorId"`
+	QuoteId      int         `json:"quoteId"`
+	TopicId      int         `json:"topicId"`
+	MaxQuotes    int         `json:"maxQuotes"`
+	OrderConfig  OrderConfig `json:"orderConfig"`
+}
+
+type OrderConfig struct {
+	// What to order by, 'alphabetical', 'popularity' or 'nrOfQuotes'
+	// example: popularity
+	OrderBy string `json:"orderBy"`
+	// Where to start the ordering (if empty it starts from beginning, for example start at 'A' for alphabetical ascending order)
+	// example: F
+	StartFrom string `json:"startFrom"`
+	// Whether to order the list in reverse or not
+	// example: true
+	Reverse bool `json:"reverse"`
 }
 
 type ErrorResponse struct {
-	Message string `json:"message"`
+	Message    string `json:"message"`
+	StatusCode int    `json:"statusCode"`
 }

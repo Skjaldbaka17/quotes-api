@@ -31,7 +31,7 @@ func getRequestBody(rw http.ResponseWriter, r *http.Request, requestBody *Reques
 		log.Printf("Got error when decoding: %s", err)
 		err = errors.New("request body is not structured correctly. Please refer to the /docs page for information on how to structure the request body")
 		rw.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(rw).Encode(ErrorResponse{err.Error()})
+		json.NewEncoder(rw).Encode(ErrorResponse{Message: err.Error()})
 		return err
 	}
 
@@ -90,6 +90,55 @@ func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	json.NewEncoder(rw).Encode(&authors)
+}
+
+//
+//{pageSize int, page int, order string, language string, orderConfig: {
+//  orderBy: "alphabetical, popularity, nrOfQuotes", startFrom: "B", reverse: true/false
+//	}
+//}
+//
+//
+func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
+	var requestBody Request
+	if err := getRequestBody(rw, r, &requestBody); err != nil {
+		return
+	}
+
+	var authors []AuthorsView
+	dbPointer := db.Table("authors").
+		Order("name ASC")
+
+	switch strings.ToLower(requestBody.Language) {
+	case "english":
+		dbPointer = dbPointer.Not("hasicelandicquotes")
+	case "icelandic":
+		dbPointer = dbPointer.Where("hasicelandicquotes")
+	}
+
+	if (OrderConfig{}) != requestBody.OrderConfig {
+		switch strings.ToLower(requestBody.OrderConfig.OrderBy) {
+		case "alphabetical":
+		case "popularity":
+		case "nrOfQuotes":
+		}
+	}
+
+	err := dbPointer.Limit(requestBody.PageSize).
+		Offset(requestBody.Page * requestBody.PageSize).
+		Find(&authors).
+		Error
+
+	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
+		log.Printf("Got error when decoding: %s", err)
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	log.Println("Authors:", len(authors))
 
 	json.NewEncoder(rw).Encode(&authors)
 }
