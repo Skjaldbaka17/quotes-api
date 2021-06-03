@@ -26,8 +26,10 @@ type AuthorsView struct {
 	Id int `json:"id"`
 	// Name of author
 	//example: Muhammad Ali
-	Name               string `json:"name"`
-	Hasicelandicquotes bool   `json:"hasicelandicquotes"`
+	Name                string `json:"name"`
+	Hasicelandicquotes  bool   `json:"hasicelandicquotes"`
+	Nroficelandicquotes int    `json:"nroficelandicquotes"`
+	Nrofenglishquotes   int    `json:"nrofenglishquotes"`
 }
 
 type QuoteView struct {
@@ -57,8 +59,13 @@ type QuoteView struct {
 	// example: false
 	Isicelandic bool `json:"isicelandic"`
 	//swagger:ignore
-	Id                 int  `json:"id"`
+	Id int `json:"id"`
+	//swagger:ignore
 	Hasicelandicquotes bool `json:"hasicelandicquotes"`
+	//swagger:ignore
+	Nroficelandicquotes int `json:"nroficelandicquotes"`
+	//swagger:ignore
+	Nrofenglishquotes int `json:"nrofenglishquotes"`
 }
 
 type ListItem struct {
@@ -88,8 +95,11 @@ type OrderConfig struct {
 	OrderBy string `json:"orderBy"`
 	// Where to start the ordering (if empty it starts from beginning, for example start at 'A' for alphabetical ascending order)
 	// example: F
-	StartFrom string `json:"startFrom"`
-	// Whether to order the list in reverse or not
+	Minimum string `json:"minimum"`
+	// Where to end the ordering (if empty it ends at the logical end, for example end at 'Z' for alphabetical ascending order)
+	// example: Z
+	Maximum string `json:"maximum"`
+	// Whether to order the list in reverse or not (true is Descending and false is Ascending, false is default)
 	// example: true
 	Reverse bool `json:"reverse"`
 }

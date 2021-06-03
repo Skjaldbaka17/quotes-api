@@ -4,6 +4,9 @@ consumes:
 definitions:
   AuthorsView:
     properties:
+      hasicelandicquotes:
+        type: boolean
+        x-go-name: Hasicelandicquotes
       id:
         description: The author's id
         example: 24952
@@ -16,6 +19,41 @@ definitions:
         example: Muhammad Ali
         type: string
         x-go-name: Name
+      nrofenglishquotes:
+        format: int64
+        type: integer
+        x-go-name: Nrofenglishquotes
+      nroficelandicquotes:
+        format: int64
+        type: integer
+        x-go-name: Nroficelandicquotes
+    type: object
+    x-go-package: github.com/Skjaldbaka17/quotes-api/handlers
+  OrderConfig:
+    properties:
+      maximum:
+        description: Where to end the ordering (if empty it ends at the logical end,
+          for example end at 'Z' for alphabetical ascending order)
+        example: Z
+        type: string
+        x-go-name: Maximum
+      minimum:
+        description: Where to start the ordering (if empty it starts from beginning,
+          for example start at 'A' for alphabetical ascending order)
+        example: F
+        type: string
+        x-go-name: Minimum
+      orderBy:
+        description: What to order by, 'alphabetical', 'popularity' or 'nrOfQuotes'
+        example: popularity
+        type: string
+        x-go-name: OrderBy
+      reverse:
+        description: Whether to order the list in reverse or not (true is Descending
+          and false is Ascending, false is default)
+        example: true
+        type: boolean
+        x-go-name: Reverse
     type: object
     x-go-package: github.com/Skjaldbaka17/quotes-api/handlers
   QuoteView:
@@ -106,6 +144,75 @@ paths:
           $ref: '#/responses/authorsResponse'
       tags:
       - AUTHORS
+  /authors/list:
+    post:
+      description: Get list of authors according to some ordering / parameters
+      operationId: getAuthorsList
+      parameters:
+      - description: The structure of the request for getting a random author
+        in: body
+        name: Body
+        schema:
+          properties:
+            OrderConfig:
+              $ref: '#/definitions/OrderConfig'
+            language:
+              description: |-
+                The authors must have quotes in the given language, also if ordering by nrOfQuotes if this parameter is set then
+                only the amount of quotes the author has in the given language counts towards the ordering.
+              example: English
+              type: string
+              x-go-name: Language
+            page:
+              description: The page you are asking for, starts with 0.
+              example: 0
+              format: int64
+              minimum: 0
+              type: integer
+              x-go-name: Page
+            pageSize:
+              default: 25
+              description: The number of Authors to be returned on each "page"
+              example: 30
+              format: int64
+              maximum: 200
+              minimum: 1
+              type: integer
+              x-go-name: PageSize
+          type: object
+      responses:
+        "200":
+          $ref: '#/responses/authorsResponse'
+      tags:
+      - AUTHORS
+  /authors/random:
+    post:
+      description: Get a random Author, and some of his quotes, according to the given
+        parameters
+      operationId: getRandomAuthor
+      parameters:
+      - description: The structure of the request for getting a random author
+        in: body
+        name: Body
+        schema:
+          properties:
+            language:
+              description: The random author must have quotes in the given language
+              example: English
+              type: string
+              x-go-name: Language
+            maxQuotes:
+              description: How many quotes, maximum, to be returned from this author
+              example: 10
+              format: int64
+              type: integer
+              x-go-name: MaxQuotes
+          type: object
+      responses:
+        "200":
+          $ref: '#/responses/randomAuthorResponse'
+      tags:
+      - AUTHORS
   /languages:
     get:
       description: Get languages supported by the api
@@ -146,32 +253,44 @@ paths:
       - QUOTES
   /quotes/random:
     post:
-      description: Get a random Author, and some of his quotes, according to the given
-        parameters
-      operationId: getRandomAuthor
+      description: Get a random quote according to the given parameters
+      operationId: getRandomQuote
       parameters:
-      - description: The structure of the request for getting a random author
+      - description: The structure of the response to random Quote post request
         in: body
         name: Body
         schema:
           properties:
+            authorid:
+              description: The random quote returned must be from the author with
+                the given authorId
+              example: 24952
+              format: int64
+              type: integer
+              x-go-name: Authorid
             language:
-              description: The random author must have quotes in the given language
+              description: The random quote returned must be in the given language
               example: English
               type: string
               x-go-name: Language
-            maxQuotes:
-              description: How many quotes, maximum, to be returned from this author
-              example: 10
-              format: int64
-              type: integer
-              x-go-name: MaxQuotes
+            searchString:
+              description: The random quote returned must contain a match with the
+                searchstring
+              example: float
+              type: string
+              x-go-name: SearchString
+            topicId:
+              description: The random quote returned must be a part of the topic with
+                the given topicId
+              example: "10"
+              type: string
+              x-go-name: TopicId
           type: object
       responses:
         "200":
-          $ref: '#/responses/randomAuthorResponse'
+          $ref: '#/responses/randomQuoteResponse'
       tags:
-      - AUTHORS
+      - QUOTES
   /search:
     post:
       description: Search for quotes / authors by a general string-search that searches

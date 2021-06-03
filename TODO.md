@@ -16,7 +16,7 @@
 - [ ] Clean up quotes.go
 - [ ] Error handling + Tests
 - [ ] Make error tests (i.e. made-to-fail-tests)
-
+- [ ] Sort return list alphabetically ICelandic support
  --------------
  
 - [x] Get random Author

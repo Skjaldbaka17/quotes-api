@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -54,16 +55,6 @@ func getRequestBody(rw http.ResponseWriter, r *http.Request, requestBody *Reques
 	return nil
 }
 
-// type Request struct {
-// 	Id           int    `json:"id,omitempty"`
-// 	SearchString string `json:"searchString,omitempty"`
-// 	Language     string `json:"language,omitempty"`
-// 	Topic        string `json:"topic,omitempty"`
-// 	AuthorId     int    `json:"authorId"`
-// 	QuoteId      int    `json:"quoteId"`
-// 	TopicId      int    `json:"topicId"`
-// }
-
 // swagger:route POST /authors AUTHORS getAuthorsByIds
 //
 // Get authors by their ids
@@ -94,13 +85,15 @@ func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(&authors)
 }
 
+// swagger:route POST /authors/list AUTHORS getAuthorsList
 //
-//{pageSize int, page int, order string, language string, orderConfig: {
-//  orderBy: "alphabetical, popularity, nrOfQuotes", startFrom: "B", reverse: true/false
-//	}
-//}
+// Get list of authors according to some ordering / parameters
 //
-//
+// responses:
+//	200: authorsResponse
+
+// GetAuthorsList handles POST requests to get the authors that fit the parameters
+
 func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
 	var requestBody Request
 	if err := getRequestBody(rw, r, &requestBody); err != nil {
@@ -108,8 +101,7 @@ func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	var authors []AuthorsView
-	dbPointer := db.Table("authors").
-		Order("name ASC")
+	dbPointer := db.Table("authors")
 
 	switch strings.ToLower(requestBody.Language) {
 	case "english":
@@ -118,15 +110,52 @@ func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
 		dbPointer = dbPointer.Where("hasicelandicquotes")
 	}
 
-	if (OrderConfig{}) != requestBody.OrderConfig {
-		switch strings.ToLower(requestBody.OrderConfig.OrderBy) {
-		case "alphabetical":
-		case "popularity":
-		case "nrOfQuotes":
-		}
+	orderDirection := "ASC"
+	if requestBody.OrderConfig.Reverse {
+		orderDirection = "DESC"
 	}
 
-	err := dbPointer.Limit(requestBody.PageSize).
+	switch strings.ToLower(requestBody.OrderConfig.OrderBy) {
+	case "popularity": //TODO: add popularity ordering
+	case "nrofquotes":
+		switch strings.ToLower(requestBody.Language) {
+		case "english":
+			if nr, err := strconv.Atoi(requestBody.OrderConfig.Maximum); err == nil {
+				dbPointer = dbPointer.Where("nrofenglishquotes <= ?", nr)
+			}
+			if nr, err := strconv.Atoi(requestBody.OrderConfig.Minimum); err == nil {
+				dbPointer = dbPointer.Where("nrofenglishquotes >= ?", nr)
+			}
+			dbPointer = dbPointer.Order("nrofenglishquotes " + orderDirection)
+		case "icelandic":
+			if nr, err := strconv.Atoi(requestBody.OrderConfig.Maximum); err == nil {
+				dbPointer = dbPointer.Where("nroficelandicquotes <= ?", nr)
+			}
+			if nr, err := strconv.Atoi(requestBody.OrderConfig.Minimum); err == nil {
+				dbPointer = dbPointer.Where("nroficelandicquotes >= ?", nr)
+			}
+			dbPointer = dbPointer.Order("nroficelandicquotes " + orderDirection)
+		default:
+			if nr, err := strconv.Atoi(requestBody.OrderConfig.Maximum); err == nil {
+				dbPointer = dbPointer.Where("nroficelandicquotes + nrofenglishquotes <= ?", nr)
+			}
+			if nr, err := strconv.Atoi(requestBody.OrderConfig.Minimum); err == nil {
+				dbPointer = dbPointer.Where("nroficelandicquotes + nrofenglishquotes >= ?", nr)
+			}
+			dbPointer = dbPointer.Order("nroficelandicquotes + nrofenglishquotes " + orderDirection)
+		}
+
+	default:
+		if requestBody.OrderConfig.Minimum != "" {
+			dbPointer = dbPointer.Where("initcap(name) >= ?", strings.ToUpper(requestBody.OrderConfig.Minimum))
+		}
+		if requestBody.OrderConfig.Maximum != "" {
+			dbPointer = dbPointer.Where("initcap(name) <= ?", strings.ToUpper(requestBody.OrderConfig.Maximum))
+		}
+		dbPointer = dbPointer.Order("initcap(name) " + orderDirection)
+	}
+
+	err := dbPointer.Limit(requestBody.PageSize).Order("id").
 		Offset(requestBody.Page * requestBody.PageSize).
 		Find(&authors).
 		Error

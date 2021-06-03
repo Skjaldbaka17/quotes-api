@@ -3,6 +3,7 @@ package handlers
 import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var db *gorm.DB
@@ -12,7 +13,7 @@ func init() {
 	var err error
 	dsn := "host=localhost port=5432 user=thorduragustsson dbname=all_quotes sslmode=disable password="
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
-		// Logger: logger.Default.LogMode(logger.Silent),
+		Logger: logger.Default.LogMode(logger.Info),
 	})
 	// db, err = gorm.Open("postgres", "host=localhost port=5432 user=thorduragustsson dbname=all_quotes sslmode=disable password=")
 	if err != nil {

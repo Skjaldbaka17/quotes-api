@@ -265,7 +265,7 @@ func TestAuthors(t *testing.T) {
 			firstAuthor := respObj[0]
 
 			if firstAuthor.Hasicelandicquotes {
-				t.Errorf("got and %+v, but expected an author that has no icelandic quotes", firstAuthor)
+				t.Errorf("got %+v, but expected an author that has no icelandic quotes", firstAuthor)
 			}
 
 			if firstAuthor.Name[0] != 'A' {
@@ -274,27 +274,179 @@ func TestAuthors(t *testing.T) {
 
 		})
 
+		t.Run("Should return first English authors in reverse alphabetical order (i.e. first author starts with Z)", func(t *testing.T) {
+
+			language := "english"
+			var jsonStr = []byte(fmt.Sprintf(`{"language": "%s", "orderConfig":{"orderBy":"alphabetical", "reverse":true}}`, language))
+
+			respObj, errResponse := requestAndReturnArray(jsonStr, GetAuthorsList)
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			firstAuthor := respObj[0]
+
+			if firstAuthor.Hasicelandicquotes {
+				t.Errorf("got %+v, but expected an author that has no icelandic quotes", firstAuthor)
+			}
+
+			if firstAuthor.Name[0] != 'Z' {
+				t.Errorf("got %s, want name that starts with 'Z'", firstAuthor.Name)
+			}
+
+		})
+
 		t.Run("Should return first authors starting from 'F' (i.e. greater than or equal to 'F' alphabetically)", func(t *testing.T) {
+			language := "english"
+			minimum := "f"
+			var jsonStr = []byte(fmt.Sprintf(`{"language": "%s", "orderConfig":{"orderBy":"alphabetical","minimum":"%s"}}`, language, minimum))
 
-			start
+			respObj, errResponse := requestAndReturnArray(jsonStr, GetAuthorsList)
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			firstAuthor := respObj[0]
+
+			if firstAuthor.Hasicelandicquotes {
+				t.Errorf("got %+v, but expected an author that has no icelandic quotes", firstAuthor)
+			}
+
+			if firstAuthor.Name[0] != strings.ToUpper(minimum)[0] {
+				t.Errorf("got %s, want name that starts with 'F'", firstAuthor.Name)
+			}
 
 		})
 
-		t.Run("Should return first authors with less than 10 quotes (i.e. greater than or equal to 'F' alphabetically)", func(t *testing.T) {
-			t.Skip()
+		t.Run("Should return first authors starting from 'Y' in reverse order (i.e. first authors gotten should start with Z and the last will end with Y)", func(t *testing.T) { t.Skip() })
+
+		t.Run("Should return first authors starting from 'F' and Ending at (including) 'H' in reverse order, i.e. start at H and end at F", func(t *testing.T) { t.Skip() })
+
+		t.Run("Should return authors with less than or equal to 1 quotes in total", func(t *testing.T) {
+
+			maximum := 1
+			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"nrOfQuotes","maximum":"%d"}}`, maximum))
+
+			respObj, errResponse := requestAndReturnArray(jsonStr, GetAuthorsList)
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			firstAuthor := respObj[0]
+
+			if firstAuthor.Nroficelandicquotes+firstAuthor.Nrofenglishquotes > 1 {
+				t.Errorf("got %+v, but expected an author that has no more than 1 quotes", firstAuthor)
+			}
+
 		})
 
-		t.Run("Should return first 50 authors (order DESC by nr of quotes)", func(t *testing.T) { t.Skip() })
+		t.Run("Should return first authors with more than 10 quotes but less than or equal to 11 in total", func(t *testing.T) {
+
+			minimum := 10
+			maximum := 11
+			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"nrOfQuotes","maximum":"%d", "minimum":"%d"}}`, maximum, minimum))
+
+			respObj, errResponse := requestAndReturnArray(jsonStr, GetAuthorsList)
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			firstAuthor := respObj[0]
+
+			if firstAuthor.Nroficelandicquotes+firstAuthor.Nrofenglishquotes != 10 {
+				t.Errorf("got %+v, but expected an author that has no fewer than 10 quotes", firstAuthor)
+			}
+
+		})
+
+		t.Run("Should return first authors with less than 10 quotes in total in reversed order (start with those with 10 quotes)", func(t *testing.T) {
+
+			maximum := 10
+			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"nrOfQuotes","maximum":"%d","reverse":true}}`, maximum))
+
+			respObj, errResponse := requestAndReturnArray(jsonStr, GetAuthorsList)
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			firstAuthor := respObj[0]
+
+			if firstAuthor.Nroficelandicquotes+firstAuthor.Nrofenglishquotes != 10 {
+				t.Errorf("got %+v, but expected an author that has 10 quotes", firstAuthor)
+			}
+
+		})
+
+		t.Run("Should return first authors (reverse order DESC by nr of quotes) only icelandic quotes", func(t *testing.T) {
+			language := "icelandic"
+			var jsonStr = []byte(fmt.Sprintf(`{"language":"%s", "orderConfig":{"orderBy":"nrOfQuotes","reverse":true}}`, language))
+
+			respObj, errResponse := requestAndReturnArray(jsonStr, GetAuthorsList)
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			firstAuthor := respObj[0]
+
+			if firstAuthor.Nroficelandicquotes != 160 {
+				t.Errorf("got %+v, but expected an author that has 10 quotes", firstAuthor)
+			}
+		})
 
 		t.Run("Should return first 50 authors (ordered by most popular, i.e. DESC count)", func(t *testing.T) { t.Skip() })
 
-		t.Run("Should return first 50 authors in reverse alphabetical order", func(t *testing.T) { t.Skip() })
-
 		t.Run("Should return first 50 authors in reverse popularity order (i.e. least popular first i.e. ASC count)", func(t *testing.T) { t.Skip() })
 
-		t.Run("Should return first 100 authors", func(t *testing.T) { t.Skip() })
+		t.Run("Should return first 100 authors", func(t *testing.T) {
+			pageSize := 100
+			var jsonStr = []byte(fmt.Sprintf(`{"pageSize":%d}}`, pageSize))
 
-		t.Run("Should return the next 50 authors (i.e. pagination, page 1, alphabetical order)", func(t *testing.T) { t.Skip() })
+			respObj, errResponse := requestAndReturnArray(jsonStr, GetAuthorsList)
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			if len(respObj) != 100 {
+				t.Errorf("got %d nr of authors, but expected %d authors", len(respObj), pageSize)
+			}
+		})
+
+		t.Run("Should return the next 50 authors starting from 'F' (i.e. pagination, page 1, alphabetical order)", func(t *testing.T) {
+
+			pageSize := 100
+			minimum := "F"
+			var jsonStr = []byte(fmt.Sprintf(`{"pageSize":%d, "orderConfig":{"minimum":"%s"}}}`, pageSize, minimum))
+
+			respObj, errResponse := requestAndReturnArray(jsonStr, GetAuthorsList)
+
+			objToFetch := respObj[50]
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			if respObj[0].Name[0] != minimum[0] {
+				t.Errorf("got %+v, but expected author starting with '%s'", len(respObj), minimum)
+			}
+
+			pageSize = 50
+			page := 1
+			jsonStr = []byte(fmt.Sprintf(`{"pageSize":%d, "page":%d, "orderConfig":{"minimum":"%s"}}}`, pageSize, page, minimum))
+
+			respObj, errResponse = requestAndReturnArray(jsonStr, GetAuthorsList)
+
+			if objToFetch != respObj[0] {
+				t.Fatalf("got %+v, but expected %+v", respObj[0], objToFetch)
+			}
+
+		})
 
 	})
 
@@ -699,6 +851,12 @@ func TestTopics(t *testing.T) {
 		}
 
 	})
+
+}
+
+func TestIncrementCount(t *testing.T) {
+	t.Run("Should Increment Authors count from direct fetch by ids", func(t *testing.T) { t.Skip() })
+	t.Run("Should Increment Authors count from appearing in a search", func(t *testing.T) { t.Skip() })
 
 }
 

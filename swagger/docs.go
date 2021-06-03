@@ -289,3 +289,28 @@ type randomAuthorWrapper struct {
 		MaxQuotes int `json:"maxQuotes"`
 	}
 }
+
+// swagger:parameters getAuthorsList
+type authorsListWrapper struct {
+	// The structure of the request for getting a random author
+	// in: body
+	Body struct {
+		// The number of Authors to be returned on each "page"
+		//
+		// Maximum: 200
+		// Minimum: 1
+		// Default: 25
+		// Example: 30
+		PageSize int `json:"pageSize"`
+		// The page you are asking for, starts with 0.
+		//
+		// Minimum: 0
+		// Example: 0
+		Page int `json:"page"`
+		// The authors must have quotes in the given language, also if ordering by nrOfQuotes if this parameter is set then
+		// only the amount of quotes the author has in the given language counts towards the ordering.
+		// Example: English
+		Language    string `json:"language"`
+		OrderConfig handlers.OrderConfig
+	}
+}
