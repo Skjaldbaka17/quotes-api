@@ -30,6 +30,7 @@ type AuthorsView struct {
 	Hasicelandicquotes  bool   `json:"hasicelandicquotes"`
 	Nroficelandicquotes int    `json:"nroficelandicquotes"`
 	Nrofenglishquotes   int    `json:"nrofenglishquotes"`
+	Count               int
 }
 
 type QuoteView struct {

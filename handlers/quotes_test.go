@@ -399,9 +399,42 @@ func TestAuthors(t *testing.T) {
 			}
 		})
 
-		t.Run("Should return first 50 authors (ordered by most popular, i.e. DESC count)", func(t *testing.T) { t.Skip() })
+		t.Run("Should return first 50 authors (ordered by most popular, i.e. DESC count)", func(t *testing.T) {
+			directFetchAuthorsCountIncrement([]int{1})
 
-		t.Run("Should return first 50 authors in reverse popularity order (i.e. least popular first i.e. ASC count)", func(t *testing.T) { t.Skip() })
+			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"%s"}}`, "popularity"))
+
+			respObj, errResponse := requestAndReturnArrayAuthors(jsonStr, GetAuthorsList)
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			firstAuthor := respObj[0]
+
+			if firstAuthor.Count == 0 {
+				t.Errorf("got %+v, but expected an author that does not have 0 popularity count", firstAuthor)
+			}
+
+		})
+
+		t.Run("Should return first 50 authors in reverse popularity order (i.e. least popular first i.e. ASC count)", func(t *testing.T) {
+
+			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"%s","reverse":true}}`, "popularity"))
+
+			respObj, errResponse := requestAndReturnArrayAuthors(jsonStr, GetAuthorsList)
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			firstAuthor := respObj[0]
+
+			if firstAuthor.Count != 0 {
+				t.Errorf("got %+v, but expected an author that has 0 popularity count", firstAuthor)
+			}
+
+		})
 
 		t.Run("Should return first 100 authors", func(t *testing.T) {
 			pageSize := 100
@@ -577,7 +610,7 @@ func TestQuotes(t *testing.T) {
 
 			teddyName := "Theodore Roosevelt"
 			teddyAuthor := getAuthor(teddyName)
-			var jsonStr = []byte(fmt.Sprintf(`{"authorId": %d}`, teddyAuthor.Authorid))
+			var jsonStr = []byte(fmt.Sprintf(`{"authorId": %d}`, teddyAuthor.Id))
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 
 			if firstRespObj.Name != teddyName {
@@ -855,9 +888,42 @@ func TestTopics(t *testing.T) {
 }
 
 func TestIncrementCount(t *testing.T) {
-	t.Run("Should Increment Authors count from direct fetch by ids", func(t *testing.T) { t.Skip() })
-	t.Run("Should Increment Authors count from appearing in a search", func(t *testing.T) { t.Skip() })
+	t.Run("Should Increment Authors count from direct fetch by ids", func(t *testing.T) {
+		authorIds := Set{1, 2, 3}
+		err := directFetchAuthorsCountIncrement(authorIds)
 
+		if err != nil {
+			t.Fatalf("Expected no error but got %s", err.Error())
+		}
+
+		authors := getAuthorsById(authorIds)
+		if authors[0].Count == 0 {
+			t.Fatalf("Expected count of authors given to increase to above 0 but got count 0 for author: %+v", authors[0])
+		}
+	})
+
+	t.Run("Should Increment Authors count from appearing in a search", func(t *testing.T) {
+
+		quotes := []QuoteView{
+			{
+				Authorid: 100,
+				Quoteid:  100,
+			},
+		}
+		err := appearInSearchCountIncrement(quotes)
+
+		if err != nil {
+			t.Fatalf("Expected no error but got %s", err.Error())
+		}
+
+		authors := getAuthorsById([]int{quotes[0].Authorid})
+		if authors[0].Count == 0 {
+			t.Fatalf("Expected count of authors given to increase to above 0 but got count 0 for author: %+v", authors[0])
+		}
+
+	})
+	t.Run("Should Increment Quotes count from direct fetch by ids", func(t *testing.T) { t.Skip() })
+	t.Run("Should Increment Quotes count from appearing in a search", func(t *testing.T) { t.Skip() })
 }
 
 type Set []int
@@ -886,7 +952,7 @@ func (set *Set) toString() string {
 	return strings.Join(IDs, ", ")
 }
 
-func getAuthor(searchString string) QuoteView {
+func getAuthor(searchString string) AuthorsView {
 
 	var jsonStr = []byte(fmt.Sprintf(`{"searchString": "%s"}`, searchString))
 	request, _ := http.NewRequest(http.MethodGet, "/api/search/authors", bytes.NewBuffer(jsonStr))
@@ -894,9 +960,22 @@ func getAuthor(searchString string) QuoteView {
 
 	SearchAuthorsByString(response, request)
 
-	var respObj []QuoteView
+	var respObj []AuthorsView
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	return respObj[0]
+}
+
+func getAuthorsById(authorIds Set) []AuthorsView {
+
+	var jsonStr = []byte(fmt.Sprintf(`{"ids": [%s]}`, authorIds.toString()))
+	request, _ := http.NewRequest(http.MethodGet, "/api/search/authors", bytes.NewBuffer(jsonStr))
+	response := httptest.NewRecorder()
+
+	GetAuthorsById(response, request)
+
+	var respObj []AuthorsView
+	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
+	return respObj
 }
 
 func getQuotes(searchString string) []QuoteView {
@@ -951,6 +1030,17 @@ func requestAndReturnArray(jsonStr []byte, fn httpRequest) ([]QuoteView, ErrorRe
 	response, request := getRequestAndResponseForTest(jsonStr)
 	fn(response, request)
 	var respObj []QuoteView
+	var errorResp ErrorResponse
+	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
+	_ = json.Unmarshal(response.Body.Bytes(), &errorResp)
+	errorResp.StatusCode = response.Result().StatusCode
+	return respObj, errorResp
+}
+
+func requestAndReturnArrayAuthors(jsonStr []byte, fn httpRequest) ([]AuthorsView, ErrorResponse) {
+	response, request := getRequestAndResponseForTest(jsonStr)
+	fn(response, request)
+	var respObj []AuthorsView
 	var errorResp ErrorResponse
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	_ = json.Unmarshal(response.Body.Bytes(), &errorResp)

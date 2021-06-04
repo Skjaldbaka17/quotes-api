@@ -1,6 +1,5 @@
 # TODOS
 
-- [ ] Get list of authors (with parameters for pagination and alphabet and languages)
 - [ ] Add get and set Quote of The Day (plus points for available to set quotes for multiple days in one request)
 - [ ] Get Author of the day + Set Author of the day (plust points for available to set authors for multiple days in one request)
 - [ ] getQuotes route (combine with getQuotesById and add to it to get quotes from a specific author + add pagination)
@@ -19,6 +18,7 @@
 - [ ] Sort return list alphabetically ICelandic support
  --------------
  
+- [x] Get list of authors (with parameters for pagination and alphabet and languages)
 - [x] Get random Author
 - [x] Validate RequestBody + Tests
 - [x] Add get random Quote

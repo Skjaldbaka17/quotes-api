@@ -82,6 +82,9 @@ func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Update popularity in background!
+	go directFetchAuthorsCountIncrement(requestBody.Ids)
+
 	json.NewEncoder(rw).Encode(&authors)
 }
 
@@ -117,6 +120,11 @@ func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
 
 	switch strings.ToLower(requestBody.OrderConfig.OrderBy) {
 	case "popularity": //TODO: add popularity ordering
+		orderDirection = "DESC"
+		if requestBody.OrderConfig.Reverse {
+			orderDirection = "ASC"
+		}
+		dbPointer = dbPointer.Order("count " + orderDirection)
 	case "nrofquotes":
 		switch strings.ToLower(requestBody.Language) {
 		case "english":
@@ -169,6 +177,9 @@ func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
 
 	log.Println("Authors:", len(authors))
 
+	//Update popularity in background!
+	go authorsAppearInSearchCountIncrement(authors)
+
 	json.NewEncoder(rw).Encode(&authors)
 }
 
@@ -198,6 +209,9 @@ func GetQuotesById(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	//Update popularity in background!
+	go directFetchQuotesCountIncrement(requestBody.Ids)
 
 	json.NewEncoder(rw).Encode(&quotes)
 }
@@ -249,6 +263,9 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Update popularity in background!
+	go appearInSearchCountIncrement(results)
+
 	json.NewEncoder(rw).Encode(&results)
 	t := time.Now()
 	elapsed := t.Sub(start)
@@ -270,33 +287,37 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 	}
 	start := time.Now()
 
-	var results []QuoteView
+	var results []AuthorsView
 
 	//Order by authorid to have definitive order (when for examplke some names rank the same for similarity), same for why quoteid
 	//% is same as SIMILARITY but with default threshold 0.3
-	dbPointer := db.Table("searchview").
-		Where("( nametsv @@ plainto_tsquery(?) OR ? % ANY(STRING_TO_ARRAY(name,' ')) )", requestBody.SearchString, requestBody.SearchString).
+	dbPointer := db.Table("authors").
+		Where("( tsv @@ plainto_tsquery(?) OR ? % ANY(STRING_TO_ARRAY(name,' ')) )", requestBody.SearchString, requestBody.SearchString).
 		Clauses(clause.OrderBy{
-			Expression: clause.Expr{SQL: "similarity(name, ?) DESC, authorid DESC, quoteid DESC", Vars: []interface{}{requestBody.SearchString}, WithoutParentheses: true},
+			Expression: clause.Expr{SQL: "similarity(name, ?) DESC, id DESC", Vars: []interface{}{requestBody.SearchString}, WithoutParentheses: true},
 		})
 
 		//Particular language search
 	switch strings.ToLower(requestBody.Language) {
 	case "english":
-		dbPointer = dbPointer.Not("isicelandic")
+		dbPointer = dbPointer.Not("hasicelandicquotes")
 	case "icelandic":
-		dbPointer = dbPointer.Where("isicelandic")
+		dbPointer = dbPointer.Where("hasicelandicquotes")
 	}
 
 	err := dbPointer.Limit(requestBody.PageSize).
 		Offset(requestBody.Page * requestBody.PageSize).
 		Find(&results).Error
 	if err != nil {
+
 		//TODO: Respond with better error -- and put into swagger -- and add tests
 		log.Printf("Got error when decoding: %s", err)
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	//Update popularity in background!
+	go authorsAppearInSearchCountIncrement(results)
 
 	json.NewEncoder(rw).Encode(&results)
 	t := time.Now()
@@ -349,6 +370,9 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	//Update popularity in background!
+	go appearInSearchCountIncrement(results)
 
 	json.NewEncoder(rw).Encode(&results)
 	t := time.Now()
@@ -426,6 +450,9 @@ func GetTopic(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Update popularity in background!
+	go directFetchTopicCountIncrement(requestBody.Id, requestBody.Topic)
+
 	json.NewEncoder(rw).Encode(&results)
 }
 
@@ -484,7 +511,7 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 			Where("random() < 0.005") //Randomized, O(n)
 	}
 
-	err := dbPointer.Find(&result).Error
+	err := dbPointer.Limit(100).Find(&result).Error
 	if err != nil {
 		//TODO: Respond with better error -- and put into swagger -- and add tests
 		http.Error(rw, err.Error(), http.StatusBadRequest)
