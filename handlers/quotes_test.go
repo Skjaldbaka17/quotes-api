@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestSearch(t *testing.T) {
@@ -601,17 +602,146 @@ func TestQuotes(t *testing.T) {
 
 	t.Run("Quote of the day", func(t *testing.T) {
 
-		t.Run("Should set / Overwrite Quote of the day", func(t *testing.T) { t.Skip() })
+		t.Run("Should set / Overwrite Quote of the day", func(t *testing.T) {
 
-		t.Run("Should get Quote of the day", func(t *testing.T) { t.Skip() })
+			quoteId := 1
+			var jsonStr = []byte(fmt.Sprintf(`{"qods": [{"id":%d, "date":""}]}`, quoteId))
+			_, response := requestAndReturnArray(jsonStr, SetQuoteOfTheDay)
+			if response.StatusCode != 200 {
+				t.Errorf("Expected a succesful insert but got %+v", response)
+			}
 
-		t.Run("Should get complete history of quote of the day", func(t *testing.T) { t.Skip() })
+		})
 
-		t.Run("Should get history of QOD starting from June 4th 2021", func(t *testing.T) { t.Skip() })
+		t.Run("Should set QOD for 12-22-2020 and 12-21-2020", func(t *testing.T) {
+			//TODO: add to test that the quotes where actually input into the DB
+			quoteId1 := 2
+			date1 := "2020-12-22"
+			date2 := "2020-12-21"
+			quoteId2 := 3
+			var jsonStr = []byte(fmt.Sprintf(`{"qods": [{"id":%d, "date":"%s"},{"id":%d, "date":"%s"}]}`, quoteId1, date1, quoteId2, date2))
+			_, response := requestAndReturnArray(jsonStr, SetQuoteOfTheDay)
+			if response.StatusCode != 200 {
+				t.Errorf("Expected a succesful insert but got %+v", response)
+			}
+
+		})
+
+		t.Run("Should get Quote of the day", func(t *testing.T) {
+			var jsonStr = []byte(fmt.Sprintf(`{"language":"%s"}`, "english"))
+			quote := requestAndReturnSingle(jsonStr, GetQuoteOfTheDay)
+
+			if quote.Quote == "" {
+				t.Fatalf("Expected the quote of the day but got an empty quote %+v", quote)
+			}
+
+			const layout = "2006-01-02T15:04:05Z" //The date needed for reference always
+			date, _ := time.Parse(layout, quote.Date)
+			if date.Format("01-02-2006") != time.Now().Format("01-02-2006") {
+				t.Fatalf("Expected the quote for the date %s but got QOD for date %s i.e. %+v", time.Now().Format("01-02-2006"), date.Format("01-02-2006"), quote)
+			}
+
+		})
+
+		t.Run("Should get complete history of quote of the day", func(t *testing.T) {
+			//Input a quote in history for testing
+			quoteId := 1111
+			date := "1998-06-16"
+			var jsonStr = []byte(fmt.Sprintf(`{"qods": [{"id":%d, "date":"%s"}]}`, quoteId, date))
+			_, response := requestAndReturnArray(jsonStr, SetQuoteOfTheDay)
+			if response.StatusCode != 200 {
+				t.Errorf("Expected a succesful insert but got %+v", response)
+			}
+
+			//Get History:
+
+			jsonStr = []byte(fmt.Sprintf(`{"language":"%s"}`, "english"))
+			quotes, _ := requestAndReturnArray(jsonStr, GetQODHistory)
+
+			if len(quotes) == 0 {
+				t.Fatalf("Expected the history of QOD but got an empty list: %+v", quotes)
+			}
+
+			containsBirfdayQuote := false
+			containsTodayQuote := false
+			const layout = "2006-01-02T15:04:05Z" //The date needed for reference always
+			for _, quote := range quotes {
+				date, _ := time.Parse(layout, quote.Date)
+				if date.Format("01-02-2006") == time.Now().Format("01-02-2006") {
+					containsTodayQuote = true
+				}
+
+				if date.Format("01-02-2006") == "06-16-1998" {
+					containsBirfdayQuote = true
+				}
+			}
+
+			if !containsBirfdayQuote {
+				t.Fatalf("QOD history should contain the QOD for birfday but does not: %+v", quotes)
+			}
+
+			if !containsTodayQuote {
+				t.Fatalf("QOD history should contain the QOD for today but does not: %+v", quotes)
+			}
+
+		})
+
+		t.Run("Should get history of QOD starting from June 4th 2021", func(t *testing.T) {
+
+			//Input a quote in history for testing
+			quoteId := 666
+			date := "2021-06-04"
+			var jsonStr = []byte(fmt.Sprintf(`{"qods": [{"id":%d, "date":"%s"}]}`, quoteId, date))
+			_, response := requestAndReturnArray(jsonStr, SetQuoteOfTheDay)
+			if response.StatusCode != 200 {
+				t.Errorf("Expected a succesful insert but got %+v", response)
+			}
+
+			//Get History:
+
+			minimum := "2021-06-04"
+			jsonStr = []byte(fmt.Sprintf(`{"language":"%s", "minimum":"%s"}`, "english", minimum))
+			quotes, _ := requestAndReturnArray(jsonStr, GetQODHistory)
+
+			if len(quotes) == 0 {
+				t.Fatalf("Expected the history of QOD but got an empty list: %+v", quotes)
+			}
+
+			const layout = "2006-01-02T15:04:05Z" //The date needed for reference always
+			compareDate, _ := time.Parse(layout, "2021-06-04")
+			compareYear := compareDate.Year()
+			compareMonth := compareDate.Month()
+			compareDay := compareDate.Day()
+			containsQuoteNotInRange := false
+			containsFourthOfJuneQuote := false
+			for _, quote := range quotes {
+				date, _ := time.Parse(layout, quote.Date)
+				yearOfQuote := date.Year()
+				monthOfQuote := date.Month()
+				dayOfQuote := date.Day()
+
+				if yearOfQuote < compareYear || (yearOfQuote == compareYear && monthOfQuote < compareMonth) || (yearOfQuote == compareYear && monthOfQuote == compareMonth && dayOfQuote < compareDay) {
+					containsQuoteNotInRange = true
+				}
+
+				if date.Format("01-02-2006") == "06-04-2021" {
+					containsFourthOfJuneQuote = true
+				}
+			}
+
+			if containsQuoteNotInRange {
+				t.Fatalf("QOD history contains an earlier quote than was requested: %+v", quotes)
+			}
+
+			if !containsFourthOfJuneQuote {
+				t.Fatalf("QOD history should contain the QOD for 4th of june 20201 but does not: %+v", quotes)
+			}
+
+		})
 
 	})
 
-	t.Run("Random Quote", func(t *testing.T) {
+	t.Run("Random Quotes", func(t *testing.T) {
 
 		//The test calls the function twice to test if the function returns two different quotes
 		t.Run("Should return a random quote", func(t *testing.T) {
@@ -1057,7 +1187,10 @@ func requestAndReturnArray(jsonStr []byte, fn httpRequest) ([]QuoteView, ErrorRe
 	var errorResp ErrorResponse
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	_ = json.Unmarshal(response.Body.Bytes(), &errorResp)
-	errorResp.StatusCode = response.Result().StatusCode
+	if errorResp.StatusCode == 0 {
+		errorResp.StatusCode = response.Result().StatusCode
+	}
+
 	return respObj, errorResp
 }
 
@@ -1068,6 +1201,8 @@ func requestAndReturnArrayAuthors(jsonStr []byte, fn httpRequest) ([]AuthorsView
 	var errorResp ErrorResponse
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	_ = json.Unmarshal(response.Body.Bytes(), &errorResp)
-	errorResp.StatusCode = response.Result().StatusCode
+	if errorResp.StatusCode == 0 {
+		errorResp.StatusCode = response.Result().StatusCode
+	}
 	return respObj, errorResp
 }

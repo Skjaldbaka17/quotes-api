@@ -29,6 +29,34 @@ package docs
 
 import "github.com/Skjaldbaka17/quotes-api/handlers"
 
+// swagger:response qodHistoryResponse
+type qodHistoryResponseWrapper struct {
+	// The structure of the request for listing topics
+	// in: body
+	Body []struct {
+		// The author's id
+		//Unique: true
+		//example: 24952
+		Authorid int `json:"authorid"`
+		// Name of author
+		//example: Muhammad Ali
+		Name string `json:"name"`
+		// The quote's id
+		//Unique: true
+		//example: 582676
+		Quoteid int `json:"quoteid" `
+		// The quote
+		//example: Float like a butterfly, sting like a bee.
+		Quote string `json:"quote"`
+		// Whether or not this quote is in Icelandic or not
+		// example: false
+		Isicelandic bool `json:"isicelandic"`
+		//The date for which this quote was the QOD
+		//example: 2021-06-07T00:00:00Z
+		Date string `json:"date"`
+	}
+}
+
 // swagger:response successResponse
 type successResponseWrapper struct {
 	// The successful response to a successful setting of a QOD
@@ -249,6 +277,24 @@ type getQuoteOfTheDayWrapper struct {
 	}
 }
 
+// swagger:parameters getQODHistory
+type getQODHistoryWrapper struct {
+	// The structure of the request for getting the QOD history
+	// in: body
+	Body struct {
+		// The language of the QOD. If left empty the english QOD is returned
+		//
+		// Example: English
+		Language string `json:"language"`
+		//The minimum date to retrieve the history
+		// example: 2020-06-21
+		Minimum string `json:"minimum"`
+		//The maximum date to retrieve the history
+		// example: 2021-06-17
+		Maximum string `json:"maximum"`
+	}
+}
+
 // swagger:parameters getTopic
 type quotesFromTopicWrapper struct {
 	// The structure of the request for listing topics
@@ -323,14 +369,7 @@ type setQuoteOfTheDayWrapper struct {
 	// The structure of the request for setting the QOD
 	// in: body
 	Body struct {
-		// the date for which this quote is the QOD, if left empty this quote is today's QOD
-		//
-		// Example: 12-22-2020
-		Date string `json:"date"`
-		// The id of the quote to be set as this dates QOD
-		//
-		// Example: 1
-		Id int `json:"id"`
+		Qods []handlers.Qod
 	}
 }
 

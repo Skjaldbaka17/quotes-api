@@ -52,20 +52,52 @@ func getRequestBody(rw http.ResponseWriter, r *http.Request, requestBody *Reques
 		requestBody.MaxQuotes = defaultMaxQuotes
 	}
 
-	if requestBody.Date == "" {
-		requestBody.Date = time.Now().UTC().Format("01-02-2006")
-	} else {
-		var parsedDate time.Time
-		parsedDate, err = time.Parse("01-02-2006", requestBody.Date)
+	const layout = "2006-01-02"
+	//Set date into correct format, if supplied, otherwise input today's date in the correct format for all qods
+	if len(requestBody.Qods) != 0 {
+		for idx, _ := range requestBody.Qods {
+			if requestBody.Qods[idx].Date == "" {
+				requestBody.Qods[idx].Date = time.Now().UTC().Format(layout)
+			} else {
+				var parsedDate time.Time
+				parsedDate, err = time.Parse(layout, requestBody.Qods[idx].Date)
+				if err != nil {
+					log.Printf("Got error when decoding: %s", err)
+					err = fmt.Errorf("the date is not structured correctly, should be in %s format", layout)
+					rw.WriteHeader(http.StatusBadRequest)
+					json.NewEncoder(rw).Encode(ErrorResponse{Message: err.Error()})
+					return err
+				}
+
+				requestBody.Qods[idx].Date = parsedDate.UTC().Format("01-02-2006")
+			}
+		}
+	}
+
+	if requestBody.Minimum != "" {
+
+		parseDate, err := time.Parse(layout, requestBody.Minimum)
 		if err != nil {
 			log.Printf("Got error when decoding: %s", err)
-			err = errors.New("the date is not structured correctly, should be in 12-24-2006 format")
+			err = fmt.Errorf("the minimum date is not structured correctly, should be in %s format", layout)
 			rw.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(rw).Encode(ErrorResponse{Message: err.Error()})
 			return err
 		}
+		requestBody.Minimum = parseDate.Format("01-02-2006")
+	}
 
-		requestBody.Date = parsedDate.UTC().Format("01-02-2006")
+	if requestBody.Maximum != "" {
+
+		parseDate, err := time.Parse(layout, requestBody.Maximum)
+		if err != nil {
+			log.Printf("Got error when decoding: %s", err)
+			err = fmt.Errorf("the maximum date is not structured correctly, should be in %s format", layout)
+			rw.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(rw).Encode(ErrorResponse{Message: err.Error()})
+			return err
+		}
+		requestBody.Minimum = parseDate.Format("01-02-2006")
 	}
 
 	return nil
@@ -611,29 +643,33 @@ func SetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if requestBody.Id == 0 {
-		json.NewEncoder(rw).Encode(ErrorResponse{Message: "Please supply a valid quoteId", StatusCode: http.StatusBadRequest})
+	if len(requestBody.Qods) == 0 {
+		json.NewEncoder(rw).Encode(ErrorResponse{Message: "Please supply some quotes", StatusCode: http.StatusBadRequest})
 		return
 	}
-	// insert into items_ver(item_id, item_group, name)
-	// select * from items where item_id=2;
-	var err error
-	switch strings.ToLower(requestBody.Language) {
-	case "icelandic":
-		err = db.Exec("insert into qodice (quoteid, date) values((select id from quotes where id = ? and isicelandic), ?) on conflict (date) do update set quoteid = ?", requestBody.Id, requestBody.Date, requestBody.Id).Error
-		if err != nil {
-			log.Println(err)
-			json.NewEncoder(rw).Encode(ErrorResponse{Message: "This id is not in icelandic", StatusCode: http.StatusBadRequest})
-			return
-		}
-	default:
-		err = db.Exec("insert into qod (quoteid, date) values((select id from quotes where id = ? and not isicelandic), ?) on conflict (date) do update set quoteid = ?", requestBody.Id, requestBody.Date, requestBody.Id).Error
-		if err != nil {
-			log.Println(err)
-			json.NewEncoder(rw).Encode(ErrorResponse{Message: "This id is not in english", StatusCode: http.StatusBadRequest})
-			return
+
+	for _, qod := range requestBody.Qods {
+		// insert into items_ver(item_id, item_group, name)
+		// select * from items where item_id=2;
+		var err error
+		switch strings.ToLower(qod.Language) {
+		case "icelandic":
+			err = db.Exec("insert into qodice (quoteid, date) values((select id from quotes where id = ? and isicelandic), ?) on conflict (date) do update set quoteid = ?", qod.Id, qod.Date, qod.Id).Error
+			if err != nil {
+				log.Println(err)
+				json.NewEncoder(rw).Encode(ErrorResponse{Message: "This id is not in icelandic", StatusCode: http.StatusBadRequest})
+				return
+			}
+		default:
+			err = db.Exec("insert into qod (quoteid, date) values((select id from quotes where id = ? and not isicelandic), ?) on conflict (date) do update set quoteid = ?", qod.Id, qod.Date, qod.Id).Error
+			if err != nil {
+				log.Println(err)
+				json.NewEncoder(rw).Encode(ErrorResponse{Message: "This id is not in english", StatusCode: http.StatusBadRequest})
+				return
+			}
 		}
 	}
+
 	json.NewEncoder(rw).Encode(ErrorResponse{Message: "Successfully inserted quote of the day!", StatusCode: http.StatusOK})
 }
 
@@ -671,13 +707,16 @@ func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	var quote QuoteView
+	var dbPointer *gorm.DB
 	var err error
 	switch strings.ToLower(requestBody.Language) {
 	case "icelandic":
-		err = db.Table("qodiceview").Where("date = current_date").Scan(&quote).Error
+		dbPointer = db.Table("qodiceview")
 	default:
-		err = db.Table("qodview").Where("date = current_date").Scan(&quote).Error
+		dbPointer = db.Table("qodview")
 	}
+
+	err = dbPointer.Where("date = current_date").Scan(&quote).Error
 
 	if err != nil {
 		//TODO: Respond with better error -- and put into swagger -- and add tests
@@ -710,6 +749,89 @@ func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(rw).Encode(quote)
+}
+
+// swagger:route POST /quotes/qod QUOTES getQODHistory
+// Gets the history for the quotes of the day
+// responses:
+//	200: qodHistoryResponse
+
+//GetQODHistory gets Qod history starting from some point
+func GetQODHistory(rw http.ResponseWriter, r *http.Request) {
+	var requestBody Request
+	if err := getRequestBody(rw, r, &requestBody); err != nil {
+		return
+	}
+
+	var quotes []QuoteView
+	var dbPointer *gorm.DB
+	var err error
+	switch strings.ToLower(requestBody.Language) {
+	case "icelandic":
+		dbPointer = db.Table("qodiceview")
+	default:
+		dbPointer = db.Table("qodview")
+	}
+
+	if requestBody.Minimum != "" {
+		dbPointer = dbPointer.Where("date >= ?", requestBody.Minimum)
+	}
+
+	if requestBody.Maximum != "" {
+		dbPointer = dbPointer.Where("date <= ?", requestBody.Maximum)
+	}
+
+	dbPointer = dbPointer.Where("date <= current_date")
+
+	err = dbPointer.Order("date DESC").Find(&quotes).Error
+
+	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if len(quotes) == 0 {
+		fmt.Println("Setting a brand new QOD for today")
+		err = setNewRandomQOD(requestBody.Language)
+		if err != nil {
+			//TODO: Respond with better error -- and put into swagger -- and add tests
+			http.Error(rw, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		switch strings.ToLower(requestBody.Language) {
+		case "icelandic":
+			dbPointer = db.Table("qodiceview")
+		default:
+			dbPointer = db.Table("qodview")
+		}
+
+		if requestBody.Minimum == "" && requestBody.Maximum == "" {
+			dbPointer = dbPointer.Where("date = current_date")
+		} else {
+			if requestBody.Minimum != "" {
+				dbPointer = dbPointer.Where("date >= ?", requestBody.Minimum)
+			}
+
+			if requestBody.Maximum != "" {
+				dbPointer = dbPointer.Where("date <= ?", requestBody.Maximum)
+			}
+
+			dbPointer = dbPointer.Where("date <= current_date")
+		}
+
+		err = dbPointer.Order("date").Scan(&quotes).Error
+
+		if err != nil {
+			//TODO: Respond with better error -- and put into swagger -- and add tests
+			http.Error(rw, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+	}
+
+	json.NewEncoder(rw).Encode(quotes)
 }
 
 // swagger:route GET /languages META getLanguages

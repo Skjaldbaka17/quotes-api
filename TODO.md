@@ -1,6 +1,6 @@
 # TODOS
 
-- [ ] Add get and set Quote of The Day (plus points for available to set quotes for multiple days in one request)
+- [ ] Add get and set Quote of The Day (plus points for available to set quotes for multiple days in one request + plus points for QOD history)
 - [ ] Add password protection / protected routes capability (at least for SetQuoteOfTheyDay route )
 - [ ] Get Author of the day + Set Author of the day (plust points for available to set authors for multiple days in one request)
 - [ ] getQuotes route (combine with getQuotesById and add to it to get quotes from a specific author + add pagination)
@@ -19,6 +19,8 @@
 - [ ] Sort return list alphabetically ICelandic support
 - [ ] Clean up get/set quote of the day
 - [ ] is random truly random (i.e. does the "random" funcitonality truly return randomly or is it biased towards quotes in the "front" of the DB (i.e. in the front where postgres stores them))
+- [ ] Go over Swagger + Clean it up and make pretty
+- [ ] Clean up quotes.go
  --------------
 
 - [x] quoteoftheday << qod

@@ -59,6 +59,27 @@ definitions:
         x-go-name: Reverse
     type: object
     x-go-package: github.com/Skjaldbaka17/quotes-api/handlers
+  Qod:
+    properties:
+      date:
+        description: the date for which this quote is the QOD, if left empty this
+          quote is today's QOD.
+        example: 12-22-2020
+        type: string
+        x-go-name: Date
+      id:
+        description: The id of the quote to be set as this dates QOD
+        example: 1
+        format: int64
+        type: integer
+        x-go-name: Id
+      language:
+        description: The language of the QOD
+        example: icelandic
+        type: string
+        x-go-name: Language
+    type: object
+    x-go-package: github.com/Skjaldbaka17/quotes-api/handlers
   QuoteView:
     properties:
       authorid:
@@ -256,10 +277,10 @@ paths:
       - QUOTES
   /quotes/qod:
     post:
-      description: Gets the quote of the day
-      operationId: getQuoteOfTheDay
+      description: Gets the history for the quotes of the day
+      operationId: getQODHistory
       parameters:
-      - description: The structure of the request for getting the QOD
+      - description: The structure of the request for getting the QOD history
         in: body
         name: Body
         schema:
@@ -270,10 +291,20 @@ paths:
               example: English
               type: string
               x-go-name: Language
+            maximum:
+              description: The maximum date to retrieve the history
+              example: "2021-06-17"
+              type: string
+              x-go-name: Maximum
+            minimum:
+              description: The minimum date to retrieve the history
+              example: "2020-06-21"
+              type: string
+              x-go-name: Minimum
           type: object
       responses:
         "200":
-          $ref: '#/responses/randomQuoteResponse'
+          $ref: '#/responses/qodHistoryResponse'
       tags:
       - QUOTES
   /quotes/qod/new:
@@ -287,18 +318,10 @@ paths:
         name: Body
         schema:
           properties:
-            date:
-              description: the date for which this quote is the QOD, if left empty
-                this quote is today's QOD
-              example: 12-22-2020
-              type: string
-              x-go-name: Date
-            id:
-              description: The id of the quote to be set as this dates QOD
-              example: 1
-              format: int64
-              type: integer
-              x-go-name: Id
+            Qods:
+              items:
+                $ref: '#/definitions/Qod'
+              type: array
           type: object
       responses:
         "200":
@@ -642,6 +665,47 @@ responses:
             type: string
             uniqueItems: true
             x-go-name: Topicname
+        type: object
+      type: array
+  qodHistoryResponse:
+    description: ""
+    schema:
+      items:
+        properties:
+          authorid:
+            description: The author's id
+            example: 24952
+            format: int64
+            type: integer
+            uniqueItems: true
+            x-go-name: Authorid
+          date:
+            description: The date for which this quote was the QOD
+            example: "2021-06-07T00:00:00Z"
+            type: string
+            x-go-name: Date
+          isicelandic:
+            description: Whether or not this quote is in Icelandic or not
+            example: false
+            type: boolean
+            x-go-name: Isicelandic
+          name:
+            description: Name of author
+            example: Muhammad Ali
+            type: string
+            x-go-name: Name
+          quote:
+            description: The quote
+            example: Float like a butterfly, sting like a bee.
+            type: string
+            x-go-name: Quote
+          quoteid:
+            description: The quote's id
+            example: 582676
+            format: int64
+            type: integer
+            uniqueItems: true
+            x-go-name: Quoteid
         type: object
       type: array
   randomAuthorResponse:

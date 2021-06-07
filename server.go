@@ -25,6 +25,7 @@ func main() {
 	posts.HandleFunc("/api/topic", handlers.GetTopic)
 	posts.HandleFunc("/api/quotes/qod/new", handlers.SetQuoteOfTheDay)
 	posts.HandleFunc("/api/quotes/qod", handlers.GetQuoteOfTheDay)
+	posts.HandleFunc("/api/quotes/qod/history", handlers.GetQODHistory)
 	// handler for documentation
 	opts := middleware.RedocOpts{SpecURL: "/swagger/swagger.yaml"}
 	sh := middleware.Redoc(opts, nil)
