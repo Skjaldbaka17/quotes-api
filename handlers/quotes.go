@@ -52,6 +52,22 @@ func getRequestBody(rw http.ResponseWriter, r *http.Request, requestBody *Reques
 		requestBody.MaxQuotes = defaultMaxQuotes
 	}
 
+	if requestBody.Date == "" {
+		requestBody.Date = time.Now().UTC().Format("01-02-2006")
+	} else {
+		var parsedDate time.Time
+		parsedDate, err = time.Parse("01-02-2006", requestBody.Date)
+		if err != nil {
+			log.Printf("Got error when decoding: %s", err)
+			err = errors.New("the date is not structured correctly, should be in 12-24-2006 format")
+			rw.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(rw).Encode(ErrorResponse{Message: err.Error()})
+			return err
+		}
+
+		requestBody.Date = parsedDate.UTC().Format("01-02-2006")
+	}
+
 	return nil
 }
 
@@ -581,6 +597,106 @@ func GetRandomAuthor(rw http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(rw).Encode(result)
 
+}
+
+func SetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
+	var requestBody Request
+	if err := getRequestBody(rw, r, &requestBody); err != nil {
+		return
+	}
+
+	if requestBody.Id == 0 {
+		json.NewEncoder(rw).Encode(ErrorResponse{Message: "Please supply a valid quoteId", StatusCode: http.StatusBadRequest})
+		return
+	}
+	// insert into items_ver(item_id, item_group, name)
+	// select * from items where item_id=2;
+	var err error
+	switch strings.ToLower(requestBody.Language) {
+	case "icelandic":
+		err = db.Exec("insert into qodice (quoteid, date) values((select id from quotes where id = ? and isicelandic), ?) on conflict (date) do update set quoteid = ?", requestBody.Id, requestBody.Date, requestBody.Id).Error
+		if err != nil {
+			log.Println(err)
+			json.NewEncoder(rw).Encode(ErrorResponse{Message: "This id is not in icelandic", StatusCode: http.StatusBadRequest})
+			return
+		}
+	default:
+		err = db.Exec("insert into qod (quoteid, date) values((select id from quotes where id = ? and not isicelandic), ?) on conflict (date) do update set quoteid = ?", requestBody.Id, requestBody.Date, requestBody.Id).Error
+		if err != nil {
+			log.Println(err)
+			json.NewEncoder(rw).Encode(ErrorResponse{Message: "This id is not in english", StatusCode: http.StatusBadRequest})
+			return
+		}
+	}
+	json.NewEncoder(rw).Encode(ErrorResponse{Message: "Successfully inserted quote of the day!", StatusCode: http.StatusOK})
+}
+
+func setNewRandomQOD(language string) error {
+	var quoteItem ListItem
+	var err error
+	switch strings.ToLower(language) {
+	case "icelandic":
+		err = db.Table("quotes").Where("isicelandic").Order("random()").Limit(1).Scan(&quoteItem).Error
+		if err != nil {
+			return err
+		}
+		return db.Table("qod").Exec("insert into qodice (quoteid, date) values(?,?) on conflict (date) do update set quoteid = ?", quoteItem.Id, time.Now().Format("01.02.2006"), quoteItem.Id).Error
+	default:
+		err = db.Table("quotes").Not("isicelandic").Where("Random() < 0.005").Order("random()").Limit(1).Scan(&quoteItem).Error
+		if err != nil {
+			return err
+		}
+		return db.Table("qod").Exec("insert into qod (quoteid, date) values(?,?) on conflict (date) do update set quoteid = ?", quoteItem.Id, time.Now().Format("01.02.2006"), quoteItem.Id).Error
+
+	}
+}
+
+func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
+	var requestBody Request
+	if err := getRequestBody(rw, r, &requestBody); err != nil {
+		return
+	}
+
+	var quote QuoteView
+	var err error
+	switch strings.ToLower(requestBody.Language) {
+	case "icelandic":
+		err = db.Table("qodiceview").Where("date = current_date").Scan(&quote).Error
+	default:
+		err = db.Table("qodview").Where("date = current_date").Scan(&quote).Error
+	}
+
+	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if (QuoteView{}) == quote {
+		fmt.Println("Setting a brand new QOD for today")
+		err = setNewRandomQOD(requestBody.Language)
+		if err != nil {
+			//TODO: Respond with better error -- and put into swagger -- and add tests
+			http.Error(rw, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		switch strings.ToLower(requestBody.Language) {
+		case "icelandic":
+			err = db.Table("qodiceview").Where("date = current_date").Scan(&quote).Error
+		default:
+			err = db.Table("qodview").Where("date = current_date").Scan(&quote).Error
+		}
+		log.Println(quote)
+
+		if err != nil {
+			//TODO: Respond with better error -- and put into swagger -- and add tests
+			http.Error(rw, err.Error(), http.StatusBadRequest)
+			return
+		}
+	}
+
+	json.NewEncoder(rw).Encode(quote)
 }
 
 // swagger:route GET /languages META getLanguages

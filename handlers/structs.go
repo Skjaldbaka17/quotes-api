@@ -88,6 +88,7 @@ type Request struct {
 	TopicId      int         `json:"topicId"`
 	MaxQuotes    int         `json:"maxQuotes"`
 	OrderConfig  OrderConfig `json:"orderConfig"`
+	Date         string      `json:"date"`
 }
 
 type OrderConfig struct {

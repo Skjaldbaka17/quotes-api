@@ -23,7 +23,8 @@ func main() {
 	posts.HandleFunc("/api/authors/random", handlers.GetRandomAuthor)
 	posts.HandleFunc("/api/topics", handlers.GetTopics)
 	posts.HandleFunc("/api/topic", handlers.GetTopic)
-
+	posts.HandleFunc("/api/quotes/qod/new", handlers.SetQuoteOfTheDay)
+	posts.HandleFunc("/api/quotes/qod", handlers.GetQuoteOfTheDay)
 	// handler for documentation
 	opts := middleware.RedocOpts{SpecURL: "/swagger/swagger.yaml"}
 	sh := middleware.Redoc(opts, nil)

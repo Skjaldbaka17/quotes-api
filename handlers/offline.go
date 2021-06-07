@@ -25,13 +25,6 @@ func directFetchTopicCountIncrement(topicId int, topicName string) error {
 	return db.Exec("UPDATE topics SET count = count + ? where id = ? or lower(name) = lower(?) returning *", incrementIdFetch, topicId, topicName).Error
 }
 
-func authorIdsAppearInSearchCountIncrement(authorIds []int) error {
-	if len(authorIds) == 0 {
-		return nil
-	}
-	return db.Exec("UPDATE authors SET count = count + ? where id in (?) returning *", incrementAppearInSearchList, authorIds).Error
-}
-
 func authorsAppearInSearchCountIncrement(authors []AuthorsView) error {
 	if len(authors) == 0 {
 		return nil

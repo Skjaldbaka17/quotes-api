@@ -16,8 +16,10 @@
 - [ ] Error handling + Tests
 - [ ] Make error tests (i.e. made-to-fail-tests)
 - [ ] Sort return list alphabetically ICelandic support
+- [ ] is random truly random (i.e. does the "random" funcitonality truly return randomly or is it biased towards quotes in the "front" of the DB (i.e. in the front where postgres stores them))
  --------------
- 
+
+- [x] quoteoftheday << qod
 - [x] Get list of authors (with parameters for pagination and alphabet and languages)
 - [x] Get random Author
 - [x] Validate RequestBody + Tests

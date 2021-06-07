@@ -567,6 +567,18 @@ func TestAuthors(t *testing.T) {
 
 	})
 
+	t.Run("Author of the day", func(t *testing.T) {
+
+		t.Run("Should set / Overwrite Author of the day", func(t *testing.T) { t.Skip() })
+
+		t.Run("Should get Author of the day", func(t *testing.T) { t.Skip() })
+
+		t.Run("Should get complete history of Author of the day", func(t *testing.T) { t.Skip() })
+
+		t.Run("Should get history of AOD starting from June 4th 2021", func(t *testing.T) { t.Skip() })
+
+	})
+
 }
 
 func TestQuotes(t *testing.T) {
@@ -585,6 +597,18 @@ func TestQuotes(t *testing.T) {
 				t.Errorf("got %d, expected %d", quote.Quoteid, quoteIds[idx])
 			}
 		}
+	})
+
+	t.Run("Quote of the day", func(t *testing.T) {
+
+		t.Run("Should set / Overwrite Quote of the day", func(t *testing.T) { t.Skip() })
+
+		t.Run("Should get Quote of the day", func(t *testing.T) { t.Skip() })
+
+		t.Run("Should get complete history of quote of the day", func(t *testing.T) { t.Skip() })
+
+		t.Run("Should get history of QOD starting from June 4th 2021", func(t *testing.T) { t.Skip() })
+
 	})
 
 	t.Run("Random Quote", func(t *testing.T) {
