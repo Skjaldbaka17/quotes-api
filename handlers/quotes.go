@@ -599,6 +599,12 @@ func GetRandomAuthor(rw http.ResponseWriter, r *http.Request) {
 
 }
 
+// swagger:route POST /quotes/qod/new QUOTES setQuoteOfTheDay
+// Sets the quote of the day for the given date. It Is password protected TODO: Put in privacy swagger
+// responses:
+//	200: successResponse
+
+//SetQuoteOfTheyDay sets the quote of the day (is password protected)
 func SetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	var requestBody Request
 	if err := getRequestBody(rw, r, &requestBody); err != nil {
@@ -631,6 +637,7 @@ func SetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(ErrorResponse{Message: "Successfully inserted quote of the day!", StatusCode: http.StatusOK})
 }
 
+//SetNewRandomQOD sets a random quote as the qod for today (if language=icelandic is supplied then it adds the random qod to the icelandic qod table)
 func setNewRandomQOD(language string) error {
 	var quoteItem ListItem
 	var err error
@@ -651,6 +658,12 @@ func setNewRandomQOD(language string) error {
 	}
 }
 
+// swagger:route POST /quotes/qod QUOTES getQuoteOfTheDay
+// Gets the quote of the day
+// responses:
+//	200: randomQuoteResponse
+
+//GetQuoteOfTheyDay gets the quote of the day
 func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	var requestBody Request
 	if err := getRequestBody(rw, r, &requestBody); err != nil {

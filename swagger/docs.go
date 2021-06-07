@@ -29,6 +29,22 @@ package docs
 
 import "github.com/Skjaldbaka17/quotes-api/handlers"
 
+// swagger:response successResponse
+type successResponseWrapper struct {
+	// The successful response to a successful setting of a QOD
+	// in: body
+	Body struct {
+		// the date for which this quote is the QOD, if left empty this quote is today's QOD
+		//
+		// Example: Successfully inserted quote of the day!
+		Message string `json:"message"`
+		// HTTP status code
+		//
+		// Example: 200
+		StatusCode int `json:"statusCode"`
+	}
+}
+
 // Data structure representing most responses
 // swagger:response multipleQuotesResponse
 type multipleResponseWrapper struct {
@@ -221,6 +237,18 @@ type listTopicsWrapper struct {
 	}
 }
 
+// swagger:parameters getQuoteOfTheDay
+type getQuoteOfTheDayWrapper struct {
+	// The structure of the request for getting the QOD
+	// in: body
+	Body struct {
+		// The language of the QOD. If left empty the english QOD is returned
+		//
+		// Example: English
+		Language string `json:"language"`
+	}
+}
+
 // swagger:parameters getTopic
 type quotesFromTopicWrapper struct {
 	// The structure of the request for listing topics
@@ -287,6 +315,22 @@ type randomAuthorWrapper struct {
 		//
 		// Example: 10
 		MaxQuotes int `json:"maxQuotes"`
+	}
+}
+
+// swagger:parameters setQuoteOfTheDay
+type setQuoteOfTheDayWrapper struct {
+	// The structure of the request for setting the QOD
+	// in: body
+	Body struct {
+		// the date for which this quote is the QOD, if left empty this quote is today's QOD
+		//
+		// Example: 12-22-2020
+		Date string `json:"date"`
+		// The id of the quote to be set as this dates QOD
+		//
+		// Example: 1
+		Id int `json:"id"`
 	}
 }
 

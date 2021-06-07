@@ -4,6 +4,9 @@ consumes:
 definitions:
   AuthorsView:
     properties:
+      Count:
+        format: int64
+        type: integer
       hasicelandicquotes:
         type: boolean
         x-go-name: Hasicelandicquotes
@@ -249,6 +252,57 @@ paths:
       responses:
         "200":
           $ref: '#/responses/multipleQuotesResponse'
+      tags:
+      - QUOTES
+  /quotes/qod:
+    post:
+      description: Gets the quote of the day
+      operationId: getQuoteOfTheDay
+      parameters:
+      - description: The structure of the request for getting the QOD
+        in: body
+        name: Body
+        schema:
+          properties:
+            language:
+              description: The language of the QOD. If left empty the english QOD
+                is returned
+              example: English
+              type: string
+              x-go-name: Language
+          type: object
+      responses:
+        "200":
+          $ref: '#/responses/randomQuoteResponse'
+      tags:
+      - QUOTES
+  /quotes/qod/new:
+    post:
+      description: 'Sets the quote of the day for the given date. It Is password protected
+        TODO: Put in privacy swagger'
+      operationId: setQuoteOfTheDay
+      parameters:
+      - description: The structure of the request for setting the QOD
+        in: body
+        name: Body
+        schema:
+          properties:
+            date:
+              description: the date for which this quote is the QOD, if left empty
+                this quote is today's QOD
+              example: 12-22-2020
+              type: string
+              x-go-name: Date
+            id:
+              description: The id of the quote to be set as this dates QOD
+              example: 1
+              format: int64
+              type: integer
+              x-go-name: Id
+          type: object
+      responses:
+        "200":
+          $ref: '#/responses/successResponse'
       tags:
       - QUOTES
   /quotes/random:
@@ -600,6 +654,23 @@ responses:
     description: Data structure representing the response for a random quote
     schema:
       $ref: '#/definitions/QuoteView'
+  successResponse:
+    description: ""
+    schema:
+      properties:
+        message:
+          description: the date for which this quote is the QOD, if left empty this
+            quote is today's QOD
+          example: Successfully inserted quote of the day!
+          type: string
+          x-go-name: Message
+        statusCode:
+          description: HTTP status code
+          example: 200
+          format: int64
+          type: integer
+          x-go-name: StatusCode
+      type: object
 schemes:
 - http
 securityDefinitions:
