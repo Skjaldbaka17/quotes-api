@@ -19,6 +19,7 @@ func main() {
 	posts.HandleFunc("/api/search/authors", handlers.SearchAuthorsByString)
 	posts.HandleFunc("/api/search/quotes", handlers.SearchQuotesByString)
 	posts.HandleFunc("/api/authors", handlers.GetAuthorsById)
+	posts.HandleFunc("/api/authors/aod/new", handlers.SetAuthorOfTheDay)
 	posts.HandleFunc("/api/authors/list", handlers.GetAuthorsList)
 	posts.HandleFunc("/api/authors/random", handlers.GetRandomAuthor)
 	posts.HandleFunc("/api/topics", handlers.GetTopics)

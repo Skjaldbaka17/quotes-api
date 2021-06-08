@@ -94,6 +94,7 @@ type Request struct {
 	Minimum      string      `json:"minimum"`
 	Maximum      string      `json:"maximum"`
 	Qods         []Qod       `json:"qods"`
+	Aods         []Qod       `json:"aods"`
 }
 
 type Qod struct {

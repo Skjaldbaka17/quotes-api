@@ -570,7 +570,17 @@ func TestAuthors(t *testing.T) {
 
 	t.Run("Author of the day", func(t *testing.T) {
 
-		t.Run("Should set / Overwrite Author of the day", func(t *testing.T) { t.Skip() })
+		t.Run("Should set / Overwrite Author of the day", func(t *testing.T) {
+
+			authorId := 1
+			var jsonStr = []byte(fmt.Sprintf(`{"aods": [{"id":%d, "date":""}]}`, authorId))
+			_, response := requestAndReturnArray(jsonStr, SetAuthorOfTheDay)
+			if response.StatusCode != 200 {
+				t.Errorf("Expected a succesful insert but got %+v", response)
+			}
+		})
+
+		t.Run("Should set AOD for 12-22-2020 and 12-21-2020", func(t *testing.T) { t.Skip() })
 
 		t.Run("Should get Author of the day", func(t *testing.T) { t.Skip() })
 

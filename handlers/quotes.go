@@ -69,7 +69,28 @@ func getRequestBody(rw http.ResponseWriter, r *http.Request, requestBody *Reques
 					return err
 				}
 
-				requestBody.Qods[idx].Date = parsedDate.UTC().Format("01-02-2006")
+				requestBody.Qods[idx].Date = parsedDate.UTC().Format(layout)
+			}
+		}
+	}
+
+	//Set date into correct format, if supplied, otherwise input today's date in the correct format for all qods
+	if len(requestBody.Aods) != 0 {
+		for idx, _ := range requestBody.Aods {
+			if requestBody.Aods[idx].Date == "" {
+				requestBody.Aods[idx].Date = time.Now().UTC().Format(layout)
+			} else {
+				var parsedDate time.Time
+				parsedDate, err = time.Parse(layout, requestBody.Aods[idx].Date)
+				if err != nil {
+					log.Printf("Got error when decoding: %s", err)
+					err = fmt.Errorf("the date is not structured correctly, should be in %s format", layout)
+					rw.WriteHeader(http.StatusBadRequest)
+					json.NewEncoder(rw).Encode(ErrorResponse{Message: err.Error()})
+					return err
+				}
+
+				requestBody.Aods[idx].Date = parsedDate.UTC().Format(layout)
 			}
 		}
 	}
@@ -98,6 +119,10 @@ func getRequestBody(rw http.ResponseWriter, r *http.Request, requestBody *Reques
 			return err
 		}
 		requestBody.Minimum = parseDate.Format("01-02-2006")
+	}
+
+	if requestBody.Language == "" {
+		requestBody.Language = "English"
 	}
 
 	return nil
@@ -631,6 +656,44 @@ func GetRandomAuthor(rw http.ResponseWriter, r *http.Request) {
 
 }
 
+// swagger:route POST /quotes/aod/new AUTHORS setAuthorsOfTheDay
+// Sets the author of the day for the given date. It Is password protected TODO: Put in privacy swagger
+// responses:
+//	200: successResponse
+
+//SetAuthorOfTheDay sets the author of the day (is password protected)
+func SetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
+	var requestBody Request
+	if err := getRequestBody(rw, r, &requestBody); err != nil {
+		return
+	}
+
+	if len(requestBody.Aods) == 0 {
+		json.NewEncoder(rw).Encode(ErrorResponse{Message: "Please supply some authors", StatusCode: http.StatusBadRequest})
+		return
+	}
+
+	for _, aod := range requestBody.Aods {
+		err := setAOD(requestBody.Language, aod.Date, aod.Id)
+		if err != nil {
+			log.Println(err)
+			json.NewEncoder(rw).Encode(ErrorResponse{Message: "Some of the authors (ids) you supplied do not have " + requestBody.Language + " quotes", StatusCode: http.StatusBadRequest})
+			return
+		}
+	}
+
+	json.NewEncoder(rw).Encode(ErrorResponse{Message: "Successfully inserted quote of the day!", StatusCode: http.StatusOK})
+}
+
+func setAOD(language string, date string, authorId int) error {
+	switch strings.ToLower(language) {
+	case "icelandic":
+		return db.Exec("insert into aodice (authorid, date) values((select id from authors where id = ? and hasicelandicquotes), ?) on conflict (date) do update set authorid = ?", authorId, date, authorId).Error
+	default:
+		return db.Exec("insert into aod (authorid, date) values((select id from authors where id = ? and not hasicelandicquotes), ?) on conflict (date) do update set authorid = ?", authorId, date, authorId).Error
+	}
+}
+
 // swagger:route POST /quotes/qod/new QUOTES setQuoteOfTheDay
 // Sets the quote of the day for the given date. It Is password protected TODO: Put in privacy swagger
 // responses:
@@ -649,49 +712,43 @@ func SetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, qod := range requestBody.Qods {
-		// insert into items_ver(item_id, item_group, name)
-		// select * from items where item_id=2;
-		var err error
-		switch strings.ToLower(qod.Language) {
-		case "icelandic":
-			err = db.Exec("insert into qodice (quoteid, date) values((select id from quotes where id = ? and isicelandic), ?) on conflict (date) do update set quoteid = ?", qod.Id, qod.Date, qod.Id).Error
-			if err != nil {
-				log.Println(err)
-				json.NewEncoder(rw).Encode(ErrorResponse{Message: "This id is not in icelandic", StatusCode: http.StatusBadRequest})
-				return
-			}
-		default:
-			err = db.Exec("insert into qod (quoteid, date) values((select id from quotes where id = ? and not isicelandic), ?) on conflict (date) do update set quoteid = ?", qod.Id, qod.Date, qod.Id).Error
-			if err != nil {
-				log.Println(err)
-				json.NewEncoder(rw).Encode(ErrorResponse{Message: "This id is not in english", StatusCode: http.StatusBadRequest})
-				return
-			}
+		err := setQOD(requestBody.Language, qod.Date, qod.Id)
+		if err != nil {
+			log.Println(err)
+			json.NewEncoder(rw).Encode(ErrorResponse{Message: "Some of the quotes (ids) you supplied are not in " + requestBody.Language, StatusCode: http.StatusBadRequest})
+			return
 		}
 	}
 
 	json.NewEncoder(rw).Encode(ErrorResponse{Message: "Successfully inserted quote of the day!", StatusCode: http.StatusOK})
 }
 
+func setQOD(language string, date string, quoteId int) error {
+	switch strings.ToLower(language) {
+	case "icelandic":
+		return db.Exec("insert into qodice (quoteid, date) values((select id from quotes where id = ? and isicelandic), ?) on conflict (date) do update set quoteid = ?", quoteId, date, quoteId).Error
+	default:
+		return db.Exec("insert into qod (quoteid, date) values((select id from quotes where id = ? and not isicelandic), ?) on conflict (date) do update set quoteid = ?", quoteId, date, quoteId).Error
+	}
+}
+
 //SetNewRandomQOD sets a random quote as the qod for today (if language=icelandic is supplied then it adds the random qod to the icelandic qod table)
 func setNewRandomQOD(language string) error {
 	var quoteItem ListItem
-	var err error
+	var dbPointer *gorm.DB
 	switch strings.ToLower(language) {
 	case "icelandic":
-		err = db.Table("quotes").Where("isicelandic").Order("random()").Limit(1).Scan(&quoteItem).Error
-		if err != nil {
-			return err
-		}
-		return db.Table("qod").Exec("insert into qodice (quoteid, date) values(?,?) on conflict (date) do update set quoteid = ?", quoteItem.Id, time.Now().Format("01.02.2006"), quoteItem.Id).Error
+		dbPointer = db.Table("quotes").Where("isicelandic")
 	default:
-		err = db.Table("quotes").Not("isicelandic").Where("Random() < 0.005").Order("random()").Limit(1).Scan(&quoteItem).Error
-		if err != nil {
-			return err
-		}
-		return db.Table("qod").Exec("insert into qod (quoteid, date) values(?,?) on conflict (date) do update set quoteid = ?", quoteItem.Id, time.Now().Format("01.02.2006"), quoteItem.Id).Error
-
+		dbPointer = db.Table("quotes").Not("isicelandic").Where("Random() < 0.005")
 	}
+
+	err := dbPointer.Order("random()").Limit(1).Scan(&quoteItem).Error
+	if err != nil {
+		return err
+	}
+
+	return setQOD(language, time.Now().Format("2006-01-02"), quoteItem.Id)
 }
 
 // swagger:route POST /quotes/qod QUOTES getQuoteOfTheDay
