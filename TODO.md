@@ -1,6 +1,5 @@
 # TODOS
 
-- [ ] Add get and set Quote of The Day (plus points for available to set quotes for multiple days in one request + plus points for QOD history)
 - [ ] Add password protection / protected routes capability (at least for SetQuoteOfTheyDay route )
 - [ ] Get Author of the day + Set Author of the day (plust points for available to set authors for multiple days in one request)
 - [ ] getQuotes route (combine with getQuotesById and add to it to get quotes from a specific author + add pagination)
@@ -23,6 +22,10 @@
 - [ ] Clean up quotes.go
  --------------
 
+- [x] Add tests for GetAOD and AODHistory and SetAOD
+- [x] Add tests for GetQOD and QODHistory and SetQOD
+- [x] Add get and set Author of The Day (plus points for available to set authors for multiple days in one request + plus points for AOD history)
+- [x] Add get and set Quote of The Day (plus points for available to set quotes for multiple days in one request + plus points for QOD history)
 - [x] quoteoftheday << qod
 - [x] Get list of authors (with parameters for pagination and alphabet and languages)
 - [x] Get random Author

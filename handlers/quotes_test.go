@@ -22,7 +22,7 @@ func TestSearch(t *testing.T) {
 			firstAuthor := respObj[0].Name
 			want := "Muhammad Ali"
 			if firstAuthor != want {
-				t.Errorf("got %q, want %q", firstAuthor, want)
+				t.Fatalf("got %q, want %q", firstAuthor, want)
 			}
 		})
 
@@ -33,7 +33,7 @@ func TestSearch(t *testing.T) {
 			firstAuthor := respObj[0].Name
 			want := "Muhammad Ali"
 			if firstAuthor != want {
-				t.Errorf("got %q, want %q", firstAuthor, want)
+				t.Fatalf("got %q, want %q", firstAuthor, want)
 			}
 		})
 
@@ -44,7 +44,7 @@ func TestSearch(t *testing.T) {
 			firstAuthor := respObj[0].Name
 			want := "Muhammad Ali"
 			if firstAuthor != want {
-				t.Errorf("got %q, want %q", firstAuthor, want)
+				t.Fatalf("got %q, want %q", firstAuthor, want)
 			}
 		})
 
@@ -59,7 +59,7 @@ func TestSearch(t *testing.T) {
 			firstAuthor := respObj[0].Name
 			want := "Friedrich Nietzsche"
 			if firstAuthor != want {
-				t.Errorf("got %q, want %q", firstAuthor, want)
+				t.Fatalf("got %q, want %q", firstAuthor, want)
 			}
 		})
 
@@ -70,7 +70,7 @@ func TestSearch(t *testing.T) {
 			firstAuthor := respObj[0].Name
 			want := "Joseph Stalin"
 			if firstAuthor != want {
-				t.Errorf("got %q, want %q", firstAuthor, want)
+				t.Fatalf("got %q, want %q", firstAuthor, want)
 			}
 		})
 
@@ -81,7 +81,7 @@ func TestSearch(t *testing.T) {
 			firstAuthor := respObj[0].Name
 			want := "Friedrich Nietzsche"
 			if firstAuthor != want {
-				t.Errorf("got %q, want %q", firstAuthor, want)
+				t.Fatalf("got %q, want %q", firstAuthor, want)
 			}
 		})
 
@@ -97,7 +97,7 @@ func TestSearch(t *testing.T) {
 				firstAuthor := respObj[1].Name //Use index 1 because in index 0 there is an author talking extensively about Nietzsche
 				want := "Friedrich Nietzsche"
 				if firstAuthor != want {
-					t.Errorf("got %q, want %q", firstAuthor, want)
+					t.Fatalf("got %q, want %q", firstAuthor, want)
 				}
 			})
 
@@ -108,7 +108,7 @@ func TestSearch(t *testing.T) {
 				firstAuthor := respObj[1].Name //Use index 1 because in index 0 there is an author talking extensively about Nietzsche
 				want := "Friedrich Nietzsche"
 				if firstAuthor != want {
-					t.Errorf("got %q, want %q", firstAuthor, want)
+					t.Fatalf("got %q, want %q", firstAuthor, want)
 				}
 			})
 		})
@@ -121,7 +121,7 @@ func TestSearch(t *testing.T) {
 				firstAuthor := respObj[1].Name //Use index 1 because in index 0 there is an author talking extensively about Nietzsche
 				want := "Martin Luther"
 				if firstAuthor != want {
-					t.Errorf("got %q, want %q", firstAuthor, want)
+					t.Fatalf("got %q, want %q", firstAuthor, want)
 				}
 			})
 		})
@@ -149,11 +149,11 @@ func TestSearch(t *testing.T) {
 			_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 			if pageSize != len(respObj) {
-				t.Errorf("got list of length %d but expected %d", len(respObj), pageSize)
+				t.Fatalf("got list of length %d but expected %d", len(respObj), pageSize)
 			}
 
 			if respObj[0] != obj26 {
-				t.Errorf("got %+v, want %+v", respObj[0], obj26)
+				t.Fatalf("got %+v, want %+v", respObj[0], obj26)
 			}
 		})
 
@@ -177,11 +177,11 @@ func TestSearch(t *testing.T) {
 			_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 			if pageSize != len(respObj) {
-				t.Errorf("got list of length %d but expected %d", len(respObj), pageSize)
+				t.Fatalf("got list of length %d but expected %d", len(respObj), pageSize)
 			}
 
 			if respObj[0] != obj26 {
-				t.Errorf("got %+v, want %+v", respObj[0], obj26)
+				t.Fatalf("got %+v, want %+v", respObj[0], obj26)
 			}
 		})
 
@@ -205,11 +205,11 @@ func TestSearch(t *testing.T) {
 			_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 			if pageSize != len(respObj) {
-				t.Errorf("got list of length %d but expected %d", len(respObj), pageSize)
+				t.Fatalf("got list of length %d but expected %d", len(respObj), pageSize)
 			}
 
 			if respObj[0] != obj26 {
-				t.Errorf("got %+v, want %+v", respObj[0], obj26)
+				t.Fatalf("got %+v, want %+v", respObj[0], obj26)
 			}
 		})
 
@@ -227,7 +227,7 @@ func TestAuthors(t *testing.T) {
 		respObj, _ := requestAndReturnArray(jsonStr, GetAuthorsById)
 		firstAuthor := respObj[0]
 		if firstAuthor.Id != authorId[0] {
-			t.Errorf("got %d, want %d", firstAuthor.Authorid, authorId[0])
+			t.Fatalf("got %d, want %d", firstAuthor.Authorid, authorId[0])
 		}
 
 	})
@@ -242,12 +242,12 @@ func TestAuthors(t *testing.T) {
 			respObj, _ := requestAndReturnArray(jsonStr, GetAuthorsList)
 
 			if len(respObj) != 50 {
-				t.Errorf("got list of length %d, but expected list of length %d", len(respObj), pageSize)
+				t.Fatalf("got list of length %d, but expected list of length %d", len(respObj), pageSize)
 			}
 
 			firstAuthor := respObj[0]
 			if firstAuthor.Name[0] != 'A' {
-				t.Errorf("got %s, want name that starts with 'A'", firstAuthor.Name)
+				t.Fatalf("got %s, want name that starts with 'A'", firstAuthor.Name)
 			}
 
 		})
@@ -266,11 +266,11 @@ func TestAuthors(t *testing.T) {
 			firstAuthor := respObj[0]
 
 			if firstAuthor.Hasicelandicquotes {
-				t.Errorf("got %+v, but expected an author that has no icelandic quotes", firstAuthor)
+				t.Fatalf("got %+v, but expected an author that has no icelandic quotes", firstAuthor)
 			}
 
 			if firstAuthor.Name[0] != 'A' {
-				t.Errorf("got %s, want name that starts with 'A'", firstAuthor.Name)
+				t.Fatalf("got %s, want name that starts with 'A'", firstAuthor.Name)
 			}
 
 		})
@@ -289,11 +289,11 @@ func TestAuthors(t *testing.T) {
 			firstAuthor := respObj[0]
 
 			if firstAuthor.Hasicelandicquotes {
-				t.Errorf("got %+v, but expected an author that has no icelandic quotes", firstAuthor)
+				t.Fatalf("got %+v, but expected an author that has no icelandic quotes", firstAuthor)
 			}
 
 			if firstAuthor.Name[0] != 'Z' {
-				t.Errorf("got %s, want name that starts with 'Z'", firstAuthor.Name)
+				t.Fatalf("got %s, want name that starts with 'Z'", firstAuthor.Name)
 			}
 
 		})
@@ -312,11 +312,11 @@ func TestAuthors(t *testing.T) {
 			firstAuthor := respObj[0]
 
 			if firstAuthor.Hasicelandicquotes {
-				t.Errorf("got %+v, but expected an author that has no icelandic quotes", firstAuthor)
+				t.Fatalf("got %+v, but expected an author that has no icelandic quotes", firstAuthor)
 			}
 
 			if firstAuthor.Name[0] != strings.ToUpper(minimum)[0] {
-				t.Errorf("got %s, want name that starts with 'F'", firstAuthor.Name)
+				t.Fatalf("got %s, want name that starts with 'F'", firstAuthor.Name)
 			}
 
 		})
@@ -339,7 +339,7 @@ func TestAuthors(t *testing.T) {
 			firstAuthor := respObj[0]
 
 			if firstAuthor.Nroficelandicquotes+firstAuthor.Nrofenglishquotes > 1 {
-				t.Errorf("got %+v, but expected an author that has no more than 1 quotes", firstAuthor)
+				t.Fatalf("got %+v, but expected an author that has no more than 1 quotes", firstAuthor)
 			}
 
 		})
@@ -359,7 +359,7 @@ func TestAuthors(t *testing.T) {
 			firstAuthor := respObj[0]
 
 			if firstAuthor.Nroficelandicquotes+firstAuthor.Nrofenglishquotes != 10 {
-				t.Errorf("got %+v, but expected an author that has no fewer than 10 quotes", firstAuthor)
+				t.Fatalf("got %+v, but expected an author that has no fewer than 10 quotes", firstAuthor)
 			}
 
 		})
@@ -378,7 +378,7 @@ func TestAuthors(t *testing.T) {
 			firstAuthor := respObj[0]
 
 			if firstAuthor.Nroficelandicquotes+firstAuthor.Nrofenglishquotes != 10 {
-				t.Errorf("got %+v, but expected an author that has 10 quotes", firstAuthor)
+				t.Fatalf("got %+v, but expected an author that has 10 quotes", firstAuthor)
 			}
 
 		})
@@ -396,7 +396,7 @@ func TestAuthors(t *testing.T) {
 			firstAuthor := respObj[0]
 
 			if firstAuthor.Nroficelandicquotes != 160 {
-				t.Errorf("got %+v, but expected an author that has 10 quotes", firstAuthor)
+				t.Fatalf("got %+v, but expected an author that has 10 quotes", firstAuthor)
 			}
 		})
 
@@ -414,7 +414,7 @@ func TestAuthors(t *testing.T) {
 			firstAuthor := respObj[0]
 
 			if firstAuthor.Count == 0 {
-				t.Errorf("got %+v, but expected an author that does not have 0 popularity count", firstAuthor)
+				t.Fatalf("got %+v, but expected an author that does not have 0 popularity count", firstAuthor)
 			}
 
 		})
@@ -432,7 +432,7 @@ func TestAuthors(t *testing.T) {
 			firstAuthor := respObj[0]
 
 			if firstAuthor.Count != 0 {
-				t.Errorf("got %+v, but expected an author that has 0 popularity count", firstAuthor)
+				t.Fatalf("got %+v, but expected an author that has 0 popularity count", firstAuthor)
 			}
 
 		})
@@ -448,7 +448,7 @@ func TestAuthors(t *testing.T) {
 			}
 
 			if len(respObj) != 100 {
-				t.Errorf("got %d nr of authors, but expected %d authors", len(respObj), pageSize)
+				t.Fatalf("got %d nr of authors, but expected %d authors", len(respObj), pageSize)
 			}
 		})
 
@@ -467,7 +467,7 @@ func TestAuthors(t *testing.T) {
 			}
 
 			if respObj[0].Name[0] != minimum[0] {
-				t.Errorf("got %+v, but expected author starting with '%s'", len(respObj), minimum)
+				t.Fatalf("got %+v, but expected author starting with '%s'", len(respObj), minimum)
 			}
 
 			pageSize = 50
@@ -491,18 +491,18 @@ func TestAuthors(t *testing.T) {
 			firstRespObj, _ := requestAndReturnArray(jsonStr, GetRandomAuthor)
 
 			if len(firstRespObj) != 1 {
-				t.Errorf("Expected only a single quote from the random author but got %d", len(firstRespObj))
+				t.Fatalf("Expected only a single quote from the random author but got %d", len(firstRespObj))
 			}
 
 			firstAuthor := firstRespObj[0]
 			if firstAuthor.Name == "" {
-				t.Errorf("Expected a random author but got an empty name for author")
+				t.Fatalf("Expected a random author but got an empty name for author")
 			}
 
 			secondRespObj, _ := requestAndReturnArray(jsonStr, GetRandomAuthor)
 			secondAuthor := secondRespObj[0]
 			if firstAuthor.Authorid == secondAuthor.Authorid {
-				t.Errorf("Expected two different authors but got the same author twice which is higly improbable, got author with id %d and name %s", firstAuthor.Authorid, firstAuthor.Name)
+				t.Fatalf("Expected two different authors but got the same author twice which is higly improbable, got author with id %d and name %s", firstAuthor.Authorid, firstAuthor.Name)
 			}
 
 		})
@@ -514,17 +514,17 @@ func TestAuthors(t *testing.T) {
 
 			firstAuthor := firstRespObj[0]
 			if firstAuthor.Name == "" {
-				t.Errorf("Expected a random author but got an empty name for author")
+				t.Fatalf("Expected a random author but got an empty name for author")
 			}
 
 			if !firstAuthor.Isicelandic {
-				t.Errorf("Expected the quotes returned to be in icelandic")
+				t.Fatalf("Expected the quotes returned to be in icelandic")
 			}
 
 			secondRespObj, _ := requestAndReturnArray(jsonStr, GetRandomAuthor)
 			secondAuthor := secondRespObj[0]
 			if firstAuthor.Authorid == secondAuthor.Authorid {
-				t.Errorf("Expected two different authors but got the same author twice which is higly improbable, got author with id %d and name %s", firstAuthor.Authorid, firstAuthor.Name)
+				t.Fatalf("Expected two different authors but got the same author twice which is higly improbable, got author with id %d and name %s", firstAuthor.Authorid, firstAuthor.Name)
 			}
 		})
 
@@ -536,17 +536,17 @@ func TestAuthors(t *testing.T) {
 
 			firstAuthor := firstRespObj[0]
 			if firstAuthor.Name == "" {
-				t.Errorf("Expected a random author but got an empty name for author")
+				t.Fatalf("Expected a random author but got an empty name for author")
 			}
 
 			if firstAuthor.Isicelandic {
-				t.Errorf("Expected the quotes returned to be in English")
+				t.Fatalf("Expected the quotes returned to be in English")
 			}
 
 			secondRespObj, _ := requestAndReturnArray(jsonStr, GetRandomAuthor)
 			secondAuthor := secondRespObj[0]
 			if firstAuthor.Authorid == secondAuthor.Authorid {
-				t.Errorf("Expected two different authors but got the same author twice which is higly improbable, got author with id %d and name %s", firstAuthor.Authorid, firstAuthor.Name)
+				t.Fatalf("Expected two different authors but got the same author twice which is higly improbable, got author with id %d and name %s", firstAuthor.Authorid, firstAuthor.Name)
 			}
 
 		})
@@ -558,11 +558,11 @@ func TestAuthors(t *testing.T) {
 
 			firstAuthor := firstRespObj[0]
 			if firstAuthor.Name == "" {
-				t.Errorf("Expected a random author but got an empty name for author")
+				t.Fatalf("Expected a random author but got an empty name for author")
 			}
 
 			if len(firstRespObj) != 2 {
-				t.Errorf("Expected 2 quotes but got %d", len(firstRespObj))
+				t.Fatalf("Expected 2 quotes but got %d", len(firstRespObj))
 			}
 		})
 
@@ -576,17 +576,150 @@ func TestAuthors(t *testing.T) {
 			var jsonStr = []byte(fmt.Sprintf(`{"aods": [{"id":%d, "date":""}]}`, authorId))
 			_, response := requestAndReturnArray(jsonStr, SetAuthorOfTheDay)
 			if response.StatusCode != 200 {
-				t.Errorf("Expected a succesful insert but got %+v", response)
+				t.Fatalf("Expected a succesful insert but got %+v", response)
 			}
 		})
 
-		t.Run("Should set AOD for 12-22-2020 and 12-21-2020", func(t *testing.T) { t.Skip() })
+		t.Run("Should set AOD for 12-22-2020 and 12-21-2020", func(t *testing.T) {
 
-		t.Run("Should get Author of the day", func(t *testing.T) { t.Skip() })
+			//TODO: add to test that the quotes where actually input into the DB
+			authorId1 := 2
+			date1 := "2020-12-22"
+			date2 := "2020-12-21"
+			authorId2 := 3
+			var jsonStr = []byte(fmt.Sprintf(`{"aods": [{"id":%d, "date":"%s"},{"id":%d, "date":"%s"}]}`, authorId1, date1, authorId2, date2))
+			_, response := requestAndReturnArray(jsonStr, SetAuthorOfTheDay)
+			if response.StatusCode != 200 {
+				t.Fatalf("Expected a succesful insert but got %+v", response)
+			}
 
-		t.Run("Should get complete history of Author of the day", func(t *testing.T) { t.Skip() })
+		})
 
-		t.Run("Should get history of AOD starting from June 4th 2021", func(t *testing.T) { t.Skip() })
+		t.Run("Should get Author of the day", func(t *testing.T) {
+
+			var jsonStr = []byte(fmt.Sprintf(`{"language":"%s"}`, "english"))
+			author := requestAndReturnSingle(jsonStr, GetAuthorOfTheDay)
+
+			if author.Name == "" {
+				t.Fatalf("Expected the author of the day but got an empty author %+v", author)
+			}
+
+			if author.Authorid == 0 {
+				t.Fatalf("Expected the autho to have id > 0 but got: %+v", author)
+			}
+
+			const layout = "2006-01-02T15:04:05Z" //The date needed for reference always
+			date, _ := time.Parse(layout, author.Date)
+			if date.Format("01-02-2006") != time.Now().Format("01-02-2006") {
+				t.Fatalf("Expected the author for the date %s but got AOD for date %s i.e. %+v", time.Now().Format("01-02-2006"), date.Format("01-02-2006"), author)
+			}
+
+		})
+
+		t.Run("Should get complete history of Author of the day", func(t *testing.T) {
+
+			//Input a quote in history for testing
+			authorId := 1111
+			date := "1998-06-16"
+			var jsonStr = []byte(fmt.Sprintf(`{"aods": [{"id":%d, "date":"%s"}]}`, authorId, date))
+			_, response := requestAndReturnArray(jsonStr, SetAuthorOfTheDay)
+			if response.StatusCode != 200 {
+				t.Fatalf("Expected a succesful insert but got %+v", response)
+			}
+
+			//Get History:
+
+			jsonStr = []byte(fmt.Sprintf(`{"language":"%s"}`, "english"))
+			authors, _ := requestAndReturnArray(jsonStr, GetAODHistory)
+
+			if len(authors) == 0 {
+				t.Fatalf("Expected the history of AOD but got an empty list: %+v", authors)
+			}
+
+			containsBirfdayAuthor := false
+			containsTodayAuthor := false
+			const layout = "2006-01-02T15:04:05Z" //The date needed for reference always
+			for _, author := range authors {
+				if author.Authorid == 0 {
+					t.Fatalf("Expected all authors to have id > 0 but got: %+v", authors)
+				}
+				date, _ := time.Parse(layout, author.Date)
+				if date.Format("01-02-2006") == time.Now().Format("01-02-2006") {
+					containsTodayAuthor = true
+				}
+
+				if date.Format("01-02-2006") == "06-16-1998" {
+					containsBirfdayAuthor = true
+				}
+			}
+
+			if !containsBirfdayAuthor {
+				t.Fatalf("AOD history should contain the AOD for birfday but does not: %+v", authors)
+			}
+
+			if !containsTodayAuthor {
+				t.Fatalf("AOD history should contain the AOD for today but does not: %+v", authors)
+			}
+
+		})
+
+		t.Run("Should get history of AOD starting from June 4th 2021", func(t *testing.T) {
+
+			//Input a quote in history for testing
+			authorId := 666
+			date := "2021-06-04"
+			var jsonStr = []byte(fmt.Sprintf(`{"aods": [{"id":%d, "date":"%s"}]}`, authorId, date))
+			_, response := requestAndReturnArray(jsonStr, SetAuthorOfTheDay)
+			if response.StatusCode != 200 {
+				t.Fatalf("Expected a succesful insert but got %+v", response)
+			}
+
+			//Get History:
+
+			minimum := "2021-06-04"
+			jsonStr = []byte(fmt.Sprintf(`{"language":"%s", "minimum":"%s"}`, "english", minimum))
+			authors, _ := requestAndReturnArray(jsonStr, GetAODHistory)
+
+			if len(authors) == 0 {
+				t.Fatalf("Expected the history of AOD but got an empty list: %+v", authors)
+			}
+
+			const layout = "2006-01-02T15:04:05Z" //The date needed for reference always
+			compareDate, _ := time.Parse(layout, "2021-06-04")
+			compareYear := compareDate.Year()
+			compareMonth := compareDate.Month()
+			compareDay := compareDate.Day()
+			containsAuthorNotInRange := false
+			containsFourthOfJuneAuthor := false
+			for _, author := range authors {
+				date, _ := time.Parse(layout, author.Date)
+				yearOfAuthor := date.Year()
+				monthOfAuthor := date.Month()
+				dayOfAuthor := date.Day()
+
+				if yearOfAuthor < compareYear || (yearOfAuthor == compareYear && monthOfAuthor < compareMonth) || (yearOfAuthor == compareYear && monthOfAuthor == compareMonth && dayOfAuthor < compareDay) {
+					containsAuthorNotInRange = true
+				}
+
+				if date.Format("2006-01-02") == "2021-06-04" {
+					containsFourthOfJuneAuthor = true
+				}
+
+				if author.Authorid == 0 {
+					t.Fatalf("Expected all authors to have id > 0 but got: %+v", authors)
+				}
+
+			}
+
+			if containsAuthorNotInRange {
+				t.Fatalf("AOD history contains an earlier quote than was requested: %+v", authors)
+			}
+
+			if !containsFourthOfJuneAuthor {
+				t.Fatalf("QOD history should contain the QOD for 4th of june 2021 but does not: %+v", authors)
+			}
+
+		})
 
 	})
 
@@ -600,12 +733,12 @@ func TestQuotes(t *testing.T) {
 		respObj, _ := requestAndReturnArray(jsonStr, GetQuotesById)
 
 		if len(respObj) != len(quoteIds) {
-			t.Errorf("got list of length %d but expected list of length %d", len(respObj), len(quoteIds))
+			t.Fatalf("got list of length %d but expected list of length %d", len(respObj), len(quoteIds))
 		}
 
 		for idx, quote := range respObj {
 			if quote.Quoteid != quoteIds[idx] {
-				t.Errorf("got %d, expected %d", quote.Quoteid, quoteIds[idx])
+				t.Fatalf("got %d, expected %d", quote.Quoteid, quoteIds[idx])
 			}
 		}
 	})
@@ -618,7 +751,7 @@ func TestQuotes(t *testing.T) {
 			var jsonStr = []byte(fmt.Sprintf(`{"qods": [{"id":%d, "date":""}]}`, quoteId))
 			_, response := requestAndReturnArray(jsonStr, SetQuoteOfTheDay)
 			if response.StatusCode != 200 {
-				t.Errorf("Expected a succesful insert but got %+v", response)
+				t.Fatalf("Expected a succesful insert but got %+v", response)
 			}
 
 		})
@@ -632,7 +765,7 @@ func TestQuotes(t *testing.T) {
 			var jsonStr = []byte(fmt.Sprintf(`{"qods": [{"id":%d, "date":"%s"},{"id":%d, "date":"%s"}]}`, quoteId1, date1, quoteId2, date2))
 			_, response := requestAndReturnArray(jsonStr, SetQuoteOfTheDay)
 			if response.StatusCode != 200 {
-				t.Errorf("Expected a succesful insert but got %+v", response)
+				t.Fatalf("Expected a succesful insert but got %+v", response)
 			}
 
 		})
@@ -660,7 +793,7 @@ func TestQuotes(t *testing.T) {
 			var jsonStr = []byte(fmt.Sprintf(`{"qods": [{"id":%d, "date":"%s"}]}`, quoteId, date))
 			_, response := requestAndReturnArray(jsonStr, SetQuoteOfTheDay)
 			if response.StatusCode != 200 {
-				t.Errorf("Expected a succesful insert but got %+v", response)
+				t.Fatalf("Expected a succesful insert but got %+v", response)
 			}
 
 			//Get History:
@@ -704,7 +837,7 @@ func TestQuotes(t *testing.T) {
 			var jsonStr = []byte(fmt.Sprintf(`{"qods": [{"id":%d, "date":"%s"}]}`, quoteId, date))
 			_, response := requestAndReturnArray(jsonStr, SetQuoteOfTheDay)
 			if response.StatusCode != 200 {
-				t.Errorf("Expected a succesful insert but got %+v", response)
+				t.Fatalf("Expected a succesful insert but got %+v", response)
 			}
 
 			//Get History:
@@ -760,13 +893,13 @@ func TestQuotes(t *testing.T) {
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 
 			if firstRespObj.Quote == "" {
-				t.Errorf("Expected a random quote but got an empty quote")
+				t.Fatalf("Expected a random quote but got an empty quote")
 			}
 
 			secondRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 
 			if secondRespObj.Quoteid == firstRespObj.Quoteid {
-				t.Errorf("Expected two different quotes but got the same quote twice which is higly improbable")
+				t.Fatalf("Expected two different quotes but got the same quote twice which is higly improbable")
 			}
 		})
 
@@ -778,17 +911,17 @@ func TestQuotes(t *testing.T) {
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 
 			if firstRespObj.Name != teddyName {
-				t.Errorf("got %s, expected %s", firstRespObj.Name, teddyName)
+				t.Fatalf("got %s, expected %s", firstRespObj.Name, teddyName)
 			}
 
 			secondRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 
 			if secondRespObj.Authorid != firstRespObj.Authorid {
-				t.Errorf("got author with id %d, expected author with id %d", secondRespObj.Authorid, firstRespObj.Authorid)
+				t.Fatalf("got author with id %d, expected author with id %d", secondRespObj.Authorid, firstRespObj.Authorid)
 			}
 
 			if secondRespObj.Quoteid == firstRespObj.Quoteid {
-				t.Errorf("got quote %s, expected a random different quote", secondRespObj.Quote)
+				t.Fatalf("got quote %s, expected a random different quote", secondRespObj.Quote)
 			}
 
 		})
@@ -800,15 +933,15 @@ func TestQuotes(t *testing.T) {
 			var jsonStr = []byte(fmt.Sprintf(`{"topicId": %d}`, topicId))
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 			if firstRespObj.Topicname != topicName {
-				t.Errorf("got %s, expected %s", firstRespObj.Topicname, topicName)
+				t.Fatalf("got %s, expected %s", firstRespObj.Topicname, topicName)
 			}
 			secondRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 			if secondRespObj.Topicid != firstRespObj.Topicid {
-				t.Errorf("got topic with id %d, expected topic with id %d", secondRespObj.Topicid, firstRespObj.Topicid)
+				t.Fatalf("got topic with id %d, expected topic with id %d", secondRespObj.Topicid, firstRespObj.Topicid)
 			}
 
 			if secondRespObj.Quoteid == firstRespObj.Quoteid {
-				t.Errorf("got quote %s, expected a random different quote", secondRespObj.Quote)
+				t.Fatalf("got quote %s, expected a random different quote", secondRespObj.Quote)
 			}
 		})
 
@@ -818,15 +951,15 @@ func TestQuotes(t *testing.T) {
 			var jsonStr = []byte(fmt.Sprintf(`{"language": "%s"}`, language))
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 			if firstRespObj.Isicelandic {
-				t.Errorf("first response, got an IcelandicQuote but expected an English quote")
+				t.Fatalf("first response, got an IcelandicQuote but expected an English quote")
 			}
 			secondRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 			if secondRespObj.Isicelandic {
-				t.Errorf("second response, got an IcelandicQuote but expected an English quote")
+				t.Fatalf("second response, got an IcelandicQuote but expected an English quote")
 			}
 
 			if secondRespObj.Quoteid == firstRespObj.Quoteid {
-				t.Errorf("got quote %s, expected a random different quote", secondRespObj.Quote)
+				t.Fatalf("got quote %s, expected a random different quote", secondRespObj.Quote)
 			}
 		})
 
@@ -836,15 +969,15 @@ func TestQuotes(t *testing.T) {
 			var jsonStr = []byte(fmt.Sprintf(`{"language": "%s"}`, language))
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 			if !firstRespObj.Isicelandic {
-				t.Errorf("first response, got an EnglishQuote but expected an Icelandic quote")
+				t.Fatalf("first response, got an EnglishQuote but expected an Icelandic quote")
 			}
 			secondRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 			if !secondRespObj.Isicelandic {
-				t.Errorf("second response, got an EnglishQuote, %+v, but expected an Icelandic quote", secondRespObj)
+				t.Fatalf("second response, got an EnglishQuote, %+v, but expected an Icelandic quote", secondRespObj)
 			}
 
 			if secondRespObj.Quoteid == firstRespObj.Quoteid {
-				t.Errorf("got quote %s, expected a random different quote", secondRespObj.Quote)
+				t.Fatalf("got quote %s, expected a random different quote", secondRespObj.Quote)
 			}
 		})
 
@@ -855,16 +988,16 @@ func TestQuotes(t *testing.T) {
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 			m1 := regexp.MustCompile(searchString)
 			if !m1.Match([]byte(firstRespObj.Quote)) {
-				t.Errorf("first response, got the quote %+v that does not contain the searchString %s", firstRespObj, searchString)
+				t.Fatalf("first response, got the quote %+v that does not contain the searchString %s", firstRespObj, searchString)
 			}
 
 			secondRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 			if !m1.Match([]byte(secondRespObj.Quote)) {
-				t.Errorf("second response, got the quote %+v that does not contain the searchString %s", secondRespObj, searchString)
+				t.Fatalf("second response, got the quote %+v that does not contain the searchString %s", secondRespObj, searchString)
 			}
 
 			if secondRespObj.Quoteid == firstRespObj.Quoteid {
-				t.Errorf("got quote %s, expected a random different quote", secondRespObj.Quote)
+				t.Fatalf("got quote %s, expected a random different quote", secondRespObj.Quote)
 			}
 
 		})
@@ -876,20 +1009,20 @@ func TestQuotes(t *testing.T) {
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 			m1 := regexp.MustCompile(searchString)
 			if !m1.Match([]byte(firstRespObj.Quote)) {
-				t.Errorf("first response, got the quote %+v that does not contain the searchString %s", firstRespObj, searchString)
+				t.Fatalf("first response, got the quote %+v that does not contain the searchString %s", firstRespObj, searchString)
 			}
 
 			if !firstRespObj.Isicelandic {
-				t.Errorf("first response, got the quote %+v which is in English but expected it to be in icelandic", firstRespObj)
+				t.Fatalf("first response, got the quote %+v which is in English but expected it to be in icelandic", firstRespObj)
 			}
 
 			secondRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 			if !m1.Match([]byte(secondRespObj.Quote)) {
-				t.Errorf("second response, got the quote %+v that does not contain the searchString %s", secondRespObj, searchString)
+				t.Fatalf("second response, got the quote %+v that does not contain the searchString %s", secondRespObj, searchString)
 			}
 
 			if secondRespObj.Quoteid == firstRespObj.Quoteid {
-				t.Errorf("got quote %s, expected a random different quote", secondRespObj.Quote)
+				t.Fatalf("got quote %s, expected a random different quote", secondRespObj.Quote)
 			}
 		})
 
@@ -902,25 +1035,25 @@ func TestQuotes(t *testing.T) {
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 
 			if firstRespObj.Topicname != topicName {
-				t.Errorf("got %s, expected %s", firstRespObj.Topicname, topicName)
+				t.Fatalf("got %s, expected %s", firstRespObj.Topicname, topicName)
 			}
 
 			m1 := regexp.MustCompile(searchString)
 			if !m1.Match([]byte(firstRespObj.Quote)) {
-				t.Errorf("first response, got the quote %+v that does not contain the searchString %s", firstRespObj, searchString)
+				t.Fatalf("first response, got the quote %+v that does not contain the searchString %s", firstRespObj, searchString)
 			}
 
 			secondRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 			if !m1.Match([]byte(secondRespObj.Quote)) {
-				t.Errorf("second response, got the quote %+v that does not contain the searchString %s", secondRespObj, searchString)
+				t.Fatalf("second response, got the quote %+v that does not contain the searchString %s", secondRespObj, searchString)
 			}
 
 			if secondRespObj.Topicid != firstRespObj.Topicid {
-				t.Errorf("got topic with id %d, expected topic with id %d", secondRespObj.Topicid, firstRespObj.Topicid)
+				t.Fatalf("got topic with id %d, expected topic with id %d", secondRespObj.Topicid, firstRespObj.Topicid)
 			}
 
 			if secondRespObj.Quoteid == firstRespObj.Quoteid {
-				t.Errorf("got quote %s, expected a random different quote... Remember that this is a random function and therefore there is a chance the same quote is fetched twice.", secondRespObj.Quote)
+				t.Fatalf("got quote %s, expected a random different quote... Remember that this is a random function and therefore there is a chance the same quote is fetched twice.", secondRespObj.Quote)
 			}
 		})
 
@@ -944,7 +1077,7 @@ func TestTopics(t *testing.T) {
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		if len(respObj) != nrOfEnglishTopics {
-			t.Errorf("got %d number of topics, expected %d", len(respObj), nrOfEnglishTopics)
+			t.Fatalf("got %d number of topics, expected %d", len(respObj), nrOfEnglishTopics)
 		}
 	})
 
@@ -960,7 +1093,7 @@ func TestTopics(t *testing.T) {
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		if len(respObj) != nrOfIcelandicTopics {
-			t.Errorf("got %d number of topics, expected %d", len(respObj), nrOfIcelandicTopics)
+			t.Fatalf("got %d number of topics, expected %d", len(respObj), nrOfIcelandicTopics)
 		}
 	})
 
@@ -977,12 +1110,12 @@ func TestTopics(t *testing.T) {
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		if len(respObj) != pageSize {
-			t.Errorf("got %d number of quotes, expected %d as the pagesize", len(respObj), pageSize)
+			t.Fatalf("got %d number of quotes, expected %d as the pagesize", len(respObj), pageSize)
 		}
 
 		for _, obj := range respObj {
 			if respObj[0].Topicname != nameOfTopic {
-				t.Errorf("got %+v but expected a quote with topic %s", obj, nameOfTopic)
+				t.Fatalf("got %+v but expected a quote with topic %s", obj, nameOfTopic)
 			}
 		}
 
@@ -1001,12 +1134,12 @@ func TestTopics(t *testing.T) {
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		if len(respObj) != pageSize {
-			t.Errorf("got %d number of quotes, expected %d as the pagesize", len(respObj), pageSize)
+			t.Fatalf("got %d number of quotes, expected %d as the pagesize", len(respObj), pageSize)
 		}
 
 		for _, obj := range respObj {
 			if respObj[0].Topicid != topicId {
-				t.Errorf("got %+v but expected a quote with topicId %d", obj, topicId)
+				t.Fatalf("got %+v but expected a quote with topicId %d", obj, topicId)
 			}
 		}
 
@@ -1039,12 +1172,12 @@ func TestTopics(t *testing.T) {
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		if len(respObj) != pageSize {
-			t.Errorf("got %d number of quotes, expected %d as the pagesize", len(respObj), pageSize)
+			t.Fatalf("got %d number of quotes, expected %d as the pagesize", len(respObj), pageSize)
 		}
 
 		//Compare the 26th object from the 100pagesize request with the 1st object from the 2nd page where pagesize is 25.
 		if respObj[25] != obj26 {
-			t.Errorf("got %+v but expected %+v", respObj[25], obj26)
+			t.Fatalf("got %+v but expected %+v", respObj[25], obj26)
 		}
 
 	})

@@ -121,10 +121,6 @@ func getRequestBody(rw http.ResponseWriter, r *http.Request, requestBody *Reques
 		requestBody.Minimum = parseDate.Format("01-02-2006")
 	}
 
-	if requestBody.Language == "" {
-		requestBody.Language = "English"
-	}
-
 	return nil
 }
 
@@ -694,6 +690,172 @@ func setAOD(language string, date string, authorId int) error {
 	}
 }
 
+//SetNewRandomQOD sets a random quote as the qod for today (if language=icelandic is supplied then it adds the random qod to the icelandic qod table)
+func setNewRandomAOD(language string) error {
+	var authorItem ListItem
+	var dbPointer *gorm.DB
+	switch strings.ToLower(language) {
+	case "icelandic":
+		dbPointer = db.Table("authors").Where("hasicelandicquotes")
+	default:
+		dbPointer = db.Table("authors").Not("hasicelandicquotes")
+	}
+
+	log.Println("HEREMatur")
+	err := dbPointer.Order("random()").Limit(1).Scan(&authorItem).Error
+	if err != nil {
+		return err
+	}
+
+	log.Println("MASSI:", authorItem)
+
+	return setAOD(language, time.Now().Format("2006-01-02"), authorItem.Id)
+}
+
+// swagger:route POST /quotes/qod AUTHORS getAuthorOfTheDay
+// Gets the author of the day
+// responses:
+//	200: randomQuoteResponse
+
+//GetAuthorOfTheDay gets the author of the day
+func GetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
+	var requestBody Request
+	if err := getRequestBody(rw, r, &requestBody); err != nil {
+		return
+	}
+	if requestBody.Language == "" {
+		requestBody.Language = "English"
+	}
+
+	var author QuoteView
+	var dbPointer *gorm.DB
+	var err error
+	switch strings.ToLower(requestBody.Language) {
+	case "icelandic":
+		dbPointer = db.Table("aodiceview")
+	default:
+		dbPointer = db.Table("aodview")
+	}
+
+	err = dbPointer.Where("date = current_date").Scan(&author).Error
+
+	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if (QuoteView{}) == author {
+		fmt.Println("Setting a brand new AOD for today")
+		err = setNewRandomAOD(requestBody.Language)
+		if err != nil {
+			//TODO: Respond with better error -- and put into swagger -- and add tests
+			http.Error(rw, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		switch strings.ToLower(requestBody.Language) {
+		case "icelandic":
+			err = db.Table("qodiceview").Where("date = current_date").Scan(&author).Error
+		default:
+			err = db.Table("qodview").Where("date = current_date").Scan(&author).Error
+		}
+		log.Println(author)
+
+		if err != nil {
+			//TODO: Respond with better error -- and put into swagger -- and add tests
+			http.Error(rw, err.Error(), http.StatusBadRequest)
+			return
+		}
+	}
+
+	json.NewEncoder(rw).Encode(author)
+}
+
+// swagger:route POST /quotes/qod AUTHORS getAODHistory
+// Gets the history for the authors of the day
+// responses:
+//	200: qodHistoryResponse
+
+//GetAODHistory gets Aod history starting from some point
+func GetAODHistory(rw http.ResponseWriter, r *http.Request) {
+	var requestBody Request
+	if err := getRequestBody(rw, r, &requestBody); err != nil {
+		return
+	}
+	if requestBody.Language == "" {
+		requestBody.Language = "English"
+	}
+	var authors []QuoteView
+	var dbPointer *gorm.DB
+	var err error
+	switch strings.ToLower(requestBody.Language) {
+	case "icelandic":
+		dbPointer = db.Table("aodiceview")
+	default:
+		dbPointer = db.Table("aodview")
+	}
+
+	if requestBody.Minimum != "" {
+		dbPointer = dbPointer.Where("date >= ?", requestBody.Minimum)
+	}
+
+	if requestBody.Maximum != "" {
+		dbPointer = dbPointer.Where("date <= ?", requestBody.Maximum)
+	}
+
+	dbPointer = dbPointer.Where("date <= current_date")
+
+	err = dbPointer.Order("date DESC").Find(&authors).Error
+
+	log.Println("HERE:", authors)
+	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	reg := regexp.MustCompile(time.Now().Format("2006-01-02"))
+	if len(authors) == 0 || !reg.Match([]byte(authors[0].Date)) {
+		log.Println("Setting a brand new AOD for today")
+		err = setNewRandomAOD(requestBody.Language)
+		if err != nil {
+			log.Println(err)
+			//TODO: Respond with better error -- and put into swagger -- and add tests
+			http.Error(rw, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		switch strings.ToLower(requestBody.Language) {
+		case "icelandic":
+			dbPointer = db.Table("aodiceview")
+		default:
+			dbPointer = db.Table("aodview")
+		}
+
+		if requestBody.Minimum != "" {
+			dbPointer = dbPointer.Where("date >= ?", requestBody.Minimum)
+		}
+
+		if requestBody.Maximum != "" {
+			dbPointer = dbPointer.Where("date <= ?", requestBody.Maximum)
+		}
+
+		dbPointer = dbPointer.Where("date <= current_date")
+
+		err = dbPointer.Order("date").Find(&authors).Error
+
+		if err != nil {
+			//TODO: Respond with better error -- and put into swagger -- and add tests
+			http.Error(rw, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+	}
+
+	json.NewEncoder(rw).Encode(authors)
+}
+
 // swagger:route POST /quotes/qod/new QUOTES setQuoteOfTheDay
 // Sets the quote of the day for the given date. It Is password protected TODO: Put in privacy swagger
 // responses:
@@ -704,6 +866,9 @@ func SetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	var requestBody Request
 	if err := getRequestBody(rw, r, &requestBody); err != nil {
 		return
+	}
+	if requestBody.Language == "" {
+		requestBody.Language = "English"
 	}
 
 	if len(requestBody.Qods) == 0 {
@@ -762,6 +927,9 @@ func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	if err := getRequestBody(rw, r, &requestBody); err != nil {
 		return
 	}
+	if requestBody.Language == "" {
+		requestBody.Language = "English"
+	}
 
 	var quote QuoteView
 	var dbPointer *gorm.DB
@@ -819,6 +987,9 @@ func GetQODHistory(rw http.ResponseWriter, r *http.Request) {
 	if err := getRequestBody(rw, r, &requestBody); err != nil {
 		return
 	}
+	if requestBody.Language == "" {
+		requestBody.Language = "English"
+	}
 
 	var quotes []QuoteView
 	var dbPointer *gorm.DB
@@ -864,21 +1035,17 @@ func GetQODHistory(rw http.ResponseWriter, r *http.Request) {
 			dbPointer = db.Table("qodview")
 		}
 
-		if requestBody.Minimum == "" && requestBody.Maximum == "" {
-			dbPointer = dbPointer.Where("date = current_date")
-		} else {
-			if requestBody.Minimum != "" {
-				dbPointer = dbPointer.Where("date >= ?", requestBody.Minimum)
-			}
-
-			if requestBody.Maximum != "" {
-				dbPointer = dbPointer.Where("date <= ?", requestBody.Maximum)
-			}
-
-			dbPointer = dbPointer.Where("date <= current_date")
+		if requestBody.Minimum != "" {
+			dbPointer = dbPointer.Where("date >= ?", requestBody.Minimum)
 		}
 
-		err = dbPointer.Order("date").Scan(&quotes).Error
+		if requestBody.Maximum != "" {
+			dbPointer = dbPointer.Where("date <= ?", requestBody.Maximum)
+		}
+
+		dbPointer = dbPointer.Where("date <= current_date")
+
+		err = dbPointer.Order("date").Find(&quotes).Error
 
 		if err != nil {
 			//TODO: Respond with better error -- and put into swagger -- and add tests

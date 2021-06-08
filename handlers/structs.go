@@ -31,6 +31,8 @@ type AuthorsView struct {
 	Nroficelandicquotes int    `json:"nroficelandicquotes"`
 	Nrofenglishquotes   int    `json:"nrofenglishquotes"`
 	Count               int
+	//swagger:ignore Date
+	Date string `json:"date"`
 }
 
 type QuoteView struct {
