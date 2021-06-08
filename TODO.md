@@ -1,27 +1,32 @@
 # TODOS
 
-- [ ] Add password protection / protected routes capability (at least for SetQuoteOfTheyDay route )
-- [ ] Get Author of the day + Set Author of the day (plust points for available to set authors for multiple days in one request)
 - [ ] getQuotes route (combine with getQuotesById and add to it to get quotes from a specific author + add pagination)
-- [ ] Add authentication for access to the api + Creating apiKeys + Documenting usage + admin access vs normal access
-- [ ] Add Counting each time a quote is accessed / sent from Api (also for topics) - i.e. stats
 - [ ] add search for topics and searching in topics (maybe just have a single search endpoint with parameters? i.e. want to search for authors / quotes / language inside a specific topic?)
-- [ ] Make function for building the SQL query (general for all?)
-- [ ] Setup AWS server
-- [ ] Draw up DB-Graph (i.e. how tables are connected to view etc)
-- [ ] Make Authors Search more efficient (create a similarity-based index ?)
-- [ ] Look into and maybe Change rest into GraphQL
-- [ ] Pagination Everywhere where needed
 - [ ] Clean up quotes.go
+- [ ] Make function for building the SQL query (general for all?)
+- [ ] Pagination Everywhere where needed
+- [ ] Clean up get/set QOD/AOD
+- [ ] Add more to Swagger docs
+
+- [ ] is random truly random (i.e. does the "random" funcitonality truly return randomly or is it biased towards quotes in the "front" of the DB (i.e. in the front where postgres stores them))
+
 - [ ] Error handling + Tests
 - [ ] Make error tests (i.e. made-to-fail-tests)
-- [ ] Sort return list alphabetically ICelandic support
-- [ ] Clean up get/set quote of the day
-- [ ] is random truly random (i.e. does the "random" funcitonality truly return randomly or is it biased towards quotes in the "front" of the DB (i.e. in the front where postgres stores them))
 - [ ] Go over Swagger + Clean it up and make pretty
-- [ ] Clean up quotes.go
+
+- [ ] Add password protection / protected routes capability (at least for SetQuoteOfTheyDay route )
+- [ ] Add authentication for access to the api + Creating apiKeys + Documenting usage + admin access vs normal access
+
+- [ ] Setup AWS server
+
+- [ ] Draw up DB-Graph (i.e. how tables are connected to view etc)
+
+- [ ] Make Authors Search more efficient (create a similarity-based index ?)
+- [ ] Look into and maybe Change rest into GraphQL
+- [ ] Sort return list alphabetically ICelandic support
  --------------
 
+- [x] Add Counting each time a quote is accessed / sent from Api (also for topics) - i.e. stats
 - [x] Add tests for GetAOD and AODHistory and SetAOD
 - [x] Add tests for GetQOD and QODHistory and SetQOD
 - [x] Add get and set Author of The Day (plus points for available to set authors for multiple days in one request + plus points for AOD history)
