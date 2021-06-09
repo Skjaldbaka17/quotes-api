@@ -13,7 +13,7 @@ func main() {
 
 	r := mux.NewRouter()
 	posts := r.Methods(http.MethodPost).Subrouter()
-	posts.HandleFunc("/api/quotes", routes.GetQuotesById)
+	posts.HandleFunc("/api/quotes", routes.GetQuotes)
 	posts.HandleFunc("/api/quotes/random", routes.GetRandomQuote)
 	posts.HandleFunc("/api/quotes/qod/new", routes.SetQuoteOfTheDay)
 	posts.HandleFunc("/api/quotes/qod", routes.GetQuoteOfTheDay)

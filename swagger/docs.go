@@ -181,8 +181,8 @@ type getAuthorsByIdsWrapper struct {
 	}
 }
 
-// swagger:parameters getQuotesByIds
-type getQuotesByIdsWrapper struct {
+// swagger:parameters getQuotes
+type getQuotesByWrapper struct {
 	// The structure of the request for quotes by their ids
 	// in: body
 	// required: true

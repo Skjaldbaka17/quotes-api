@@ -15,7 +15,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// swagger:route POST /quotes QUOTES getQuotesByIds
+// swagger:route POST /quotes QUOTES getQuotes
 // Get quotes by their ids
 //
 // responses:
@@ -26,8 +26,8 @@ import (
 //
 //
 
-// GetQuotesById handles POST requests to get the quotes, and their authors, that have the given ids
-func GetQuotesById(rw http.ResponseWriter, r *http.Request) {
+// GetQuotes handles POST requests to get the quotes, and their authors, that have the given ids
+func GetQuotes(rw http.ResponseWriter, r *http.Request) {
 	var requestBody structs.Request
 	if err := handlers.GetRequestBody(rw, r, &requestBody); err != nil {
 		return

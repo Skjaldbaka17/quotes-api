@@ -1,6 +1,5 @@
 # TODOS
 
-- [ ] getQuotes route (combine with getQuotesById and add to it to get quotes from a specific author + add pagination)
 - [ ] add search for topics and searching in topics (maybe just have a single search endpoint with parameters? i.e. want to search for authors / quotes / language inside a specific topic?)
 - [ ] Clean up quotes.go
 - [ ] Make function for building the SQL query (general for all?)
@@ -26,6 +25,7 @@
 - [ ] Sort return list alphabetically ICelandic support
  --------------
 
+- [x] getQuotes route (combine with getQuotesById and add to it to get quotes from a specific author + add pagination)
 - [x] Add Counting each time a quote is accessed / sent from Api (also for topics) - i.e. stats
 - [x] Add tests for GetAOD and AODHistory and SetAOD
 - [x] Add tests for GetQOD and QODHistory and SetQOD
