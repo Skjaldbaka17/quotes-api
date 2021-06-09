@@ -1,11 +1,19 @@
 # TODOS
 
 - [ ] add search for topics and searching in topics (maybe just have a single search endpoint with parameters? i.e. want to search for authors / quotes / language inside a specific topic?)
-- [ ] Clean up quotes.go
+- [ ] Clean up routes files
 - [ ] Make function for building the SQL query (general for all?)
 - [ ] Pagination Everywhere where needed
 - [ ] Clean up get/set QOD/AOD
-- [ ] Add more to Swagger docs
+
+- [ ] Review /authors for Swagger 
+- [ ] Review /meta for Swagger 
+- [ ] Review /quotes for Swagger 
+- [ ] Review /search for Swagger 
+- [ ] Review /topics for Swagger 
+- [ ] Review Swagger 
+- [ ] Clean up swagger in code
+- [ ] Clean up Documentation look (Swagger)
 
 - [ ] is random truly random (i.e. does the "random" funcitonality truly return randomly or is it biased towards quotes in the "front" of the DB (i.e. in the front where postgres stores them))
 
