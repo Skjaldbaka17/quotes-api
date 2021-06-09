@@ -1,4 +1,4 @@
-package handlers
+package routes
 
 import (
 	"bytes"
@@ -11,6 +11,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/Skjaldbaka17/quotes-api/handlers"
+	"github.com/Skjaldbaka17/quotes-api/structs"
 )
 
 func TestSearch(t *testing.T) {
@@ -145,7 +148,7 @@ func TestSearch(t *testing.T) {
 			response := httptest.NewRecorder()
 
 			SearchByString(response, request)
-			var respObj []QuoteView
+			var respObj []structs.QuoteView
 			_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 			if pageSize != len(respObj) {
@@ -173,7 +176,7 @@ func TestSearch(t *testing.T) {
 
 			SearchAuthorsByString(response, request)
 
-			var respObj []QuoteView
+			var respObj []structs.QuoteView
 			_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 			if pageSize != len(respObj) {
@@ -201,7 +204,7 @@ func TestSearch(t *testing.T) {
 
 			SearchQuotesByString(response, request)
 
-			var respObj []QuoteView
+			var respObj []structs.QuoteView
 			_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 			if pageSize != len(respObj) {
@@ -214,7 +217,6 @@ func TestSearch(t *testing.T) {
 		})
 
 	})
-
 }
 
 func TestAuthors(t *testing.T) {
@@ -401,7 +403,7 @@ func TestAuthors(t *testing.T) {
 		})
 
 		t.Run("Should return first 50 authors (ordered by most popular, i.e. DESC count)", func(t *testing.T) {
-			directFetchAuthorsCountIncrement([]int{1})
+			handlers.DirectFetchAuthorsCountIncrement([]int{1})
 
 			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"%s"}}`, "popularity"))
 
@@ -722,25 +724,258 @@ func TestAuthors(t *testing.T) {
 		})
 
 	})
-
 }
 
 func TestQuotes(t *testing.T) {
-	t.Run("should return Quotes with id 1, 2 and 3...", func(t *testing.T) {
+	t.Run("Get Quotes", func(t *testing.T) {
+		t.Run("should return Quotes with id 1, 2 and 3...", func(t *testing.T) {
 
-		var quoteIds = Set{1, 2, 3}
-		var jsonStr = []byte(fmt.Sprintf(`{"ids":  [%s]}`, quoteIds.toString()))
-		respObj, _ := requestAndReturnArray(jsonStr, GetQuotesById)
+			var quoteIds = Set{1, 2, 3}
+			var jsonStr = []byte(fmt.Sprintf(`{"ids":  [%s]}`, quoteIds.toString()))
+			respObj, _ := requestAndReturnArray(jsonStr, GetQuotesById)
 
-		if len(respObj) != len(quoteIds) {
-			t.Fatalf("got list of length %d but expected list of length %d", len(respObj), len(quoteIds))
-		}
-
-		for idx, quote := range respObj {
-			if quote.Quoteid != quoteIds[idx] {
-				t.Fatalf("got %d, expected %d", quote.Quoteid, quoteIds[idx])
+			if len(respObj) != len(quoteIds) {
+				t.Fatalf("got list of length %d but expected list of length %d", len(respObj), len(quoteIds))
 			}
-		}
+
+			for idx, quote := range respObj {
+				if quote.Quoteid != quoteIds[idx] {
+					t.Fatalf("got %d, expected %d", quote.Quoteid, quoteIds[idx])
+				}
+			}
+		})
+
+		t.Run("should get Quotes for author with id 1", func(t *testing.T) {
+			authorId := 1
+			var jsonStr = []byte(fmt.Sprintf(`{"authorId":  %d}`, authorId))
+			respObj, _ := requestAndReturnArray(jsonStr, GetQuotesById)
+
+			if len(respObj) == 0 {
+				t.Fatalf("got list of length 0 but expected some quotes, response : %+v", respObj)
+			}
+
+			if respObj[0].Authorid != authorId {
+				t.Fatalf("got quotes for author with id %d but expected quotes for the author with id %d, respObj: %+v", respObj[0].Authorid, authorId, respObj)
+			}
+		})
+	})
+
+	t.Run("Quoteslist Test", func(t *testing.T) {
+
+		t.Run("Should return first 50 quotes (by quoteId)", func(t *testing.T) {
+
+			pageSize := 50
+			var jsonStr = []byte(fmt.Sprintf(`{"pageSize": %d}`, pageSize))
+
+			respObj, _ := requestAndReturnArray(jsonStr, GetQuotesList)
+
+			if len(respObj) != 50 {
+				t.Fatalf("got list of length %d, but expected list of length %d", len(respObj), pageSize)
+			}
+
+			firstQuote := respObj[0]
+			if firstQuote.Quoteid != 1 {
+				t.Fatalf("got %d, want quote with id 1. Resp: %+v", firstQuote.Quoteid, firstQuote)
+			}
+
+		})
+
+		t.Run("Should return first quotes, in Icelandic", func(t *testing.T) {
+
+			language := "icelandic"
+			var jsonStr = []byte(fmt.Sprintf(`{"language": "%s"}`, language))
+
+			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			firstQuote := respObj[0]
+
+			if !firstQuote.Isicelandic {
+				t.Fatalf("got %+v, but expected a quote in Icelandic.", firstQuote)
+			}
+
+		})
+
+		t.Run("Should return first quotes in reverse quoteId order (i.e. first quote has id larger than 639.028)", func(t *testing.T) {
+
+			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"reverse":%s}}`, "true"))
+
+			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			firstQuote := respObj[0]
+
+			if firstQuote.Quoteid > 639028 {
+				t.Fatalf("got %+v, but want quote with larger quoteid i.e. want last quote in db", firstQuote)
+			}
+
+		})
+
+		t.Run("Should return first quotes starting from id 300.000  (i.e. greater than or equal to 300.000)", func(t *testing.T) {
+			minimum := 300000
+			orderBy := "id"
+			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"%s","minimum":"%d"}}`, orderBy, minimum))
+
+			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			firstQuote := respObj[0]
+
+			if firstQuote.Quoteid < minimum {
+				t.Fatalf("got %+v, want quote that has id larger or equal to 300.000", firstQuote)
+			}
+
+		})
+
+		t.Run("Should return quotes with less than or equal to 5 letters in the quote", func(t *testing.T) {
+
+			maximum := 5
+			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"length","maximum":"%d"}}`, maximum))
+
+			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			firstQuote := respObj[0]
+
+			if len(firstQuote.Quote) > 5 {
+				t.Fatalf("got %+v, but expected a quote that has no more than 5 letters", firstQuote)
+			}
+
+		})
+
+		t.Run("Should return first quotes with quote-length at least 10 an most 11", func(t *testing.T) {
+
+			minimum := 10
+			maximum := 11
+			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"length","maximum":"%d", "minimum":"%d"}}`, maximum, minimum))
+
+			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			firstQuote := respObj[0]
+
+			if len(firstQuote.Quote) != 10 {
+				t.Fatalf("got %+v, but expected a quote that has no fewer than 10 letters", firstQuote)
+			}
+
+		})
+
+		t.Run("Should return first Quotes with less than letters in the quote in total in reversed order (start with those quotes of length 10)", func(t *testing.T) {
+
+			maximum := 10
+			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"length","maximum":"%d","reverse":true}}`, maximum))
+
+			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			firstQuote := respObj[0]
+
+			if len(firstQuote.Quote) != 10 {
+				t.Fatalf("got %+v, but expected a quote that has 10 letters", firstQuote)
+			}
+
+		})
+
+		t.Run("Should return first 50 quotes (ordered by most popular, i.e. DESC count)", func(t *testing.T) {
+			handlers.DirectFetchQuotesCountIncrement([]int{1})
+
+			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"%s"}}`, "popularity"))
+
+			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			firstQuote := respObj[0]
+
+			if firstQuote.Quotecount == 0 {
+				t.Fatalf("got %+v, but expected a quote that has more than 0 popularity count", firstQuote)
+			}
+
+		})
+
+		t.Run("Should return first 50 quotes in reverse popularity order (i.e. least popular first i.e. ASC count)", func(t *testing.T) {
+
+			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"%s","reverse":true}}`, "popularity"))
+
+			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			firstQuote := respObj[0]
+
+			if firstQuote.Quotecount != 0 {
+				t.Fatalf("got %+v, but expected an author that has 0 popularity count", firstQuote)
+			}
+
+		})
+
+		t.Run("Should return first 100 Quotes", func(t *testing.T) {
+			pageSize := 100
+			var jsonStr = []byte(fmt.Sprintf(`{"pageSize":%d}}`, pageSize))
+
+			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			if len(respObj) != 100 {
+				t.Fatalf("got %d nr of quotes, but expected %d quotes", len(respObj), pageSize)
+			}
+		})
+
+		t.Run("Should return the next 50 quotes starting from quoteId 250.000 (i.e. pagination, page 1, quoteId order)", func(t *testing.T) {
+
+			pageSize := 100
+			minimum := 250000
+			var jsonStr = []byte(fmt.Sprintf(`{"pageSize":%d, "orderConfig":{"minimum":"%d"}}}`, pageSize, minimum))
+
+			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
+
+			objToFetch := respObj[50]
+
+			if errResponse.StatusCode != 200 {
+				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
+			}
+
+			if respObj[0].Quoteid < minimum {
+				t.Fatalf("got %+v, but expected quote with a higher quoteid than %d", len(respObj), minimum)
+			}
+
+			pageSize = 50
+			page := 1
+			jsonStr = []byte(fmt.Sprintf(`{"pageSize":%d, "page":%d, "orderConfig":{"minimum":"%d"}}}`, pageSize, page, minimum))
+
+			respObj, errResponse = requestAndReturnArray(jsonStr, GetQuotesList)
+
+			if objToFetch != respObj[0] {
+				t.Fatalf("got %+v, but expected %+v", respObj[0], objToFetch)
+			}
+
+		})
+
 	})
 
 	t.Run("Quote of the day", func(t *testing.T) {
@@ -1058,7 +1293,6 @@ func TestQuotes(t *testing.T) {
 		})
 
 	})
-
 }
 
 func TestTopics(t *testing.T) {
@@ -1073,7 +1307,7 @@ func TestTopics(t *testing.T) {
 
 		GetTopics(response, request)
 
-		var respObj []ListItem
+		var respObj []structs.ListItem
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		if len(respObj) != nrOfEnglishTopics {
@@ -1089,7 +1323,7 @@ func TestTopics(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodPost, "/api", bytes.NewBuffer(jsonStr))
 		response := httptest.NewRecorder()
 		GetTopics(response, request)
-		var respObj []ListItem
+		var respObj []structs.ListItem
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		if len(respObj) != nrOfIcelandicTopics {
@@ -1106,7 +1340,7 @@ func TestTopics(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodPost, "/api", bytes.NewBuffer(jsonStr))
 		response := httptest.NewRecorder()
 		GetTopic(response, request)
-		var respObj []QuoteView
+		var respObj []structs.QuoteView
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		if len(respObj) != pageSize {
@@ -1130,7 +1364,7 @@ func TestTopics(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodPost, "/api", bytes.NewBuffer(jsonStr))
 		response := httptest.NewRecorder()
 		GetTopic(response, request)
-		var respObj []QuoteView
+		var respObj []structs.QuoteView
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		if len(respObj) != pageSize {
@@ -1156,7 +1390,7 @@ func TestTopics(t *testing.T) {
 		response := httptest.NewRecorder()
 		GetTopic(response, request)
 
-		var respObj []QuoteView
+		var respObj []structs.QuoteView
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		obj26 := respObj[0]
@@ -1181,13 +1415,12 @@ func TestTopics(t *testing.T) {
 		}
 
 	})
-
 }
 
 func TestIncrementCount(t *testing.T) {
 	t.Run("Should Increment Authors count from direct fetch by ids", func(t *testing.T) {
 		authorIds := Set{1, 2, 3}
-		err := directFetchAuthorsCountIncrement(authorIds)
+		err := handlers.DirectFetchAuthorsCountIncrement(authorIds)
 
 		if err != nil {
 			t.Fatalf("Expected no error but got %s", err.Error())
@@ -1201,13 +1434,13 @@ func TestIncrementCount(t *testing.T) {
 
 	t.Run("Should Increment Authors count from appearing in a search", func(t *testing.T) {
 
-		quotes := []QuoteView{
+		quotes := []structs.QuoteView{
 			{
 				Authorid: 100,
 				Quoteid:  100,
 			},
 		}
-		err := appearInSearchCountIncrement(quotes)
+		err := handlers.AppearInSearchCountIncrement(quotes)
 
 		if err != nil {
 			t.Fatalf("Expected no error but got %s", err.Error())
@@ -1235,7 +1468,7 @@ func getTopicId(topicName string) int {
 
 	GetTopic(response, request)
 
-	var respObj []QuoteView
+	var respObj []structs.QuoteView
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	return respObj[0].Topicid
 }
@@ -1249,7 +1482,7 @@ func (set *Set) toString() string {
 	return strings.Join(IDs, ", ")
 }
 
-func getAuthor(searchString string) AuthorsView {
+func getAuthor(searchString string) structs.AuthorsView {
 
 	var jsonStr = []byte(fmt.Sprintf(`{"searchString": "%s"}`, searchString))
 	request, _ := http.NewRequest(http.MethodGet, "/api/search/authors", bytes.NewBuffer(jsonStr))
@@ -1257,12 +1490,12 @@ func getAuthor(searchString string) AuthorsView {
 
 	SearchAuthorsByString(response, request)
 
-	var respObj []AuthorsView
+	var respObj []structs.AuthorsView
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	return respObj[0]
 }
 
-func getAuthorsById(authorIds Set) []AuthorsView {
+func getAuthorsById(authorIds Set) []structs.AuthorsView {
 
 	var jsonStr = []byte(fmt.Sprintf(`{"ids": [%s]}`, authorIds.toString()))
 	request, _ := http.NewRequest(http.MethodGet, "/api/search/authors", bytes.NewBuffer(jsonStr))
@@ -1270,12 +1503,12 @@ func getAuthorsById(authorIds Set) []AuthorsView {
 
 	GetAuthorsById(response, request)
 
-	var respObj []AuthorsView
+	var respObj []structs.AuthorsView
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	return respObj
 }
 
-func getQuotes(searchString string) []QuoteView {
+func getQuotes(searchString string) []structs.QuoteView {
 
 	var jsonStr = []byte(fmt.Sprintf(`{"searchString": "%s"}`, searchString))
 	request, _ := http.NewRequest(http.MethodGet, "/api/search/quotes", bytes.NewBuffer(jsonStr))
@@ -1283,7 +1516,7 @@ func getQuotes(searchString string) []QuoteView {
 
 	SearchQuotesByString(response, request)
 
-	var respObj []QuoteView
+	var respObj []structs.QuoteView
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	return respObj
 }
@@ -1295,7 +1528,7 @@ func getRequestAndResponseForTest(jsonStr []byte) (*httptest.ResponseRecorder, *
 }
 
 //TODO: Give a better name,more intuitive
-func getObjNr26(searchString string, fn httpRequest) (QuoteView, error) {
+func getObjNr26(searchString string, fn httpRequest) (structs.QuoteView, error) {
 	pageSize := 100
 	var jsonStr = []byte(fmt.Sprintf(`{"searchString": "%s", "pageSize":%d}`, searchString, pageSize))
 	request, _ := http.NewRequest(http.MethodPost, "/api/search", bytes.NewBuffer(jsonStr))
@@ -1303,31 +1536,31 @@ func getObjNr26(searchString string, fn httpRequest) (QuoteView, error) {
 
 	fn(response, request)
 
-	var respObj []QuoteView
+	var respObj []structs.QuoteView
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 	if pageSize != len(respObj) {
-		return QuoteView{}, fmt.Errorf("got list of length %d but expected %d", len(respObj), pageSize)
+		return structs.QuoteView{}, fmt.Errorf("got list of length %d but expected %d", len(respObj), pageSize)
 	}
 
 	return respObj[25], nil
 }
 
-func requestAndReturnSingle(jsonStr []byte, fn httpRequest) QuoteView {
+func requestAndReturnSingle(jsonStr []byte, fn httpRequest) structs.QuoteView {
 	response, request := getRequestAndResponseForTest(jsonStr)
 	fn(response, request)
 
-	var respObj QuoteView
+	var respObj structs.QuoteView
 
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	return respObj
 }
 
-func requestAndReturnArray(jsonStr []byte, fn httpRequest) ([]QuoteView, ErrorResponse) {
+func requestAndReturnArray(jsonStr []byte, fn httpRequest) ([]structs.QuoteView, structs.ErrorResponse) {
 	response, request := getRequestAndResponseForTest(jsonStr)
 	fn(response, request)
-	var respObj []QuoteView
-	var errorResp ErrorResponse
+	var respObj []structs.QuoteView
+	var errorResp structs.ErrorResponse
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	_ = json.Unmarshal(response.Body.Bytes(), &errorResp)
 	if errorResp.StatusCode == 0 {
@@ -1337,11 +1570,11 @@ func requestAndReturnArray(jsonStr []byte, fn httpRequest) ([]QuoteView, ErrorRe
 	return respObj, errorResp
 }
 
-func requestAndReturnArrayAuthors(jsonStr []byte, fn httpRequest) ([]AuthorsView, ErrorResponse) {
+func requestAndReturnArrayAuthors(jsonStr []byte, fn httpRequest) ([]structs.AuthorsView, structs.ErrorResponse) {
 	response, request := getRequestAndResponseForTest(jsonStr)
 	fn(response, request)
-	var respObj []AuthorsView
-	var errorResp ErrorResponse
+	var respObj []structs.AuthorsView
+	var errorResp structs.ErrorResponse
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	_ = json.Unmarshal(response.Body.Bytes(), &errorResp)
 	if errorResp.StatusCode == 0 {

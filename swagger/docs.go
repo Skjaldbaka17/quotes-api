@@ -27,7 +27,7 @@
 // swagger:meta
 package docs
 
-import "github.com/Skjaldbaka17/quotes-api/handlers"
+import "github.com/Skjaldbaka17/quotes-api/structs"
 
 // swagger:response qodHistoryResponse
 type qodHistoryResponseWrapper struct {
@@ -78,7 +78,7 @@ type successResponseWrapper struct {
 type multipleResponseWrapper struct {
 	// List of authors / quotes
 	// in: body
-	Body []handlers.QuoteView
+	Body []structs.QuoteView
 }
 
 // Data structure representing the response for a random quote
@@ -86,7 +86,7 @@ type multipleResponseWrapper struct {
 type randomQuoteResponseWrapper struct {
 	// A quote struct
 	// in: body
-	Body handlers.QuoteView
+	Body structs.QuoteView
 }
 
 // Data structure representing the response for a random author
@@ -94,7 +94,7 @@ type randomQuoteResponseWrapper struct {
 type randomAuthorResponseWrapper struct {
 	// A quote struct
 	// in: body
-	Body []handlers.QuoteView
+	Body []structs.QuoteView
 }
 
 // Data structure representing the response for a authors
@@ -102,7 +102,7 @@ type randomAuthorResponseWrapper struct {
 type authorsResponseWrapper struct {
 	// A quote struct
 	// in: body
-	Body []handlers.AuthorsView
+	Body []structs.AuthorsView
 }
 
 // Data structure representing topic quotes response
@@ -369,7 +369,7 @@ type setQuoteOfTheDayWrapper struct {
 	// The structure of the request for setting the QOD
 	// in: body
 	Body struct {
-		Qods []handlers.Qod
+		Qods []structs.Qod
 	}
 }
 
@@ -394,6 +394,6 @@ type authorsListWrapper struct {
 		// only the amount of quotes the author has in the given language counts towards the ordering.
 		// Example: English
 		Language    string `json:"language"`
-		OrderConfig handlers.OrderConfig
+		OrderConfig structs.OrderConfig
 	}
 }

@@ -1,5 +1,7 @@
 package handlers
 
+import "github.com/Skjaldbaka17/quotes-api/structs"
+
 //Functions below are for "offline" updating Database
 //Points incremented for appearing in search list
 const incrementAppearInSearchList = 1
@@ -7,25 +9,25 @@ const incrementAppearInSearchList = 1
 //Points incremented for direct get
 const incrementIdFetch = 10
 
-func directFetchAuthorsCountIncrement(authorIds []int) error {
+func DirectFetchAuthorsCountIncrement(authorIds []int) error {
 	if len(authorIds) == 0 {
 		return nil
 	}
-	return db.Exec("UPDATE authors SET count = count + ? where id in (?) returning *", incrementIdFetch, authorIds).Error
+	return Db.Exec("UPDATE authors SET count = count + ? where id in (?) returning *", incrementIdFetch, authorIds).Error
 }
 
-func directFetchQuotesCountIncrement(quoteIds []int) error {
+func DirectFetchQuotesCountIncrement(quoteIds []int) error {
 	if len(quoteIds) == 0 {
 		return nil
 	}
-	return db.Exec("UPDATE quotes SET count = count + ? where id in (?) returning *", incrementIdFetch, quoteIds).Error
+	return Db.Exec("UPDATE quotes SET count = count + ? where id in (?) returning *", incrementIdFetch, quoteIds).Error
 }
 
-func directFetchTopicCountIncrement(topicId int, topicName string) error {
-	return db.Exec("UPDATE topics SET count = count + ? where id = ? or lower(name) = lower(?) returning *", incrementIdFetch, topicId, topicName).Error
+func DirectFetchTopicCountIncrement(topicId int, topicName string) error {
+	return Db.Exec("UPDATE topics SET count = count + ? where id = ? or lower(name) = lower(?) returning *", incrementIdFetch, topicId, topicName).Error
 }
 
-func authorsAppearInSearchCountIncrement(authors []AuthorsView) error {
+func AuthorsAppearInSearchCountIncrement(authors []structs.AuthorsView) error {
 	if len(authors) == 0 {
 		return nil
 	}
@@ -35,10 +37,23 @@ func authorsAppearInSearchCountIncrement(authors []AuthorsView) error {
 		authorIds = append(authorIds, author.Id)
 	}
 
-	return db.Exec("UPDATE authors SET count = count + ? where id in (?) returning *", incrementAppearInSearchList, authorIds).Error
+	return Db.Exec("UPDATE authors SET count = count + ? where id in (?) returning *", incrementAppearInSearchList, authorIds).Error
 }
 
-func appearInSearchCountIncrement(quotes []QuoteView) error {
+func QuotesAppearInSearchCountIncrement(quotes []structs.QuoteView) error {
+	if len(quotes) == 0 {
+		return nil
+	}
+	quoteIds := []int{}
+
+	for _, quote := range quotes {
+		quoteIds = append(quoteIds, quote.Quoteid)
+	}
+
+	return Db.Exec("UPDATE quotes SET count = count + ? where id in (?) returning *", incrementAppearInSearchList, quoteIds).Error
+}
+
+func AppearInSearchCountIncrement(quotes []structs.QuoteView) error {
 	if len(quotes) == 0 {
 		return nil
 	}
@@ -49,10 +64,10 @@ func appearInSearchCountIncrement(quotes []QuoteView) error {
 		quoteIds = append(quoteIds, quote.Quoteid)
 	}
 
-	err := db.Exec("UPDATE authors SET count = count + ? where id in (?) returning *", incrementAppearInSearchList, authorIds).Error
+	err := Db.Exec("UPDATE authors SET count = count + ? where id in (?) returning *", incrementAppearInSearchList, authorIds).Error
 	if err != nil {
 		return err
 	}
-	err = db.Exec("UPDATE quotes SET count = count + ? where id in (?) returning *", incrementAppearInSearchList, quoteIds).Error
+	err = Db.Exec("UPDATE quotes SET count = count + ? where id in (?) returning *", incrementAppearInSearchList, quoteIds).Error
 	return err
 }

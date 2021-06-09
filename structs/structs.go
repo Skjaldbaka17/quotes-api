@@ -1,4 +1,4 @@
-package handlers
+package structs
 
 import "gorm.io/gorm"
 
@@ -71,6 +71,10 @@ type QuoteView struct {
 	Nrofenglishquotes int `json:"nrofenglishquotes"`
 	//swagger:ignore Date
 	Date string `json:"date"`
+	//swagger:ignore
+	Quotecount int `json:"quotecount"`
+	//swagger:ignore
+	Authorcount int `json:"authorcount"`
 }
 
 type ListItem struct {
