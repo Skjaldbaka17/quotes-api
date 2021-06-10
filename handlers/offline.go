@@ -9,6 +9,7 @@ const incrementAppearInSearchList = 1
 //Points incremented for direct get
 const incrementIdFetch = 10
 
+//DirectFetchAuthorsCountIncrement increments the popularity count of the Authors from a id-query
 func DirectFetchAuthorsCountIncrement(authorIds []int) error {
 	if len(authorIds) == 0 {
 		return nil
@@ -16,6 +17,7 @@ func DirectFetchAuthorsCountIncrement(authorIds []int) error {
 	return Db.Exec("UPDATE authors SET count = count + ? where id in (?) returning *", incrementIdFetch, authorIds).Error
 }
 
+//DirectFetchQuotesCountIncrement increments the popularity count of the Quotes from a id-query
 func DirectFetchQuotesCountIncrement(quoteIds []int) error {
 	if len(quoteIds) == 0 {
 		return nil
@@ -23,10 +25,12 @@ func DirectFetchQuotesCountIncrement(quoteIds []int) error {
 	return Db.Exec("UPDATE quotes SET count = count + ? where id in (?) returning *", incrementIdFetch, quoteIds).Error
 }
 
+//DirectFetchTopicCountIncrement increments the popularity count of the Topic from a id- or name-query
 func DirectFetchTopicCountIncrement(topicId int, topicName string) error {
 	return Db.Exec("UPDATE topics SET count = count + ? where id = ? or lower(name) = lower(?) returning *", incrementIdFetch, topicId, topicName).Error
 }
 
+//AuthorsAppearInSearchCountIncrement increments the popularity count of the Authors from a listing in a search
 func AuthorsAppearInSearchCountIncrement(authors []structs.AuthorsView) error {
 	if len(authors) == 0 {
 		return nil
@@ -40,6 +44,7 @@ func AuthorsAppearInSearchCountIncrement(authors []structs.AuthorsView) error {
 	return Db.Exec("UPDATE authors SET count = count + ? where id in (?) returning *", incrementAppearInSearchList, authorIds).Error
 }
 
+//QuotesAppearInSearchCountIncrement increments the popularity count of the Quotes from a listing in a search
 func QuotesAppearInSearchCountIncrement(quotes []structs.QuoteView) error {
 	if len(quotes) == 0 {
 		return nil
@@ -53,6 +58,7 @@ func QuotesAppearInSearchCountIncrement(quotes []structs.QuoteView) error {
 	return Db.Exec("UPDATE quotes SET count = count + ? where id in (?) returning *", incrementAppearInSearchList, quoteIds).Error
 }
 
+//AppearInSearchCountIncrement increments the popularity count of the Authors and quotes from a listing in a search
 func AppearInSearchCountIncrement(quotes []structs.QuoteView) error {
 	if len(quotes) == 0 {
 		return nil

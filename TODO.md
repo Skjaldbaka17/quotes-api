@@ -1,6 +1,5 @@
 # TODOS
 
-- [ ] Clean up routes files
 - [ ] Make function for building the SQL query (general for all?)
 - [ ] Pagination Everywhere where needed
 - [ ] Clean up get/set QOD/AOD
@@ -51,6 +50,7 @@
 - [ ] New crawler for new quotes / authors
  --------------
 
+- [x] Clean up routes files
 - [x] add search for topics and searching in topics (maybe just have a single search endpoint with parameters? i.e. want to search for authors / quotes / language inside a specific topic?)
 - [x] getQuotes route (combine with getQuotesById and add to it to get quotes from a specific author + add pagination)
 - [x] Add Counting each time a quote is accessed / sent from Api (also for topics) - i.e. stats
