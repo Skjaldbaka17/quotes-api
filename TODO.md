@@ -15,22 +15,34 @@
 - [ ] Clean up swagger in code
 - [ ] Clean up Documentation look (Swagger)
 
-- [ ] is random truly random (i.e. does the "random" funcitonality truly return randomly or is it biased towards quotes in the "front" of the DB (i.e. in the front where postgres stores them))
+- [ ] only return keys, in the response-json, that are relevant to the request
 
 - [ ] Error handling + Tests
 - [ ] Make error tests (i.e. made-to-fail-tests)
+- [ ] Add error response to Swagger
 - [ ] Go over Swagger + Clean it up and make pretty
 
 - [ ] Add password protection / protected routes capability (at least for SetQuoteOfTheyDay route )
 - [ ] Add authentication for access to the api + Creating apiKeys + Documenting usage + admin access vs normal access
 
+- [ ] Insert Quote for created author or for a 'real' author (private and public)
+- [ ] update inserted quote (priv and pub)
+- [ ] Create new Author (private and public)
+- [ ] Update created author (priv and pub)
+- [ ] Create new Topic (private and public)
+- [ ] update created topic (priv and pub)
+
 - [ ] Setup AWS server
 
 - [ ] Draw up DB-Graph (i.e. how tables are connected to view etc)
 
+- [ ] is random truly random (i.e. does the "random" funcitonality truly return randomly or is it biased towards quotes in the "front" of the DB (i.e. in the front where postgres stores them))
 - [ ] Make Authors Search more efficient (create a similarity-based index ?)
-- [ ] Look into and maybe Change rest into GraphQL
-- [ ] Sort return list alphabetically ICelandic support
+- [ ] Sort return list alphabetically Icelandic support
+
+- [ ] Look into and maybe Change rest into GraphQL (neeeeeee, frekar fyrir næsta project)
+- [ ] Look into payment for some privileges
+- [ ] New crawler for new quotes / authors
  --------------
 
 - [x] getQuotes route (combine with getQuotesById and add to it to get quotes from a specific author + add pagination)
