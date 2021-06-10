@@ -11,6 +11,7 @@ import (
 
 	"github.com/Skjaldbaka17/quotes-api/handlers"
 	"github.com/Skjaldbaka17/quotes-api/structs"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -32,17 +33,30 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 	m1 := regexp.MustCompile(` `)
 	phrasesearch := m1.ReplaceAllString(requestBody.SearchString, " <-> ")
 	generalsearch := m1.ReplaceAllString(requestBody.SearchString, " | ")
+	var dbPointer *gorm.DB
+	//TODO: Validate that this topicId exists
+	if requestBody.TopicId > 0 {
+		dbPointer = handlers.Db.Table("topicsview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq,to_tsquery(?) as generalq ",
+			requestBody.SearchString, phrasesearch, generalsearch)
+	} else {
+		dbPointer = handlers.Db.Table("searchview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq,to_tsquery(?) as generalq ",
+			requestBody.SearchString, phrasesearch, generalsearch)
+	}
+
+	dbPointer = dbPointer.
+		Select("*, ts_rank(quotetsv, plainq) as plainrank, ts_rank(quotetsv, phraseq) as phraserank, ts_rank(quotetsv, generalq) as generalrank").
+		Where("( tsv @@ plainq OR tsv @@ phraseq OR ? % ANY(STRING_TO_ARRAY(name,' ')) OR tsv @@ generalq)", requestBody.SearchString)
+
+	if requestBody.TopicId > 0 {
+		dbPointer = dbPointer.Where("topicid = ?", requestBody.TopicId)
+	}
 
 	//Order by authorid to have definitive order (when for examplke some quotes rank the same for plain, phrase, general and similarity)
-	dbPointer := handlers.Db.Table("searchview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq,to_tsquery(?) as generalq ",
-		requestBody.SearchString, phrasesearch, generalsearch).
-		Select("*, ts_rank(quotetsv, plainq) as plainrank, ts_rank(quotetsv, phraseq) as phraserank, ts_rank(quotetsv, generalq) as generalrank").
-		Where("( tsv @@ plainq OR tsv @@ phraseq OR ? % ANY(STRING_TO_ARRAY(name,' ')) OR tsv @@ generalq)", requestBody.SearchString).
-		Clauses(clause.OrderBy{
-			Expression: clause.Expr{SQL: "phraserank DESC,similarity(name, ?) DESC, plainrank DESC, generalrank DESC, authorid DESC", Vars: []interface{}{requestBody.SearchString}, WithoutParentheses: true},
-		})
+	dbPointer = dbPointer.Clauses(clause.OrderBy{
+		Expression: clause.Expr{SQL: "phraserank DESC,similarity(name, ?) DESC, plainrank DESC, generalrank DESC, authorid DESC", Vars: []interface{}{requestBody.SearchString}, WithoutParentheses: true},
+	})
 
-		//Particular language search
+	//Particular language search
 	switch strings.ToLower(requestBody.Language) {
 	case "english":
 		dbPointer = dbPointer.Not("isicelandic")
@@ -140,17 +154,30 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 	m1 := regexp.MustCompile(` `)
 	phrasesearch := m1.ReplaceAllString(requestBody.SearchString, " <-> ")
 	generalsearch := m1.ReplaceAllString(requestBody.SearchString, " | ")
+	var dbPointer *gorm.DB
+	//TODO: Validate that this topicId exists
+	if requestBody.TopicId > 0 {
+		dbPointer = handlers.Db.Table("topicsview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq,to_tsquery(?) as generalq ",
+			requestBody.SearchString, phrasesearch, generalsearch)
+	} else {
+		dbPointer = handlers.Db.Table("searchview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq,to_tsquery(?) as generalq ",
+			requestBody.SearchString, phrasesearch, generalsearch)
+	}
+
+	dbPointer = dbPointer.Select("*, ts_rank(quotetsv, plainq) as plainrank, ts_rank(quotetsv, phraseq) as phraserank, ts_rank(quotetsv, generalq) as generalrank").
+		Where("( quotetsv @@ plainq OR quotetsv @@ phraseq OR quotetsv @@ generalq)")
+
+	if requestBody.TopicId > 0 {
+		dbPointer = dbPointer.Where("topicid = ?", requestBody.TopicId)
+	}
 
 	//Order by quoteid to have definitive order (when for examplke some quotes rank the same for plain, phrase and general)
-	dbPointer := handlers.Db.Table("searchview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq,to_tsquery(?) as generalq ",
-		requestBody.SearchString, phrasesearch, generalsearch).
-		Select("*, ts_rank(quotetsv, plainq) as plainrank, ts_rank(quotetsv, phraseq) as phraserank, ts_rank(quotetsv, generalq) as generalrank").
-		Where("( quotetsv @@ plainq OR quotetsv @@ phraseq OR quotetsv @@ generalq)").
+	dbPointer = dbPointer.
 		Clauses(clause.OrderBy{
 			Expression: clause.Expr{SQL: "plainrank DESC, phraserank DESC, generalrank DESC, quoteid DESC", Vars: []interface{}{}, WithoutParentheses: true},
 		})
 
-		//Particular language search
+	//Particular language search
 	switch strings.ToLower(requestBody.Language) {
 	case "english":
 		dbPointer = dbPointer.Not("isicelandic")

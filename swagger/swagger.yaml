@@ -31,7 +31,7 @@ definitions:
         type: integer
         x-go-name: Nroficelandicquotes
     type: object
-    x-go-package: github.com/Skjaldbaka17/quotes-api/handlers
+    x-go-package: github.com/Skjaldbaka17/quotes-api/structs
   OrderConfig:
     properties:
       maximum:
@@ -58,7 +58,7 @@ definitions:
         type: boolean
         x-go-name: Reverse
     type: object
-    x-go-package: github.com/Skjaldbaka17/quotes-api/handlers
+    x-go-package: github.com/Skjaldbaka17/quotes-api/structs
   Qod:
     properties:
       date:
@@ -79,7 +79,7 @@ definitions:
         type: string
         x-go-name: Language
     type: object
-    x-go-package: github.com/Skjaldbaka17/quotes-api/handlers
+    x-go-package: github.com/Skjaldbaka17/quotes-api/structs
   QuoteView:
     properties:
       authorid:
@@ -125,7 +125,7 @@ definitions:
         uniqueItems: true
         x-go-name: Topicname
     type: object
-    x-go-package: github.com/Skjaldbaka17/quotes-api/handlers
+    x-go-package: github.com/Skjaldbaka17/quotes-api/structs
 host: quotel-api.com
 info:
   contact:
@@ -249,7 +249,7 @@ paths:
   /quotes:
     post:
       description: Get quotes by their ids
-      operationId: getQuotesByIds
+      operationId: getQuotes
       parameters:
       - description: The structure of the request for quotes by their ids
         in: body
@@ -273,6 +273,25 @@ paths:
       responses:
         "200":
           $ref: '#/responses/multipleQuotesResponse'
+      tags:
+      - QUOTES
+  /quotes/aod/new:
+    post:
+      description: 'Sets the author of the day for the given date. It Is password
+        protected TODO: Put in privacy swagger'
+      operationId: setAuthorsOfTheDay
+      responses:
+        "200":
+          $ref: '#/responses/successResponse'
+      tags:
+      - AUTHORS
+  /quotes/list:
+    post:
+      description: Get list of quotes according to some ordering / parameters
+      operationId: getQuotesList
+      responses:
+        "200":
+          $ref: '#/responses/multipleQuoteResponse'
       tags:
       - QUOTES
   /quotes/qod:

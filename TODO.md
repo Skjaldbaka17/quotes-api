@@ -1,11 +1,11 @@
 # TODOS
 
-- [ ] add search for topics and searching in topics (maybe just have a single search endpoint with parameters? i.e. want to search for authors / quotes / language inside a specific topic?)
 - [ ] Clean up routes files
 - [ ] Make function for building the SQL query (general for all?)
 - [ ] Pagination Everywhere where needed
 - [ ] Clean up get/set QOD/AOD
 
+- [ ] Change all searches by a single id into a search of array of ids (i.e. in sql "in ids" rather than "= id")
 - [ ] Review /authors for Swagger 
 - [ ] Review /meta for Swagger 
 - [ ] Review /quotes for Swagger 
@@ -17,6 +17,7 @@
 
 - [ ] only return keys, in the response-json, that are relevant to the request
 
+
 - [ ] Error handling + Tests
 - [ ] Make error tests (i.e. made-to-fail-tests)
 - [ ] Add error response to Swagger
@@ -24,6 +25,8 @@
 
 - [ ] Add password protection / protected routes capability (at least for SetQuoteOfTheyDay route )
 - [ ] Add authentication for access to the api + Creating apiKeys + Documenting usage + admin access vs normal access
+
+- [ ] Add .env variables (i.e. for names of tables etc.)
 
 - [ ] Insert Quote for created author or for a 'real' author (private and public)
 - [ ] update inserted quote (priv and pub)
@@ -45,6 +48,7 @@
 - [ ] New crawler for new quotes / authors
  --------------
 
+- [x] add search for topics and searching in topics (maybe just have a single search endpoint with parameters? i.e. want to search for authors / quotes / language inside a specific topic?)
 - [x] getQuotes route (combine with getQuotesById and add to it to get quotes from a specific author + add pagination)
 - [x] Add Counting each time a quote is accessed / sent from Api (also for topics) - i.e. stats
 - [x] Add tests for GetAOD and AODHistory and SetAOD

@@ -46,10 +46,30 @@ func TestSearch(t *testing.T) {
 			}
 		})
 
+		t.Run("Search for quote 'Happiness resides not in possessions...' inside topic 'inspirational' by supplying its topicid", func(t *testing.T) {
+			topicId := getTopicId("inspirational")
+			var jsonStr = []byte(fmt.Sprintf(`{"searchString": "Happiness resides not in possessions", "topicId":%d}`, topicId))
+			respObj, _ := requestAndReturnArray(jsonStr, SearchQuotesByString)
+			firstAuthorName := respObj[0].Name
+			want_author := "Democritus"
+			if firstAuthorName != want_author {
+				t.Fatalf("got %q, want %q", firstAuthorName, want_author)
+			}
+
+			firstAuthorQuote := respObj[0].Quote
+			want_quote := "Happiness resides not in possessions, and not in gold, happiness dwells in the soul."
+			if firstAuthorQuote != want_quote {
+				t.Fatalf("got %q, want %q", firstAuthorQuote, want_quote)
+			}
+
+			if respObj[0].Topicid != topicId {
+				t.Fatalf("got quote with topicId %d, but expected with topicID %d. Quote got: %+v", respObj[0].Topicid, topicId, respObj[0])
+			}
+		})
 	})
 
 	t.Run("Search Authors By String", func(t *testing.T) {
-
+		//Michael Jordan
 		t.Run("easy search should return list of quotes with Friedrich Nietzsche as first author", func(t *testing.T) {
 
 			var jsonStr = []byte(`{"searchString": "Friedrich Nietzsche"}`)
@@ -83,6 +103,8 @@ func TestSearch(t *testing.T) {
 			}
 		})
 
+		//Dont think this application is necessary
+		t.Run("Search Authors inside topic 'inspirational' for 'Michael Jordan' by supplying its topicid", func(t *testing.T) { t.Skip() })
 	})
 
 	t.Run("Search by String", func(t *testing.T) {
@@ -124,6 +146,20 @@ func TestSearch(t *testing.T) {
 			})
 		})
 
+		t.Run("General Search inside topic 'inspirational' by supplying its id, should return 'Michael Jordan' Quote", func(t *testing.T) {
+			topicId := getTopicId("inspirational")
+			var jsonStr = []byte(fmt.Sprintf(`{"searchString": "Jordan Michel", "topicId":%d}`, topicId))
+			respObj, _ := requestAndReturnArray(jsonStr, SearchByString)
+			firstAuthorName := respObj[0].Name
+			want_author := "Michael Jordan"
+			if firstAuthorName != want_author {
+				t.Fatalf("got %q, want %q", firstAuthorName, want_author)
+			}
+
+			if respObj[0].Topicid != topicId {
+				t.Fatalf("got quote with topicId %d, but expected with topicID %d. Quote got: %+v", respObj[0].Topicid, topicId, respObj[0])
+			}
+		})
 	})
 
 	t.Run("Search Pagination Test", func(t *testing.T) {
@@ -212,4 +248,5 @@ func TestSearch(t *testing.T) {
 		})
 
 	})
+
 }
