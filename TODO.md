@@ -11,7 +11,6 @@
 
 - [ ] only return keys, in the response-json, that are relevant to the request
 
-
 - [ ] Error handling + Tests
 - [ ] Make error tests (i.e. made-to-fail-tests)
 - [ ] Add error response to Swagger

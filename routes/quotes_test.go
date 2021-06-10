@@ -513,14 +513,15 @@ func TestQuotes(t *testing.T) {
 			searchString := "love"
 			var jsonStr = []byte(fmt.Sprintf(`{"searchString":"%s"}`, searchString))
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
-			m1 := regexp.MustCompile(searchString)
-			if !m1.Match([]byte(firstRespObj.Quote)) {
-				t.Fatalf("first response, got the quote %+v that does not contain the searchString %s", firstRespObj, searchString)
+			regexStub := searchString[:3]
+			m1 := regexp.MustCompile(regexStub)
+			if !m1.Match([]byte(strings.ToLower(firstRespObj.Quote))) {
+				t.Fatalf("first response, got the quote %+v that does not contain the searchString %s", firstRespObj, regexStub)
 			}
 
 			secondRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
-			if !m1.Match([]byte(secondRespObj.Quote)) {
-				t.Fatalf("second response, got the quote %+v that does not contain the searchString %s", secondRespObj, searchString)
+			if !m1.Match([]byte(strings.ToLower(secondRespObj.Quote))) {
+				t.Fatalf("second response, got the quote %+v that does not contain the searchString %s", secondRespObj, regexStub)
 			}
 
 			if secondRespObj.Quoteid == firstRespObj.Quoteid {
