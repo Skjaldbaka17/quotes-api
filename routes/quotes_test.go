@@ -103,7 +103,7 @@ func TestQuotes(t *testing.T) {
 
 			firstQuote := respObj[0]
 
-			if firstQuote.Quoteid > 639028 {
+			if firstQuote.Quoteid < 639028 {
 				t.Fatalf("got %+v, but want quote with larger quoteid i.e. want last quote in db", firstQuote)
 			}
 

@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -74,7 +73,6 @@ func GetQuotesList(rw http.ResponseWriter, r *http.Request) {
 
 	var quotes []structs.QuoteView
 	dbPointer := handlers.Db.Table("searchview")
-
 	dbPointer = quoteLanguageSQL(requestBody.Language, dbPointer)
 
 	orderDirection := "ASC"
@@ -90,20 +88,9 @@ func GetQuotesList(rw http.ResponseWriter, r *http.Request) {
 		}
 		dbPointer = dbPointer.Order("quotecount " + orderDirection)
 	case "length":
-		if nr, err := strconv.Atoi(requestBody.OrderConfig.Maximum); err == nil {
-			dbPointer = dbPointer.Where("length(quote) <= ?", nr)
-		}
-		if nr, err := strconv.Atoi(requestBody.OrderConfig.Minimum); err == nil {
-			dbPointer = dbPointer.Where("length(quote) >= ?", nr)
-		}
-		dbPointer = dbPointer.Order("length(quote)" + orderDirection)
+		dbPointer = setMaxMinNumber(requestBody.OrderConfig, "length(quote)", orderDirection, dbPointer)
 	default:
-		if nr, err := strconv.Atoi(requestBody.OrderConfig.Maximum); err == nil {
-			dbPointer = dbPointer.Where("quoteid <= ?", nr)
-		}
-		if nr, err := strconv.Atoi(requestBody.OrderConfig.Minimum); err == nil {
-			dbPointer = dbPointer.Where("quoteid >= ?", nr)
-		}
+		dbPointer = setMaxMinNumber(requestBody.OrderConfig, "quoteid", orderDirection, dbPointer)
 	}
 
 	err := dbPointer.Limit(requestBody.PageSize).Order("quoteid").
@@ -136,9 +123,10 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var dbPointer *gorm.DB
-	var result []structs.QuoteView
+	var result structs.QuoteView
 	shouldOrderBy := false //Used when there are few rows to choose from and therefore higher probability that random() < 0.005 returns no rows
 
+	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	m1 := regexp.MustCompile(` `)
 	phrasesearch := m1.ReplaceAllString(requestBody.SearchString, " <-> ")
 
@@ -165,24 +153,22 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	//Order by used to get random quote if there are "few" rows returned
-	if shouldOrderBy {
-		dbPointer = dbPointer.Order("random()") //Randomized, O( n*log(n) )
-	} else {
+	if !shouldOrderBy {
 		dbPointer = dbPointer.
-			Where("random() < 0.005") //Randomized, O(n)
+			Where("random() < 0.005")
 	}
 
-	err := dbPointer.Limit(100).Find(&result).Error
+	dbPointer = dbPointer.Order("random()") //Randomized, O( n*log(n) )
+	//** ---------- Paramater configuratino for DB query ends ---------- **//
+
+	err := dbPointer.Limit(1).Find(&result).Error
 	if err != nil {
 		//TODO: Respond with better error -- and put into swagger -- and add tests
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
-	if len(result) == 0 {
-		json.NewEncoder(rw).Encode(result)
-	} else {
-		json.NewEncoder(rw).Encode(result[0])
-	}
+
+	json.NewEncoder(rw).Encode(result)
 
 }
 
@@ -218,6 +204,7 @@ func SetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: "Successfully inserted quote of the day!", StatusCode: http.StatusOK})
 }
 
+//setQOD inserts a new row into qod/qodice table
 func setQOD(language string, date string, quoteId int) error {
 	switch strings.ToLower(language) {
 	case "icelandic":
@@ -263,6 +250,7 @@ func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	var quote structs.QuoteView
 	var dbPointer *gorm.DB
 	var err error
+
 	switch strings.ToLower(requestBody.Language) {
 	case "icelandic":
 		dbPointer = handlers.Db.Table("qodiceview")
@@ -321,23 +309,13 @@ func GetQODHistory(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	var quotes []structs.QuoteView
-	var dbPointer *gorm.DB
 	var err error
-	switch strings.ToLower(requestBody.Language) {
-	case "icelandic":
-		dbPointer = handlers.Db.Table("qodiceview")
-	default:
-		dbPointer = handlers.Db.Table("qodview")
-	}
+	dbPointer := qodLanguageSQL(requestBody.Language)
 
+	//Not maximum because then possibility of endless cycle with the if statement below!
 	if requestBody.Minimum != "" {
 		dbPointer = dbPointer.Where("date >= ?", requestBody.Minimum)
 	}
-
-	if requestBody.Maximum != "" {
-		dbPointer = dbPointer.Where("date <= ?", requestBody.Maximum)
-	}
-
 	dbPointer = dbPointer.Where("date <= current_date")
 
 	err = dbPointer.Order("date DESC").Find(&quotes).Error
@@ -349,39 +327,14 @@ func GetQODHistory(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(quotes) == 0 {
-		fmt.Println("Setting a brand new QOD for today")
 		err = setNewRandomQOD(requestBody.Language)
 		if err != nil {
 			//TODO: Respond with better error -- and put into swagger -- and add tests
 			http.Error(rw, err.Error(), http.StatusBadRequest)
 			return
 		}
-
-		switch strings.ToLower(requestBody.Language) {
-		case "icelandic":
-			dbPointer = handlers.Db.Table("qodiceview")
-		default:
-			dbPointer = handlers.Db.Table("qodview")
-		}
-
-		if requestBody.Minimum != "" {
-			dbPointer = dbPointer.Where("date >= ?", requestBody.Minimum)
-		}
-
-		if requestBody.Maximum != "" {
-			dbPointer = dbPointer.Where("date <= ?", requestBody.Maximum)
-		}
-
-		dbPointer = dbPointer.Where("date <= current_date")
-
-		err = dbPointer.Order("date").Find(&quotes).Error
-
-		if err != nil {
-			//TODO: Respond with better error -- and put into swagger -- and add tests
-			http.Error(rw, err.Error(), http.StatusBadRequest)
-			return
-		}
-
+		GetQODHistory(rw, r)
+		return
 	}
 
 	json.NewEncoder(rw).Encode(quotes)

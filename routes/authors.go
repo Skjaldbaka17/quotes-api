@@ -327,6 +327,16 @@ func aodLanguageSQL(language string) *gorm.DB {
 	}
 }
 
+//qodLanguageSQL adds to the sql query for the quotes db a condition of whether the quotes to be fetched are quotes in a particular language
+func qodLanguageSQL(language string) *gorm.DB {
+	switch strings.ToLower(language) {
+	case "icelandic":
+		return handlers.Db.Table("qodiceview")
+	default:
+		return handlers.Db.Table("qodview")
+	}
+}
+
 //authorLanguageSQL adds to the sql query for the authors db a condition of whether the authors to be fetched have quotes in a particular language
 func authorLanguageSQL(language string, dbPointer *gorm.DB) *gorm.DB {
 	if language != "" {
