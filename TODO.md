@@ -1,10 +1,5 @@
 # TODOS
-
-- [ ] Make function for building the SQL query (general for all?)
-- [ ] Pagination Everywhere where needed
-- [ ] Clean up get/set QOD/AOD
-
-- [ ] Change all searches by a single id into a search of array of ids (i.e. in sql "in ids" rather than "= id")
+- [ ] Change all searches for a single id into a search of array of ids (i.e. in sql "in ids" rather than "= id")
 - [ ] Review /authors for Swagger 
 - [ ] Review /meta for Swagger 
 - [ ] Review /quotes for Swagger 
@@ -50,6 +45,8 @@
 - [ ] New crawler for new quotes / authors
  --------------
 
+- [x] Clean up get/set QOD/AOD
+- [x] Pagination Everywhere where needed
 - [x] Clean up routes files
 - [x] add search for topics and searching in topics (maybe just have a single search endpoint with parameters? i.e. want to search for authors / quotes / language inside a specific topic?)
 - [x] getQuotes route (combine with getQuotesById and add to it to get quotes from a specific author + add pagination)

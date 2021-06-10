@@ -37,9 +37,8 @@ func GetQuotes(rw http.ResponseWriter, r *http.Request) {
 	dbPointer := handlers.Db.Table("searchview").Order("quoteid ASC")
 	if requestBody.AuthorId > 0 {
 		dbPointer = dbPointer.
-			Where("authorid = ?", requestBody.AuthorId).
-			Limit(requestBody.PageSize).
-			Offset(requestBody.Page * requestBody.PageSize)
+			Where("authorid = ?", requestBody.AuthorId)
+		dbPointer = pagination(requestBody, dbPointer)
 	} else {
 		dbPointer = dbPointer.Where("quoteid in ?", requestBody.Ids)
 	}
