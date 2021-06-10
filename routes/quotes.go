@@ -174,7 +174,6 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(rw).Encode(result)
-
 }
 
 // swagger:route POST /quotes/qod/new QUOTES setQuoteOfTheDay
@@ -207,34 +206,6 @@ func SetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: "Successfully inserted quote of the day!", StatusCode: http.StatusOK})
-}
-
-//setQOD inserts a new row into qod/qodice table
-func setQOD(language string, date string, quoteId int) error {
-	switch strings.ToLower(language) {
-	case "icelandic":
-		return handlers.Db.Exec("insert into qodice (quoteid, date) values((select id from quotes where id = ? and isicelandic), ?) on conflict (date) do update set quoteid = ?", quoteId, date, quoteId).Error
-	default:
-		return handlers.Db.Exec("insert into qod (quoteid, date) values((select id from quotes where id = ? and not isicelandic), ?) on conflict (date) do update set quoteid = ?", quoteId, date, quoteId).Error
-	}
-}
-
-//SetNewRandomQOD sets a random quote as the qod for today (if language=icelandic is supplied then it adds the random qod to the icelandic qod table)
-func setNewRandomQOD(language string) error {
-	var quoteItem structs.ListItem
-	var dbPointer *gorm.DB
-	dbPointer = handlers.Db.Table("quotes")
-	dbPointer = quoteLanguageSQL(language, dbPointer)
-	if strings.ToLower(language) != "icelandic" {
-		dbPointer = dbPointer.Where("Random() < 0.005")
-	}
-
-	err := dbPointer.Order("random()").Limit(1).Scan(&quoteItem).Error
-	if err != nil {
-		return err
-	}
-
-	return setQOD(language, time.Now().Format("2006-01-02"), quoteItem.Id)
 }
 
 // swagger:route POST /quotes/qod QUOTES getQuoteOfTheDay
@@ -327,4 +298,32 @@ func GetQODHistory(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(rw).Encode(quotes)
+}
+
+//setQOD inserts a new row into qod/qodice table
+func setQOD(language string, date string, quoteId int) error {
+	switch strings.ToLower(language) {
+	case "icelandic":
+		return handlers.Db.Exec("insert into qodice (quoteid, date) values((select id from quotes where id = ? and isicelandic), ?) on conflict (date) do update set quoteid = ?", quoteId, date, quoteId).Error
+	default:
+		return handlers.Db.Exec("insert into qod (quoteid, date) values((select id from quotes where id = ? and not isicelandic), ?) on conflict (date) do update set quoteid = ?", quoteId, date, quoteId).Error
+	}
+}
+
+//SetNewRandomQOD sets a random quote as the qod for today (if language=icelandic is supplied then it adds the random qod to the icelandic qod table)
+func setNewRandomQOD(language string) error {
+	var quoteItem structs.ListItem
+	var dbPointer *gorm.DB
+	dbPointer = handlers.Db.Table("quotes")
+	dbPointer = quoteLanguageSQL(language, dbPointer)
+	if strings.ToLower(language) != "icelandic" {
+		dbPointer = dbPointer.Where("Random() < 0.005")
+	}
+
+	err := dbPointer.Order("random()").Limit(1).Scan(&quoteItem).Error
+	if err != nil {
+		return err
+	}
+
+	return setQOD(language, time.Now().Format("2006-01-02"), quoteItem.Id)
 }

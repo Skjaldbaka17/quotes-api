@@ -114,6 +114,10 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 	dbPointer := getBasePointer(requestBody)
 	dbPointer = dbPointer.Where("( quotetsv @@ plainq OR quotetsv @@ phraseq OR quotetsv @@ generalq)")
 
+	if requestBody.AuthorId > 0 {
+		dbPointer = dbPointer.Where("authorid = ?", requestBody.AuthorId)
+	}
+
 	//Order by quoteid to have definitive order (when for examplke some quotes rank the same for plain, phrase and general)
 	dbPointer = dbPointer.
 		Clauses(clause.OrderBy{
