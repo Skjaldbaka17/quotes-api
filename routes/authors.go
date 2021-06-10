@@ -15,9 +15,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// swagger:route POST /authors AUTHORS getAuthorsByIds
-//
-// Get authors by their ids
+// swagger:route POST /authors AUTHORS GetAuthors
+// Get the authors by their ids
 //
 // responses:
 //	200: authorsResponse
@@ -50,9 +49,9 @@ func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(&authors)
 }
 
-// swagger:route POST /authors/list AUTHORS getAuthorsList
+// swagger:route POST /authors/list AUTHORS ListAuthors
 //
-// Get list of authors according to some ordering / parameters
+// Get a list of authors according to some ordering / parameters
 //
 // responses:
 //	200: authorsResponse
@@ -122,7 +121,7 @@ func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(&authors)
 }
 
-// swagger:route POST /authors/random AUTHORS getRandomAuthor
+// swagger:route POST /authors/random AUTHORS GetRandomAuthor
 // Get a random Author, and some of his quotes, according to the given parameters
 // responses:
 //	200: randomAuthorResponse
@@ -168,6 +167,8 @@ func GetRandomAuthor(rw http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(rw).Encode(result)
 }
+
+// I AM HERE!!!!!
 
 // swagger:route POST /quotes/qod AUTHORS getAuthorOfTheDay
 // Gets the author of the day

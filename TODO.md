@@ -1,5 +1,4 @@
 # TODOS
-- [ ] Change all searches for a single id into a search of array of ids (i.e. in sql "in ids" rather than "= id")
 - [ ] Review /authors for Swagger 
 - [ ] Review /meta for Swagger 
 - [ ] Review /quotes for Swagger 

@@ -24,14 +24,21 @@ type AuthorsView struct {
 	//Unique: true
 	//example: 24952
 	Id int `json:"id"`
-	// Name of author
+	// Name of the author
 	//example: Muhammad Ali
-	Name                string `json:"name"`
-	Hasicelandicquotes  bool   `json:"hasicelandicquotes"`
-	Nroficelandicquotes int    `json:"nroficelandicquotes"`
-	Nrofenglishquotes   int    `json:"nrofenglishquotes"`
-	Count               int
-	//swagger:ignore Date
+	Name string `json:"name"`
+	// Whether or not this author has some icelandic quotes
+	//example: true
+	Hasicelandicquotes bool `json:"hasicelandicquotes"`
+	// How many quotes in icelandic this author has
+	//example: 6
+	Nroficelandicquotes int `json:"nroficelandicquotes"`
+	// How many quotes in icelandic this author has
+	//example: 78
+	Nrofenglishquotes int `json:"nrofenglishquotes"`
+	//swagger:ignore
+	Count int `json:"count"`
+	//swagger:ignore
 	Date string `json:"date"`
 }
 

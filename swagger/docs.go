@@ -89,22 +89,6 @@ type randomQuoteResponseWrapper struct {
 	Body structs.QuoteView
 }
 
-// Data structure representing the response for a random author
-// swagger:response randomAuthorResponse
-type randomAuthorResponseWrapper struct {
-	// A quote struct
-	// in: body
-	Body []structs.QuoteView
-}
-
-// Data structure representing the response for a authors
-// swagger:response authorsResponse
-type authorsResponseWrapper struct {
-	// A quote struct
-	// in: body
-	Body []structs.AuthorsView
-}
-
 // Data structure representing topic quotes response
 // swagger:response multipleQuotesTopicResponse
 type multipleQuotesTopicResponseWrapper struct {
@@ -164,20 +148,6 @@ type listOfStringsWrapper struct {
 		// The languages supported
 		// example: ["English", "Icelandic"]
 		Languages []string `json:"languages"`
-	}
-}
-
-// swagger:parameters getAuthorsByIds
-type getAuthorsByIdsWrapper struct {
-	// The structure of the request for authors by their ids
-	// in: body
-	// required: true
-	Body struct {
-		// The list of author's ids you want
-		//
-		// Required: true
-		// Example: [24952,19161]
-		Ids []int `json:"ids"`
 	}
 }
 
@@ -348,52 +318,11 @@ type getRandomQuoteResponseWrapper struct {
 	}
 }
 
-// swagger:parameters getRandomAuthor
-type randomAuthorWrapper struct {
-	// The structure of the request for getting a random author
-	// in: body
-	Body struct {
-		// The random author must have quotes in the given language
-		//
-		// Example: English
-		Language string `json:"language"`
-		// How many quotes, maximum, to be returned from this author
-		//
-		// Example: 10
-		MaxQuotes int `json:"maxQuotes"`
-	}
-}
-
 // swagger:parameters setQuoteOfTheDay
 type setQuoteOfTheDayWrapper struct {
 	// The structure of the request for setting the QOD
 	// in: body
 	Body struct {
 		Qods []structs.Qod
-	}
-}
-
-// swagger:parameters getAuthorsList
-type authorsListWrapper struct {
-	// The structure of the request for getting a random author
-	// in: body
-	Body struct {
-		// The number of Authors to be returned on each "page"
-		//
-		// Maximum: 200
-		// Minimum: 1
-		// Default: 25
-		// Example: 30
-		PageSize int `json:"pageSize"`
-		// The page you are asking for, starts with 0.
-		//
-		// Minimum: 0
-		// Example: 0
-		Page int `json:"page"`
-		// The authors must have quotes in the given language, also if ordering by nrOfQuotes if this parameter is set then
-		// only the amount of quotes the author has in the given language counts towards the ordering.
-		// Example: English
-		Language    string `json:"language"`
-		OrderConfig structs.OrderConfig
 	}
 }

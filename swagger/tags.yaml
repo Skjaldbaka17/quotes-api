@@ -4,4 +4,4 @@ tags:
   - name: QUOTES
     description: Everthing with quotes.
   - name: AUTHORS
-    description: Everything with authors.
+    description: Access all authors. Use this to get/explore authors, get a random author or see the Author of the day. 
