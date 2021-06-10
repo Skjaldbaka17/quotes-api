@@ -32,6 +32,8 @@ func GetQuotes(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var quotes []structs.QuoteView
+	//** ---------- Paramatere configuratino for DB query begins ---------- **//
+
 	dbPointer := handlers.Db.Table("searchview").Order("quoteid ASC")
 	if requestBody.AuthorId > 0 {
 		dbPointer = dbPointer.
@@ -41,6 +43,8 @@ func GetQuotes(rw http.ResponseWriter, r *http.Request) {
 	} else {
 		dbPointer = dbPointer.Where("quoteid in ?", requestBody.Ids)
 	}
+	//** ---------- Paramatere configuratino for DB query ends ---------- **//
+
 	err := dbPointer.Find(&quotes).Error
 
 	if err != nil {
@@ -72,6 +76,7 @@ func GetQuotesList(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	var quotes []structs.QuoteView
+	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	dbPointer := handlers.Db.Table("searchview")
 	dbPointer = quoteLanguageSQL(requestBody.Language, dbPointer)
 
@@ -93,8 +98,9 @@ func GetQuotesList(rw http.ResponseWriter, r *http.Request) {
 		dbPointer = setMaxMinNumber(requestBody.OrderConfig, "quoteid", orderDirection, dbPointer)
 	}
 
-	err := dbPointer.Limit(requestBody.PageSize).Order("quoteid").
-		Offset(requestBody.Page * requestBody.PageSize).
+	//** ---------- Paramatere configuratino for DB query ends ---------- **//
+
+	err := pagination(requestBody, dbPointer).Order("quoteid").
 		Find(&quotes).
 		Error
 
@@ -248,17 +254,11 @@ func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	var quote structs.QuoteView
-	var dbPointer *gorm.DB
 	var err error
-
-	switch strings.ToLower(requestBody.Language) {
-	case "icelandic":
-		dbPointer = handlers.Db.Table("qodiceview")
-	default:
-		dbPointer = handlers.Db.Table("qodview")
-	}
-
-	err = dbPointer.Where("date = current_date").Scan(&quote).Error
+	//** ---------- Paramatere configuratino for DB query begins ---------- **//
+	dbPointer := qodLanguageSQL(requestBody.Language).Where("date = current_date")
+	//** ---------- Paramatere configuratino for DB query ends ---------- **//
+	err = dbPointer.Scan(&quote).Error
 
 	if err != nil {
 		//TODO: Respond with better error -- and put into swagger -- and add tests
@@ -275,19 +275,8 @@ func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		switch strings.ToLower(requestBody.Language) {
-		case "icelandic":
-			err = handlers.Db.Table("qodiceview").Where("date = current_date").Scan(&quote).Error
-		default:
-			err = handlers.Db.Table("qodview").Where("date = current_date").Scan(&quote).Error
-		}
-		log.Println(quote)
-
-		if err != nil {
-			//TODO: Respond with better error -- and put into swagger -- and add tests
-			http.Error(rw, err.Error(), http.StatusBadRequest)
-			return
-		}
+		GetQuoteOfTheDay(rw, r)
+		return
 	}
 
 	json.NewEncoder(rw).Encode(quote)
@@ -310,15 +299,16 @@ func GetQODHistory(rw http.ResponseWriter, r *http.Request) {
 
 	var quotes []structs.QuoteView
 	var err error
+	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	dbPointer := qodLanguageSQL(requestBody.Language)
 
 	//Not maximum because then possibility of endless cycle with the if statement below!
 	if requestBody.Minimum != "" {
 		dbPointer = dbPointer.Where("date >= ?", requestBody.Minimum)
 	}
-	dbPointer = dbPointer.Where("date <= current_date")
-
-	err = dbPointer.Order("date DESC").Find(&quotes).Error
+	dbPointer = dbPointer.Where("date <= current_date").Order("date DESC")
+	//** ---------- Paramatere configuratino for DB query ends ---------- **//
+	err = dbPointer.Find(&quotes).Error
 
 	if err != nil {
 		//TODO: Respond with better error -- and put into swagger -- and add tests

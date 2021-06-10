@@ -2,11 +2,9 @@ package routes
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"regexp"
-	"time"
 
 	"github.com/Skjaldbaka17/quotes-api/handlers"
 	"github.com/Skjaldbaka17/quotes-api/structs"
@@ -26,40 +24,21 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 	if err := handlers.GetRequestBody(rw, r, &requestBody); err != nil {
 		return
 	}
-	start := time.Now()
 
 	var results []structs.QuoteView
-	m1 := regexp.MustCompile(` `)
-	phrasesearch := m1.ReplaceAllString(requestBody.SearchString, " <-> ")
-	generalsearch := m1.ReplaceAllString(requestBody.SearchString, " | ")
-	var dbPointer *gorm.DB
-	//TODO: Validate that this topicId exists
-	if requestBody.TopicId > 0 {
-		dbPointer = handlers.Db.Table("topicsview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq,to_tsquery(?) as generalq ",
-			requestBody.SearchString, phrasesearch, generalsearch)
-	} else {
-		dbPointer = handlers.Db.Table("searchview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq,to_tsquery(?) as generalq ",
-			requestBody.SearchString, phrasesearch, generalsearch)
-	}
-
-	dbPointer = dbPointer.
-		Select("*, ts_rank(quotetsv, plainq) as plainrank, ts_rank(quotetsv, phraseq) as phraserank, ts_rank(quotetsv, generalq) as generalrank").
-		Where("( tsv @@ plainq OR tsv @@ phraseq OR ? % ANY(STRING_TO_ARRAY(name,' ')) OR tsv @@ generalq)", requestBody.SearchString)
-
-	if requestBody.TopicId > 0 {
-		dbPointer = dbPointer.Where("topicid = ?", requestBody.TopicId)
-	}
-
+	//** ---------- Paramatere configuratino for DB query begins ---------- **//
+	dbPointer := getBasePointer(requestBody)
 	//Order by authorid to have definitive order (when for examplke some quotes rank the same for plain, phrase, general and similarity)
-	dbPointer = dbPointer.Clauses(clause.OrderBy{
-		Expression: clause.Expr{SQL: "phraserank DESC,similarity(name, ?) DESC, plainrank DESC, generalrank DESC, authorid DESC", Vars: []interface{}{requestBody.SearchString}, WithoutParentheses: true},
-	})
+	dbPointer = dbPointer.
+		Where("( tsv @@ plainq OR tsv @@ phraseq OR ? % ANY(STRING_TO_ARRAY(name,' ')) OR tsv @@ generalq)", requestBody.SearchString).
+		Clauses(clause.OrderBy{
+			Expression: clause.Expr{SQL: "phraserank DESC,similarity(name, ?) DESC, plainrank DESC, generalrank DESC, authorid DESC", Vars: []interface{}{requestBody.SearchString}, WithoutParentheses: true},
+		})
 
 	//Particular language search
 	dbPointer = quoteLanguageSQL(requestBody.Language, dbPointer)
-
-	err := dbPointer.Limit(requestBody.PageSize).
-		Offset(requestBody.Page * requestBody.PageSize).
+	//** ---------- Paramatere configuratino for DB query ends ---------- **//
+	err := pagination(requestBody, dbPointer).
 		Find(&results).Error
 
 	if err != nil {
@@ -73,9 +52,6 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 	go handlers.AppearInSearchCountIncrement(results)
 
 	json.NewEncoder(rw).Encode(&results)
-	t := time.Now()
-	elapsed := t.Sub(start)
-	fmt.Printf("Time: %d", elapsed.Milliseconds())
 }
 
 // swagger:route POST /search/authors SEARCH searchAuthorsByString
@@ -91,23 +67,21 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 	if err := handlers.GetRequestBody(rw, r, &requestBody); err != nil {
 		return
 	}
-	start := time.Now()
 
 	var results []structs.AuthorsView
-
+	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	//Order by authorid to have definitive order (when for examplke some names rank the same for similarity), same for why quoteid
 	//% is same as SIMILARITY but with default threshold 0.3
 	dbPointer := handlers.Db.Table("authors").
-		Where("( tsv @@ plainto_tsquery(?) OR ? % ANY(STRING_TO_ARRAY(name,' ')) )", requestBody.SearchString, requestBody.SearchString).
+		Where("( tsv @@ plainto_tsquery(?) OR (?) % ANY(STRING_TO_ARRAY(name,' ')) )", requestBody.SearchString, requestBody.SearchString).
 		Clauses(clause.OrderBy{
 			Expression: clause.Expr{SQL: "similarity(name, ?) DESC, id DESC", Vars: []interface{}{requestBody.SearchString}, WithoutParentheses: true},
 		})
 
-		//Particular language search
+	//Particular language search
 	dbPointer = authorLanguageSQL(requestBody.Language, dbPointer)
-
-	err := dbPointer.Limit(requestBody.PageSize).
-		Offset(requestBody.Page * requestBody.PageSize).
+	//** ---------- Paramatere configuratino for DB query ends ---------- **//
+	err := pagination(requestBody, dbPointer).
 		Find(&results).Error
 	if err != nil {
 
@@ -121,9 +95,6 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 	go handlers.AuthorsAppearInSearchCountIncrement(results)
 
 	json.NewEncoder(rw).Encode(&results)
-	t := time.Now()
-	elapsed := t.Sub(start)
-	fmt.Printf("Time: %d", elapsed.Milliseconds())
 }
 
 // swagger:route POST /search/quotes SEARCH searchQuotesByString
@@ -137,28 +108,11 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 	if err := handlers.GetRequestBody(rw, r, &requestBody); err != nil {
 		return
 	}
-	start := time.Now()
 
 	var results []structs.QuoteView
-	m1 := regexp.MustCompile(` `)
-	phrasesearch := m1.ReplaceAllString(requestBody.SearchString, " <-> ")
-	generalsearch := m1.ReplaceAllString(requestBody.SearchString, " | ")
-	var dbPointer *gorm.DB
-	//TODO: Validate that this topicId exists
-	if requestBody.TopicId > 0 {
-		dbPointer = handlers.Db.Table("topicsview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq,to_tsquery(?) as generalq ",
-			requestBody.SearchString, phrasesearch, generalsearch)
-	} else {
-		dbPointer = handlers.Db.Table("searchview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq,to_tsquery(?) as generalq ",
-			requestBody.SearchString, phrasesearch, generalsearch)
-	}
-
-	dbPointer = dbPointer.Select("*, ts_rank(quotetsv, plainq) as plainrank, ts_rank(quotetsv, phraseq) as phraserank, ts_rank(quotetsv, generalq) as generalrank").
-		Where("( quotetsv @@ plainq OR quotetsv @@ phraseq OR quotetsv @@ generalq)")
-
-	if requestBody.TopicId > 0 {
-		dbPointer = dbPointer.Where("topicid = ?", requestBody.TopicId)
-	}
+	//** ---------- Paramatere configuratino for DB query begins ---------- **//
+	dbPointer := getBasePointer(requestBody)
+	dbPointer = dbPointer.Where("( quotetsv @@ plainq OR quotetsv @@ phraseq OR quotetsv @@ generalq)")
 
 	//Order by quoteid to have definitive order (when for examplke some quotes rank the same for plain, phrase and general)
 	dbPointer = dbPointer.
@@ -168,9 +122,8 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 
 	//Particular language search
 	dbPointer = quoteLanguageSQL(requestBody.Language, dbPointer)
-
-	err := dbPointer.Limit(requestBody.PageSize).
-		Offset(requestBody.Page * requestBody.PageSize).
+	//** ---------- Paramatere configuratino for DB query ends ---------- **//
+	err := pagination(requestBody, dbPointer).
 		Find(&results).Error
 
 	if err != nil {
@@ -184,7 +137,28 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 	go handlers.AppearInSearchCountIncrement(results)
 
 	json.NewEncoder(rw).Encode(&results)
-	t := time.Now()
-	elapsed := t.Sub(start)
-	fmt.Printf("Time: %d", elapsed.Milliseconds())
+}
+
+//getBasePointer returns a base DB pointer for a table for a thorough full text search
+func getBasePointer(requestBody structs.Request) *gorm.DB {
+	table := "searchview"
+	//TODO: Validate that this topicId exists
+	if requestBody.TopicId > 0 {
+		table = "topicsview"
+	}
+	m1 := regexp.MustCompile(` `)
+	phrasesearch := m1.ReplaceAllString(requestBody.SearchString, " <-> ")
+	generalsearch := m1.ReplaceAllString(requestBody.SearchString, " | ")
+	dbPointer := handlers.Db.Table(table+", plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq,to_tsquery(?) as generalq ",
+		requestBody.SearchString, phrasesearch, generalsearch).Select("*, ts_rank(quotetsv, plainq) as plainrank, ts_rank(quotetsv, phraseq) as phraserank, ts_rank(quotetsv, generalq) as generalrank")
+
+	if requestBody.TopicId > 0 {
+		dbPointer = dbPointer.Where("topicid = ?", requestBody.TopicId)
+	}
+	return dbPointer
+}
+
+func pagination(requestBody structs.Request, dbPointer *gorm.DB) *gorm.DB {
+	return dbPointer.Limit(requestBody.PageSize).
+		Offset(requestBody.Page * requestBody.PageSize)
 }

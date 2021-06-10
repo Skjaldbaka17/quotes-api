@@ -22,13 +22,12 @@ func GetTopics(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var results []structs.ListItem
-
+	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	dbPointer := handlers.Db.Table("topics")
 
 	dbPointer = quoteLanguageSQL(requestBody.Language, dbPointer)
-
+	//** ---------- Paramatere configuratino for DB query ends ---------- **//
 	err := dbPointer.Find(&results).Error
-	log.Println(results)
 	if err != nil {
 		//TODO: Respond with better error -- and put into swagger -- and add tests
 		log.Printf("Got error when decoding: %s", err)
@@ -51,9 +50,11 @@ func GetTopic(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var results []structs.QuoteView
-
+	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	//Order by quoteid to have definitive order (when for examplke some quotes rank the same for plain, phrase and general)
-	dbPoint := handlers.Db.Table("topicsview")
+	dbPoint := handlers.Db.Table("topicsview").Clauses(clause.OrderBy{
+		Expression: clause.Expr{SQL: "quoteid DESC", Vars: []interface{}{}, WithoutParentheses: true},
+	})
 
 	if requestBody.Topic != "" {
 		dbPoint = dbPoint.Where("lower(topicname) = lower(?)", requestBody.Topic)
@@ -61,12 +62,8 @@ func GetTopic(rw http.ResponseWriter, r *http.Request) {
 		dbPoint = dbPoint.Where("topicid = ?", requestBody.Id)
 	}
 
-	err := dbPoint.Clauses(clause.OrderBy{
-		Expression: clause.Expr{SQL: "quoteid DESC", Vars: []interface{}{}, WithoutParentheses: true},
-	}).
-		Limit(requestBody.PageSize).
-		Offset(requestBody.Page * requestBody.PageSize).
-		Find(&results).Error
+	//** ---------- Paramatere configuratino for DB query ends ---------- **//
+	err := pagination(requestBody, dbPoint).Find(&results).Error
 
 	if err != nil {
 		//TODO: Respond with better error -- and put into swagger -- and add tests

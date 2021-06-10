@@ -30,10 +30,12 @@ func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	var authors []structs.AuthorsView
+	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	err := handlers.Db.Table("authors").
 		Where("id in (?)", requestBody.Ids).
 		Scan(&authors).
 		Error
+	//** ---------- Paramatere configuratino for DB query ends ---------- **//
 
 	if err != nil {
 		//TODO: Respond with better error -- and put into swagger -- and add tests
@@ -63,6 +65,7 @@ func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	var authors []structs.AuthorsView
+	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	dbPointer := handlers.Db.Table("authors")
 
 	dbPointer = authorLanguageSQL(requestBody.Language, dbPointer)
@@ -101,8 +104,8 @@ func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
 		dbPointer = dbPointer.Order("initcap(name) " + orderDirection)
 	}
 
-	err := dbPointer.Limit(requestBody.PageSize).Order("id").
-		Offset(requestBody.Page * requestBody.PageSize).
+	//** ---------- Paramatere configuratino for DB query ends---------- **//
+	err := pagination(requestBody, dbPointer).Order("id").
 		Find(&authors).
 		Error
 
@@ -133,12 +136,14 @@ func GetRandomAuthor(rw http.ResponseWriter, r *http.Request) {
 
 	var result []structs.QuoteView
 	var author structs.AuthorsView
+	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 
 	//Get Random author
 	dbPointer := handlers.Db.Table("authors").Where("random() < 0.01")
 
 	//author from a particular language
 	dbPointer = authorLanguageSQL(requestBody.Language, dbPointer)
+	//** ---------- Paramatere configuratino for DB query ends ---------- **//
 
 	err := dbPointer.First(&author).Error
 
@@ -182,10 +187,14 @@ func GetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	var author structs.QuoteView
 	var err error
 
-	//Which table to look for quotes (ice table has icelandic quotes)
-	dbPointer := aodLanguageSQL(requestBody.Language)
+	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 
-	err = dbPointer.Where("date = current_date").Scan(&author).Error
+	//Which table to look for quotes (ice table has icelandic quotes)
+	dbPointer := aodLanguageSQL(requestBody.Language).
+		Where("date = current_date")
+	//** ---------- Paramatere configuratino for DB query ends ---------- **//
+
+	err = dbPointer.Scan(&author).Error
 
 	if err != nil {
 		//TODO: Respond with better error -- and put into swagger -- and add tests
@@ -224,15 +233,16 @@ func GetAODHistory(rw http.ResponseWriter, r *http.Request) {
 	}
 	var authors []structs.QuoteView
 	var err error
+	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	dbPointer := aodLanguageSQL(requestBody.Language)
 
 	//Not maximum because then possibility of endless cycle with the if statement below!
 	if requestBody.Minimum != "" {
 		dbPointer = dbPointer.Where("date >= ?", requestBody.Minimum)
 	}
-	dbPointer = dbPointer.Where("date <= current_date")
-
-	err = dbPointer.Order("date DESC").Find(&authors).Error
+	dbPointer = dbPointer.Where("date <= current_date").Order("date DESC")
+	//** ---------- Paramatere configuratino for DB query ends ---------- **//
+	err = dbPointer.Find(&authors).Error
 
 	if err != nil {
 		//TODO: Respond with better error -- and put into swagger -- and add tests
