@@ -2,7 +2,6 @@ package routes
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"regexp"
@@ -57,7 +56,6 @@ func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
 //	200: authorsResponse
 
 // GetAuthorsList handles POST requests to get the authors that fit the parameters
-
 func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
 	var requestBody structs.Request
 	if err := handlers.GetRequestBody(rw, r, &requestBody); err != nil {
@@ -67,12 +65,7 @@ func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
 	var authors []structs.AuthorsView
 	dbPointer := handlers.Db.Table("authors")
 
-	switch strings.ToLower(requestBody.Language) {
-	case "english":
-		dbPointer = dbPointer.Not("hasicelandicquotes")
-	case "icelandic":
-		dbPointer = dbPointer.Where("hasicelandicquotes")
-	}
+	dbPointer = authorLanguageSQL(requestBody.Language, dbPointer)
 
 	orderDirection := "ASC"
 	if requestBody.OrderConfig.Reverse {
@@ -89,35 +82,19 @@ func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
 	case "nrofquotes":
 		switch strings.ToLower(requestBody.Language) {
 		case "english":
-			if nr, err := strconv.Atoi(requestBody.OrderConfig.Maximum); err == nil {
-				dbPointer = dbPointer.Where("nrofenglishquotes <= ?", nr)
-			}
-			if nr, err := strconv.Atoi(requestBody.OrderConfig.Minimum); err == nil {
-				dbPointer = dbPointer.Where("nrofenglishquotes >= ?", nr)
-			}
-			dbPointer = dbPointer.Order("nrofenglishquotes " + orderDirection)
+			dbPointer = setMaxMinNumber(requestBody.OrderConfig, "nrofenglishquotes", orderDirection, dbPointer)
 		case "icelandic":
-			if nr, err := strconv.Atoi(requestBody.OrderConfig.Maximum); err == nil {
-				dbPointer = dbPointer.Where("nroficelandicquotes <= ?", nr)
-			}
-			if nr, err := strconv.Atoi(requestBody.OrderConfig.Minimum); err == nil {
-				dbPointer = dbPointer.Where("nroficelandicquotes >= ?", nr)
-			}
-			dbPointer = dbPointer.Order("nroficelandicquotes " + orderDirection)
+			dbPointer = setMaxMinNumber(requestBody.OrderConfig, "nroficelandicquotes", orderDirection, dbPointer)
 		default:
-			if nr, err := strconv.Atoi(requestBody.OrderConfig.Maximum); err == nil {
-				dbPointer = dbPointer.Where("nroficelandicquotes + nrofenglishquotes <= ?", nr)
-			}
-			if nr, err := strconv.Atoi(requestBody.OrderConfig.Minimum); err == nil {
-				dbPointer = dbPointer.Where("nroficelandicquotes + nrofenglishquotes >= ?", nr)
-			}
-			dbPointer = dbPointer.Order("nroficelandicquotes + nrofenglishquotes " + orderDirection)
+			dbPointer = setMaxMinNumber(requestBody.OrderConfig, "nroficelandicquotes + nrofenglishquotes", orderDirection, dbPointer)
 		}
 
 	default:
+		//Minimum letter to start with (i.e. start from given minimum letter of the alphabet)
 		if requestBody.OrderConfig.Minimum != "" {
 			dbPointer = dbPointer.Where("initcap(name) >= ?", strings.ToUpper(requestBody.OrderConfig.Minimum))
 		}
+		//Maximum letter to start with (i.e. end at the given maximum letter of the alphabet)
 		if requestBody.OrderConfig.Maximum != "" {
 			dbPointer = dbPointer.Where("initcap(name) <= ?", strings.ToUpper(requestBody.OrderConfig.Maximum))
 		}
@@ -135,8 +112,6 @@ func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	log.Println("Authors:", len(authors))
 
 	//Update popularity in background!
 	go handlers.AuthorsAppearInSearchCountIncrement(authors)
@@ -158,17 +133,12 @@ func GetRandomAuthor(rw http.ResponseWriter, r *http.Request) {
 
 	var result []structs.QuoteView
 	var author structs.AuthorsView
+
+	//Get Random author
 	dbPointer := handlers.Db.Table("authors").Where("random() < 0.01")
 
-	//Random author from a particular language
-	if requestBody.Language != "" {
-		switch strings.ToLower(requestBody.Language) {
-		case "english":
-			dbPointer = dbPointer.Not("hasicelandicquotes")
-		case "icelandic":
-			dbPointer = dbPointer.Where("hasicelandicquotes")
-		}
-	}
+	//author from a particular language
+	dbPointer = authorLanguageSQL(requestBody.Language, dbPointer)
 
 	err := dbPointer.First(&author).Error
 
@@ -181,14 +151,7 @@ func GetRandomAuthor(rw http.ResponseWriter, r *http.Request) {
 	dbPointer = handlers.Db.Table("searchview").Where("authorid = ?", author.Id)
 
 	//An icelandic quote from the particular/random author
-	if requestBody.Language != "" {
-		switch strings.ToLower(requestBody.Language) {
-		case "english":
-			dbPointer = dbPointer.Not("isicelandic")
-		case "icelandic":
-			dbPointer = dbPointer.Where("isicelandic")
-		}
-	}
+	dbPointer = quoteLanguageSQL(requestBody.Language, dbPointer)
 
 	err = dbPointer.Limit(requestBody.MaxQuotes).Find(&result).Error
 
@@ -199,7 +162,6 @@ func GetRandomAuthor(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(rw).Encode(result)
-
 }
 
 // swagger:route POST /quotes/qod AUTHORS getAuthorOfTheDay
@@ -218,14 +180,10 @@ func GetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	var author structs.QuoteView
-	var dbPointer *gorm.DB
 	var err error
-	switch strings.ToLower(requestBody.Language) {
-	case "icelandic":
-		dbPointer = handlers.Db.Table("aodiceview")
-	default:
-		dbPointer = handlers.Db.Table("aodview")
-	}
+
+	//Which table to look for quotes (ice table has icelandic quotes)
+	dbPointer := aodLanguageSQL(requestBody.Language)
 
 	err = dbPointer.Where("date = current_date").Scan(&author).Error
 
@@ -236,7 +194,6 @@ func GetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if (structs.QuoteView{}) == author {
-		fmt.Println("Setting a brand new AOD for today")
 		err = setNewRandomAOD(requestBody.Language)
 		if err != nil {
 			//TODO: Respond with better error -- and put into swagger -- and add tests
@@ -244,19 +201,8 @@ func GetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		switch strings.ToLower(requestBody.Language) {
-		case "icelandic":
-			err = handlers.Db.Table("qodiceview").Where("date = current_date").Scan(&author).Error
-		default:
-			err = handlers.Db.Table("qodview").Where("date = current_date").Scan(&author).Error
-		}
-		log.Println(author)
-
-		if err != nil {
-			//TODO: Respond with better error -- and put into swagger -- and add tests
-			http.Error(rw, err.Error(), http.StatusBadRequest)
-			return
-		}
+		GetAuthorOfTheDay(rw, r) //Dangerous? possibility of endless cycle? Only iff the setNewRandomAOD fails in some way. Or the date is not saved correctly into the DB?
+		return
 	}
 
 	json.NewEncoder(rw).Encode(author)
@@ -277,28 +223,17 @@ func GetAODHistory(rw http.ResponseWriter, r *http.Request) {
 		requestBody.Language = "English"
 	}
 	var authors []structs.QuoteView
-	var dbPointer *gorm.DB
 	var err error
-	switch strings.ToLower(requestBody.Language) {
-	case "icelandic":
-		dbPointer = handlers.Db.Table("aodiceview")
-	default:
-		dbPointer = handlers.Db.Table("aodview")
-	}
+	dbPointer := aodLanguageSQL(requestBody.Language)
 
+	//Not maximum because then possibility of endless cycle with the if statement below!
 	if requestBody.Minimum != "" {
 		dbPointer = dbPointer.Where("date >= ?", requestBody.Minimum)
 	}
-
-	if requestBody.Maximum != "" {
-		dbPointer = dbPointer.Where("date <= ?", requestBody.Maximum)
-	}
-
 	dbPointer = dbPointer.Where("date <= current_date")
 
 	err = dbPointer.Order("date DESC").Find(&authors).Error
 
-	log.Println("HERE:", authors)
 	if err != nil {
 		//TODO: Respond with better error -- and put into swagger -- and add tests
 		http.Error(rw, err.Error(), http.StatusBadRequest)
@@ -307,7 +242,6 @@ func GetAODHistory(rw http.ResponseWriter, r *http.Request) {
 
 	reg := regexp.MustCompile(time.Now().Format("2006-01-02"))
 	if len(authors) == 0 || !reg.Match([]byte(authors[0].Date)) {
-		log.Println("Setting a brand new AOD for today")
 		err = setNewRandomAOD(requestBody.Language)
 		if err != nil {
 			log.Println(err)
@@ -316,31 +250,8 @@ func GetAODHistory(rw http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		switch strings.ToLower(requestBody.Language) {
-		case "icelandic":
-			dbPointer = handlers.Db.Table("aodiceview")
-		default:
-			dbPointer = handlers.Db.Table("aodview")
-		}
-
-		if requestBody.Minimum != "" {
-			dbPointer = dbPointer.Where("date >= ?", requestBody.Minimum)
-		}
-
-		if requestBody.Maximum != "" {
-			dbPointer = dbPointer.Where("date <= ?", requestBody.Maximum)
-		}
-
-		dbPointer = dbPointer.Where("date <= current_date")
-
-		err = dbPointer.Order("date").Find(&authors).Error
-
-		if err != nil {
-			//TODO: Respond with better error -- and put into swagger -- and add tests
-			http.Error(rw, err.Error(), http.StatusBadRequest)
-			return
-		}
-
+		GetAODHistory(rw, r)
+		return
 	}
 
 	json.NewEncoder(rw).Encode(authors)
@@ -375,6 +286,7 @@ func SetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: "Successfully inserted quote of the day!", StatusCode: http.StatusOK})
 }
 
+//setAOD inserts a new row into the aod/aodice table
 func setAOD(language string, date string, authorId int) error {
 	switch strings.ToLower(language) {
 	case "icelandic":
@@ -387,13 +299,12 @@ func setAOD(language string, date string, authorId int) error {
 //SetNewRandomQOD sets a random quote as the qod for today (if language=icelandic is supplied then it adds the random qod to the icelandic qod table)
 func setNewRandomAOD(language string) error {
 	var authorItem structs.ListItem
-	var dbPointer *gorm.DB
-	switch strings.ToLower(language) {
-	case "icelandic":
-		dbPointer = handlers.Db.Table("authors").Where("hasicelandicquotes")
-	default:
-		dbPointer = handlers.Db.Table("authors").Not("hasicelandicquotes")
+
+	if language == "" {
+		language = "english"
 	}
+	dbPointer := handlers.Db.Table("authors")
+	dbPointer = authorLanguageSQL(language, dbPointer)
 
 	log.Println("HEREMatur")
 	err := dbPointer.Order("random()").Limit(1).Scan(&authorItem).Error
@@ -404,4 +315,51 @@ func setNewRandomAOD(language string) error {
 	log.Println("MASSI:", authorItem)
 
 	return setAOD(language, time.Now().Format("2006-01-02"), authorItem.Id)
+}
+
+//aodLanguageSQL adds to the sql query for the authors db a condition of whether the authors to be fetched have quotes in a particular language
+func aodLanguageSQL(language string) *gorm.DB {
+	switch strings.ToLower(language) {
+	case "icelandic":
+		return handlers.Db.Table("aodiceview")
+	default:
+		return handlers.Db.Table("aodview")
+	}
+}
+
+//authorLanguageSQL adds to the sql query for the authors db a condition of whether the authors to be fetched have quotes in a particular language
+func authorLanguageSQL(language string, dbPointer *gorm.DB) *gorm.DB {
+	if language != "" {
+		switch strings.ToLower(language) {
+		case "english":
+			dbPointer = dbPointer.Not("hasicelandicquotes")
+		case "icelandic":
+			dbPointer = dbPointer.Where("hasicelandicquotes")
+		}
+	}
+	return dbPointer
+}
+
+//quoteLanguageSQL adds to the sql query for the quotes db a condition of whether the quotes to be fetched are in a particular language
+func quoteLanguageSQL(language string, dbPointer *gorm.DB) *gorm.DB {
+	if language != "" {
+		switch strings.ToLower(language) {
+		case "english":
+			dbPointer = dbPointer.Not("isicelandic")
+		case "icelandic":
+			dbPointer = dbPointer.Where("isicelandic")
+		}
+	}
+	return dbPointer
+}
+
+//setMaxMinNumber sets the condition for which authors to return
+func setMaxMinNumber(orderConfig structs.OrderConfig, column string, orderDirection string, dbPointer *gorm.DB) *gorm.DB {
+	if nr, err := strconv.Atoi(orderConfig.Maximum); err == nil {
+		dbPointer = dbPointer.Where(column+" <= ?", nr)
+	}
+	if nr, err := strconv.Atoi(orderConfig.Minimum); err == nil {
+		dbPointer = dbPointer.Where(column+" >= ?", nr)
+	}
+	return dbPointer.Order(column + " " + orderDirection)
 }

@@ -26,6 +26,9 @@
 - [ ] Add password protection / protected routes capability (at least for SetQuoteOfTheyDay route )
 - [ ] Add authentication for access to the api + Creating apiKeys + Documenting usage + admin access vs normal access
 
+- [ ] create type handler around the *gorm.DB so that you can create specific methods for building the sql-queries
+
+
 - [ ] Add .env variables (i.e. for names of tables etc.)
 
 - [ ] Insert Quote for created author or for a 'real' author (private and public)

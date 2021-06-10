@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/Skjaldbaka17/quotes-api/handlers"
 	"github.com/Skjaldbaka17/quotes-api/structs"
@@ -24,16 +23,11 @@ func GetTopics(rw http.ResponseWriter, r *http.Request) {
 	}
 	var results []structs.ListItem
 
-	pointer := handlers.Db.Table("topics")
+	dbPointer := handlers.Db.Table("topics")
 
-	switch strings.ToLower(requestBody.Language) {
-	case "english":
-		pointer = pointer.Not("isicelandic")
-	case "icelandic":
-		pointer = pointer.Where("isicelandic")
-	}
+	dbPointer = quoteLanguageSQL(requestBody.Language, dbPointer)
 
-	err := pointer.Find(&results).Error
+	err := dbPointer.Find(&results).Error
 	log.Println(results)
 	if err != nil {
 		//TODO: Respond with better error -- and put into swagger -- and add tests

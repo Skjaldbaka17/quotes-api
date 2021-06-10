@@ -75,12 +75,7 @@ func GetQuotesList(rw http.ResponseWriter, r *http.Request) {
 	var quotes []structs.QuoteView
 	dbPointer := handlers.Db.Table("searchview")
 
-	switch strings.ToLower(requestBody.Language) {
-	case "english":
-		dbPointer = dbPointer.Not("isicelandic")
-	case "icelandic":
-		dbPointer = dbPointer.Where("isicelandic")
-	}
+	dbPointer = quoteLanguageSQL(requestBody.Language, dbPointer)
 
 	orderDirection := "ASC"
 	if requestBody.OrderConfig.Reverse {
@@ -162,14 +157,7 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	//Random quote from a particular language
-	if requestBody.Language != "" {
-		switch strings.ToLower(requestBody.Language) {
-		case "english":
-			dbPointer = dbPointer.Not("isicelandic")
-		case "icelandic":
-			dbPointer = dbPointer.Where("isicelandic")
-		}
-	}
+	dbPointer = quoteLanguageSQL(requestBody.Language, dbPointer)
 
 	if requestBody.SearchString != "" {
 		dbPointer = dbPointer.Where("( quotetsv @@ plainq OR quotetsv @@ phraseq)")
@@ -243,11 +231,10 @@ func setQOD(language string, date string, quoteId int) error {
 func setNewRandomQOD(language string) error {
 	var quoteItem structs.ListItem
 	var dbPointer *gorm.DB
-	switch strings.ToLower(language) {
-	case "icelandic":
-		dbPointer = handlers.Db.Table("quotes").Where("isicelandic")
-	default:
-		dbPointer = handlers.Db.Table("quotes").Not("isicelandic").Where("Random() < 0.005")
+	dbPointer = handlers.Db.Table("quotes")
+	dbPointer = quoteLanguageSQL(language, dbPointer)
+	if strings.ToLower(language) != "icelandic" {
+		dbPointer = dbPointer.Where("Random() < 0.005")
 	}
 
 	err := dbPointer.Order("random()").Limit(1).Scan(&quoteItem).Error

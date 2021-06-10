@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -20,7 +22,13 @@ const defaultMaxQuotes = 1
 //if validation fails.
 //TODO: Make validation better! i.e. make it "real"
 func GetRequestBody(rw http.ResponseWriter, r *http.Request, requestBody *structs.Request) error {
-	err := json.NewDecoder(r.Body).Decode(&requestBody)
+	buf, _ := ioutil.ReadAll(r.Body)
+	rdr1 := ioutil.NopCloser(bytes.NewBuffer(buf))
+	rdr2 := ioutil.NopCloser(bytes.NewBuffer(buf))
+
+	//Save the state back into the body for later use (Especially useful for getting the AOD/QOD because if the AOD has not been set a random AOD is set and the function called again)
+	r.Body = rdr2
+	err := json.NewDecoder(rdr1).Decode(&requestBody)
 
 	if err != nil {
 		log.Printf("Got error when decoding: %s", err)

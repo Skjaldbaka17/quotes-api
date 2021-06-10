@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/Skjaldbaka17/quotes-api/handlers"
@@ -57,12 +56,7 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 	})
 
 	//Particular language search
-	switch strings.ToLower(requestBody.Language) {
-	case "english":
-		dbPointer = dbPointer.Not("isicelandic")
-	case "icelandic":
-		dbPointer = dbPointer.Where("isicelandic")
-	}
+	dbPointer = quoteLanguageSQL(requestBody.Language, dbPointer)
 
 	err := dbPointer.Limit(requestBody.PageSize).
 		Offset(requestBody.Page * requestBody.PageSize).
@@ -110,12 +104,7 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 		})
 
 		//Particular language search
-	switch strings.ToLower(requestBody.Language) {
-	case "english":
-		dbPointer = dbPointer.Not("hasicelandicquotes")
-	case "icelandic":
-		dbPointer = dbPointer.Where("hasicelandicquotes")
-	}
+	dbPointer = authorLanguageSQL(requestBody.Language, dbPointer)
 
 	err := dbPointer.Limit(requestBody.PageSize).
 		Offset(requestBody.Page * requestBody.PageSize).
@@ -178,12 +167,7 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 		})
 
 	//Particular language search
-	switch strings.ToLower(requestBody.Language) {
-	case "english":
-		dbPointer = dbPointer.Not("isicelandic")
-	case "icelandic":
-		dbPointer = dbPointer.Where("isicelandic")
-	}
+	dbPointer = quoteLanguageSQL(requestBody.Language, dbPointer)
 
 	err := dbPointer.Limit(requestBody.PageSize).
 		Offset(requestBody.Page * requestBody.PageSize).
