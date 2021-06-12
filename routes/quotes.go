@@ -19,6 +19,7 @@ import (
 //
 // responses:
 //	200: quotesResponse
+//  400: incorrectBodyStructureResponse
 
 // GetQuotes handles POST requests to get the quotes, and their authors, that have the given ids
 func GetQuotes(rw http.ResponseWriter, r *http.Request) {
@@ -60,6 +61,7 @@ func GetQuotes(rw http.ResponseWriter, r *http.Request) {
 //
 // responses:
 //	200: quotesResponse
+//  400: incorrectBodyStructureResponse
 
 // GetQuotesList handles POST requests to get the quotes that fit the parameters
 
@@ -115,6 +117,7 @@ func GetQuotesList(rw http.ResponseWriter, r *http.Request) {
 // Get a random quote according to the given parameters
 // responses:
 //	200: randomQuoteResponse
+//  400: incorrectBodyStructureResponse
 
 // GetRandomQuote handles POST requests for getting a random quote
 func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
@@ -175,6 +178,7 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 // Sets the quote of the day for the given dates
 // responses:
 //	200: successResponse
+//  400: incorrectBodyStructureResponse
 
 //SetQuoteOfTheyDay sets the quote of the day (is password protected)
 func SetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
@@ -207,6 +211,7 @@ func SetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 // Gets the quote of the day
 // responses:
 //	200: quoteOfTheDayResponse
+//  400: incorrectBodyStructureResponse
 
 //GetQuoteOfTheyDay gets the quote of the day
 func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
@@ -251,6 +256,7 @@ func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 // Gets the history for the quotes of the day
 // responses:
 //	200: qodHistoryResponse
+//  400: incorrectBodyStructureResponse
 
 //GetQODHistory gets Qod history starting from some point
 func GetQODHistory(rw http.ResponseWriter, r *http.Request) {

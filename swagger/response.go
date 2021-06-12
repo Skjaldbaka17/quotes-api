@@ -102,6 +102,30 @@ type successResponseWrapper struct {
 	}
 }
 
+// Data structure representing the error response to a wrongly structured request body
+// swagger:response incorrectBodyStructureResponse
+type incorrectBodyStructureResponseWrapper struct {
+	// The error response to a wrongly structured request body
+	// in: body
+	Body struct {
+		// The error message
+		// Example: request body is not structured correctly.
+		Message string `json:"message"`
+	}
+}
+
+// Data structure representing the error response to an internal server error
+// swagger:response internalServerErrorResponse
+type internalServerErrorResponseWrapper struct {
+	// The error response to a wrongly structured request body
+	// in: body
+	Body struct {
+		// The error message
+		// Example: Please try again later.
+		Message string `json:"message"`
+	}
+}
+
 // Data structure for supported languages information
 // swagger:response listOfStrings
 type listOfStringsWrapper struct {

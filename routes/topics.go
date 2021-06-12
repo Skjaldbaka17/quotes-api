@@ -14,6 +14,7 @@ import (
 // List the available topics, english / icelandic or both
 // responses:
 //	200: listTopicsResponse
+//  400: incorrectBodyStructureResponse
 
 // GetTopics handles POST requests for listing the available quote-topics
 func GetTopics(rw http.ResponseWriter, r *http.Request) {
@@ -42,6 +43,7 @@ func GetTopics(rw http.ResponseWriter, r *http.Request) {
 // Get quotes from a particular topic
 // responses:
 //	200: multipleQuotesTopicResponse
+//  400: incorrectBodyStructureResponse
 
 // GetTopic handles POST requests for getting quotes from a particular topic
 func GetTopic(rw http.ResponseWriter, r *http.Request) {

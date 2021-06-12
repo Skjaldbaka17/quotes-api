@@ -11,16 +11,28 @@ import (
 
 func TestAuthors(t *testing.T) {
 
-	t.Run("should return Author with id 1", func(t *testing.T) {
+	t.Run("Get authors", func(t *testing.T) {
+		t.Run("should return Author with id 1", func(t *testing.T) {
 
-		authorId := Set{1}
-		var jsonStr = []byte(fmt.Sprintf(`{"ids": [%s]}`, authorId.toString()))
+			authorId := Set{1}
+			var jsonStr = []byte(fmt.Sprintf(`{"ids": [%s]}`, authorId.toString()))
 
-		respObj, _ := requestAndReturnArray(jsonStr, GetAuthorsById)
-		firstAuthor := respObj[0]
-		if firstAuthor.Id != authorId[0] {
-			t.Fatalf("got %d, want %d", firstAuthor.Authorid, authorId[0])
-		}
+			respObj, _ := requestAndReturnArray(jsonStr, GetAuthorsById)
+			firstAuthor := respObj[0]
+			if firstAuthor.Id != authorId[0] {
+				t.Fatalf("got %d, want %d", firstAuthor.Authorid, authorId[0])
+			}
+		})
+
+		t.Run("Should return 400 error, request body not structured correctly, the ids in body is array of strings", func(t *testing.T) {
+			authorId := []string{"1", "2", "3"}
+			var jsonStr = []byte(fmt.Sprintf(`{"ids": [%s]}`, authorId))
+
+			_, response := requestAndReturnArray(jsonStr, GetAuthorsById)
+			if response.StatusCode != 400 {
+				t.Fatalf("got statusCode %d, want 400", response.StatusCode)
+			}
+		})
 
 	})
 

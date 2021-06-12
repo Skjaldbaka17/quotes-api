@@ -17,6 +17,7 @@ import (
 //
 // responses:
 //	200: quotesResponse
+//  400: incorrectBodyStructureResponse
 
 // SearchByString handles POST requests to search for quotes / authors by a search-string
 func SearchByString(rw http.ResponseWriter, r *http.Request) {
@@ -60,6 +61,7 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 //
 // responses:
 //	200: authorsResponse
+//  400: incorrectBodyStructureResponse
 
 // SearchAuthorsByString handles POST requests to search for authors by a search-string
 func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
@@ -101,6 +103,7 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 // Quotes search. Searching quotes by a given search string
 // responses:
 //	200: quotesResponse
+//  400: incorrectBodyStructureResponse
 
 // SearchQuotesByString handles POST requests to search for quotes by a search-string
 func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {

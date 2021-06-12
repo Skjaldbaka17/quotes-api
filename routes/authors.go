@@ -20,6 +20,8 @@ import (
 //
 // responses:
 //	200: authorsResponse
+//  400: incorrectBodyStructureResponse
+//  500: internalServerErrorResponse
 
 // Get Authors handles POST requests to get the authors, and their quotes, that have the given ids
 func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
@@ -37,9 +39,9 @@ func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
 	//** ---------- Paramatere configuratino for DB query ends ---------- **//
 
 	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		log.Printf("Got error when decoding: %s", err)
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Got error when querying DB in GetAuthorsById: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 		return
 	}
 
@@ -55,6 +57,8 @@ func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
 //
 // responses:
 //	200: authorsResponse
+//  400: incorrectBodyStructureResponse
+//  500: internalServerErrorResponse
 
 // GetAuthorsList handles POST requests to get the authors that fit the parameters
 func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
@@ -109,9 +113,9 @@ func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
 		Error
 
 	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		log.Printf("Got error when decoding: %s", err)
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Got error when querying DB in GetAuthors: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 		return
 	}
 
@@ -125,6 +129,8 @@ func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
 // Get a random Author, and some of his quotes, according to the given parameters
 // responses:
 //	200: randomAuthorResponse
+//  400: incorrectBodyStructureResponse
+//  500: internalServerErrorResponse
 
 // GetRandomAuthor handles POST requests for getting a random author
 func GetRandomAuthor(rw http.ResponseWriter, r *http.Request) {
@@ -147,8 +153,9 @@ func GetRandomAuthor(rw http.ResponseWriter, r *http.Request) {
 	err := dbPointer.First(&author).Error
 
 	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Got error when querying DB, first one, in GetRandomAuthor: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 		return
 	}
 
@@ -160,8 +167,9 @@ func GetRandomAuthor(rw http.ResponseWriter, r *http.Request) {
 	err = dbPointer.Limit(requestBody.MaxQuotes).Find(&result).Error
 
 	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Got error when querying DB, second one, in GetAuthors: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 		return
 	}
 
@@ -172,6 +180,8 @@ func GetRandomAuthor(rw http.ResponseWriter, r *http.Request) {
 // Gets the author of the day
 // responses:
 //	200: authorOfTheDayResponse
+//  400: incorrectBodyStructureResponse
+//  500: internalServerErrorResponse
 
 //GetAuthorOfTheDay gets the author of the day
 func GetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
@@ -196,16 +206,18 @@ func GetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	err = dbPointer.Scan(&author).Error
 
 	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Got error when querying DB in GetAuthorOfTheDay: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 		return
 	}
 
 	if (structs.AuthorsView{}) == author {
 		err = setNewRandomAOD(requestBody.Language)
 		if err != nil {
-			//TODO: Respond with better error -- and put into swagger -- and add tests
-			http.Error(rw, err.Error(), http.StatusBadRequest)
+			rw.WriteHeader(http.StatusInternalServerError)
+			log.Printf("Got error when setting new random AOD in GetAuthorOfTheDay: %s", err)
+			json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 			return
 		}
 
@@ -220,6 +232,8 @@ func GetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
 // Gets the history for the authors of the day
 // responses:
 //	200: aodHistoryResponse
+//  400: incorrectBodyStructureResponse
+//  500: internalServerErrorResponse
 
 //GetAODHistory gets Aod history starting from some point
 func GetAODHistory(rw http.ResponseWriter, r *http.Request) {
@@ -242,14 +256,16 @@ func GetAODHistory(rw http.ResponseWriter, r *http.Request) {
 	minDate, err := time.Parse("2006-01-02", requestBody.Minimum)
 
 	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		rw.WriteHeader(http.StatusBadRequest)
+		log.Printf("Got error when parsing mindate in GetAODHistory: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: "Please supply date in '2020-12-21' format"})
 		return
 	}
 
 	if !now.After(minDate) {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		http.Error(rw, "Please send a minimum date that is before today", http.StatusBadRequest)
+		rw.WriteHeader(http.StatusBadRequest)
+		log.Printf("Got error when comparing mindate to today in GetAodHistory: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: "Please send a minimum date that is before today"})
 		return
 	}
 
@@ -262,8 +278,9 @@ func GetAODHistory(rw http.ResponseWriter, r *http.Request) {
 	err = dbPointer.Find(&authors).Error
 
 	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Got error when querying DB in GetAodHistory: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 		return
 	}
 
@@ -272,9 +289,9 @@ func GetAODHistory(rw http.ResponseWriter, r *http.Request) {
 	if len(authors) == 0 || !reg.Match([]byte(authors[0].Date)) {
 		err = setNewRandomAOD(requestBody.Language)
 		if err != nil {
-			log.Println(err)
-			//TODO: Respond with better error -- and put into swagger -- and add tests
-			http.Error(rw, err.Error(), http.StatusBadRequest)
+			rw.WriteHeader(http.StatusInternalServerError)
+			log.Printf("Got error when setting newRandomAOD in getAODHistory: %s", err)
+			json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 			return
 		}
 
@@ -291,6 +308,8 @@ func GetAODHistory(rw http.ResponseWriter, r *http.Request) {
 //
 // responses:
 //	200: successResponse
+//  400: incorrectBodyStructureResponse
+//  500: internalServerErrorResponse
 
 //SetAuthorOfTheDay sets the author of the day.
 func SetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
@@ -300,6 +319,8 @@ func SetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(requestBody.Aods) == 0 {
+		log.Println("No author supplied")
+		rw.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: "Please supply some authors", StatusCode: http.StatusBadRequest})
 		return
 	}
@@ -307,7 +328,8 @@ func SetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	for _, aod := range requestBody.Aods {
 		err := setAOD(requestBody.Language, aod.Date, aod.Id)
 		if err != nil {
-			log.Println(err)
+			log.Printf("Got err when setting the AOD for %+v: %s", aod, err)
+			rw.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: "Some of the authors (ids) you supplied do not have " + requestBody.Language + " quotes", StatusCode: http.StatusBadRequest})
 			return
 		}
