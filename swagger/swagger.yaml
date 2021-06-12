@@ -604,7 +604,7 @@ paths:
     post:
       description: Search for quotes / authors by a general string-search that searches
         both in the names of the authors and the quotes themselves
-      operationId: generalSearchByString
+      operationId: SearchByString
       parameters:
       - description: The structure of the request for searching quotes/authors
         in: body
@@ -643,15 +643,15 @@ paths:
           type: object
       responses:
         "200":
-          $ref: '#/responses/multipleQuotesResponse'
+          $ref: '#/responses/quotesResponse'
       tags:
       - SEARCH
   /search/authors:
     post:
       description: Authors search. Searching authors by a given search string
-      operationId: searchAuthorsByString
+      operationId: SearchAuthorsByString
       parameters:
-      - description: The structure of the request for searching authors
+      - description: The structure of the request for searching quotes/authors
         in: body
         name: Body
         required: true
@@ -688,13 +688,13 @@ paths:
           type: object
       responses:
         "200":
-          $ref: '#/responses/multipleQuotesResponse'
+          $ref: '#/responses/authorsResponse'
       tags:
       - SEARCH
   /search/quotes:
     post:
       description: Quotes search. Searching quotes by a given search string
-      operationId: searchQuotesByString
+      operationId: SearchQuotesByString
       parameters:
       - description: The structure of the request for searching quotes/authors
         in: body
@@ -733,7 +733,7 @@ paths:
           type: object
       responses:
         "200":
-          $ref: '#/responses/multipleQuotesResponse'
+          $ref: '#/responses/quotesResponse'
       tags:
       - SEARCH
   /topic:

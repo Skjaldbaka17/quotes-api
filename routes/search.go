@@ -12,11 +12,11 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// swagger:route POST /search SEARCH generalSearchByString
+// swagger:route POST /search SEARCH SearchByString
 // Search for quotes / authors by a general string-search that searches both in the names of the authors and the quotes themselves
 //
 // responses:
-//	200: multipleQuotesResponse
+//	200: quotesResponse
 
 // SearchByString handles POST requests to search for quotes / authors by a search-string
 func SearchByString(rw http.ResponseWriter, r *http.Request) {
@@ -54,12 +54,12 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(&results)
 }
 
-// swagger:route POST /search/authors SEARCH searchAuthorsByString
+// swagger:route POST /search/authors SEARCH SearchAuthorsByString
 //
 // Authors search. Searching authors by a given search string
 //
 // responses:
-//	200: multipleQuotesResponse
+//	200: authorsResponse
 
 // SearchAuthorsByString handles POST requests to search for authors by a search-string
 func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
@@ -97,10 +97,10 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(&results)
 }
 
-// swagger:route POST /search/quotes SEARCH searchQuotesByString
+// swagger:route POST /search/quotes SEARCH SearchQuotesByString
 // Quotes search. Searching quotes by a given search string
 // responses:
-//	200: multipleQuotesResponse
+//	200: quotesResponse
 
 // SearchQuotesByString handles POST requests to search for quotes by a search-string
 func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {

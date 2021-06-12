@@ -185,3 +185,61 @@ type getRandomQuoteResponseWrapper struct {
 		Authorid int `json:"authorid"`
 	}
 }
+
+// swagger:parameters SearchByString SearchQuotesByString
+type getSearchByStringWrapper struct {
+	// The structure of the request for searching quotes/authors
+	// in: body
+	// required: true
+	Body struct {
+		// The string to be used in the search
+		//
+		// Required: true
+		// Example: sting like butterfly
+		SearchString string `json:"searchString"`
+		// The number of quotes to be returned on each "page"
+		//
+		// Maximum: 200
+		// Minimum: 1
+		// Default: 25
+		// Example: 30
+		PageSize int `json:"pageSize"`
+		// The page you are asking for, starts with 0.
+		//
+		// Minimum: 0
+		// Example: 0
+		Page int `json:"page"`
+		// The particular language that the quote should be in
+		// example: English
+		Language string `json:"language"`
+	}
+}
+
+// swagger:parameters SearchAuthorsByString
+type getSearchAuthorsByStringWrapper struct {
+	// The structure of the request for searching quotes/authors
+	// in: body
+	// required: true
+	Body struct {
+		// The string to be used in the search
+		//
+		// Required: true
+		// Example: Ali Muhammad
+		SearchString string `json:"searchString"`
+		// The number of quotes to be returned on each "page"
+		//
+		// Maximum: 200
+		// Minimum: 1
+		// Default: 25
+		// Example: 30
+		PageSize int `json:"pageSize"`
+		// The page you are asking for, starts with 0.
+		//
+		// Minimum: 0
+		// Example: 0
+		Page int `json:"page"`
+		// The particular language that the quote should be in
+		// example: English
+		Language string `json:"language"`
+	}
+}
