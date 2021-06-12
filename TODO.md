@@ -1,5 +1,4 @@
 # TODOS
-- [ ] Review /topics for Swagger 
 - [ ] Review Swagger 
 - [ ] Clean up swagger in code
 - [ ] Clean up Documentation look (Swagger)
@@ -41,6 +40,7 @@
 - [ ] New crawler for new quotes / authors
  --------------
 
+- [x] Review /topics for Swagger 
 - [x] Review /search for Swagger 
 - [x] Review /quotes for Swagger 
 - [x] Review /meta for Swagger 

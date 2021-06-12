@@ -591,8 +591,9 @@ paths:
             topicId:
               description: The random quote returned must be a part of the topic with
                 the given topicId
-              example: "10"
-              type: string
+              example: 10
+              format: int64
+              type: integer
               x-go-name: TopicId
           type: object
       responses:
@@ -739,7 +740,7 @@ paths:
   /topic:
     post:
       description: Get quotes from a particular topic
-      operationId: getTopic
+      operationId: GetTopic
       parameters:
       - description: The structure of the request for listing topics
         in: body
@@ -748,8 +749,9 @@ paths:
           properties:
             id:
               description: The topic's id, if left empty then the topic name is used
-              example: "10"
-              type: string
+              example: 10
+              format: int64
+              type: integer
               x-go-name: Id
             page:
               description: The page you are asking for, starts with 0.
@@ -781,7 +783,7 @@ paths:
   /topics:
     post:
       description: List the available topics, english / icelandic or both
-      operationId: getTopics
+      operationId: GetTopics
       parameters:
       - description: The structure of the request for listing topics
         in: body

@@ -178,7 +178,7 @@ type getRandomQuoteResponseWrapper struct {
 		// The random quote returned must be a part of the topic with the given topicId
 		//
 		// Example: 10
-		TopicId string `json:"topicId"`
+		TopicId int `json:"topicId"`
 		// The random quote returned must be from the author with the given authorId
 		//
 		//example: 24952
@@ -241,5 +241,46 @@ type getSearchAuthorsByStringWrapper struct {
 		// The particular language that the quote should be in
 		// example: English
 		Language string `json:"language"`
+	}
+}
+
+// swagger:parameters GetTopics
+type listTopicsWrapper struct {
+	// The structure of the request for listing topics
+	// in: body
+	Body struct {
+		// The language of the topics. If left empty all topics from all languages are returned
+		//
+		// Example: English
+		Language string `json:"language"`
+	}
+}
+
+// swagger:parameters GetTopic
+type quotesFromTopicWrapper struct {
+	// The structure of the request for listing topics
+	// in: body
+	Body struct {
+		// Name of the topic, if left empty then the id is used
+		//
+		// required: false
+		// Example: Motivational
+		Topic string `json:"topic"`
+		// The topic's id, if left empty then the topic name is used
+		//
+		// Example: 10
+		Id int `json:"id"`
+		// The number of quotes to be returned on each "page"
+		//
+		// Maximum: 200
+		// Minimum: 1
+		// Default: 25
+		// Example: 30
+		PageSize int `json:"pageSize"`
+		// The page you are asking for, starts with 0.
+		//
+		// Minimum: 0
+		// Example: 0
+		Page int `json:"page"`
 	}
 }

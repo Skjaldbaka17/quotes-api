@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// swagger:route POST /topics TOPICS getTopics
+// swagger:route POST /topics TOPICS GetTopics
 // List the available topics, english / icelandic or both
 // responses:
 //	200: listTopicsResponse
@@ -38,7 +38,7 @@ func GetTopics(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(&results)
 }
 
-// swagger:route POST /topic TOPICS getTopic
+// swagger:route POST /topic TOPICS GetTopic
 // Get quotes from a particular topic
 // responses:
 //	200: multipleQuotesTopicResponse
