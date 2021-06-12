@@ -14,16 +14,11 @@ import (
 	"gorm.io/gorm"
 )
 
-// swagger:route POST /quotes QUOTES getQuotes
+// swagger:route POST /quotes QUOTES GetQuotes
 // Get quotes by their ids
 //
 // responses:
-//	200: multipleQuotesResponse
-
-//
-//Params: in Body {ids:[]int, authorId: int}
-//
-//
+//	200: quotesResponse
 
 // GetQuotes handles POST requests to get the quotes, and their authors, that have the given ids
 func GetQuotes(rw http.ResponseWriter, r *http.Request) {
@@ -59,12 +54,12 @@ func GetQuotes(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(&quotes)
 }
 
-// swagger:route POST /quotes/list QUOTES getQuotesList
+// swagger:route POST /quotes/list QUOTES GetQuotesList
 //
 // Get list of quotes according to some ordering / parameters
 //
 // responses:
-//	200: multipleQuoteResponse
+//	200: quotesResponse
 
 // GetQuotesList handles POST requests to get the quotes that fit the parameters
 
@@ -116,7 +111,7 @@ func GetQuotesList(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(&quotes)
 }
 
-// swagger:route POST /quotes/random QUOTES getRandomQuote
+// swagger:route POST /quotes/random QUOTES GetRandomQuote
 // Get a random quote according to the given parameters
 // responses:
 //	200: randomQuoteResponse
@@ -176,8 +171,8 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(result)
 }
 
-// swagger:route POST /quotes/qod/new QUOTES setQuoteOfTheDay
-// Sets the quote of the day for the given date. It Is password protected TODO: Put in privacy swagger
+// swagger:route POST /quotes/qod/new QUOTES SetQuoteOfTheDay
+// Sets the quote of the day for the given dates
 // responses:
 //	200: successResponse
 
@@ -208,10 +203,10 @@ func SetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: "Successfully inserted quote of the day!", StatusCode: http.StatusOK})
 }
 
-// swagger:route POST /quotes/qod QUOTES getQuoteOfTheDay
+// swagger:route POST /quotes/qod QUOTES GetQuoteOfTheDay
 // Gets the quote of the day
 // responses:
-//	200: randomQuoteResponse
+//	200: quoteOfTheDayResponse
 
 //GetQuoteOfTheyDay gets the quote of the day
 func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
@@ -252,7 +247,7 @@ func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(quote)
 }
 
-// swagger:route POST /quotes/qod QUOTES getQODHistory
+// swagger:route POST /quotes/qod QUOTES GetQODHistory
 // Gets the history for the quotes of the day
 // responses:
 //	200: qodHistoryResponse

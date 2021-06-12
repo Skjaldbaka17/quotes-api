@@ -1,6 +1,4 @@
 # TODOS
-- [ ] Review /meta for Swagger 
-- [ ] Review /quotes for Swagger 
 - [ ] Review /search for Swagger 
 - [ ] Review /topics for Swagger 
 - [ ] Review Swagger 
@@ -43,6 +41,9 @@
 - [ ] Look into payment for some privileges
 - [ ] New crawler for new quotes / authors
  --------------
+
+- [x] Review /quotes for Swagger 
+- [x] Review /meta for Swagger 
 - [x] Review /authors for Swagger 
 - [x] Clean up get/set QOD/AOD
 - [x] Pagination Everywhere where needed

@@ -41,6 +41,30 @@ type baseQuotesResponseModel struct {
 	Isicelandic bool `json:"isicelandic"`
 }
 
+// swagger:model qodResponseModel
+type qodResponseModel struct {
+	// The author's id
+	//Unique: true
+	//example: 24952
+	Authorid int `json:"authorid"`
+	// Name of the author
+	//example: Muhammad Ali
+	Name string `json:"name"`
+	// The date when this author was the author of the day
+	// example: 2021-06-12T00:00:00Z
+	Date string `json:"date"`
+	// The quote's id
+	//Unique: true
+	//example: 582676
+	Quoteid int `json:"quoteid" `
+	// The quote for the day
+	// example: Float like a butterfly, sting like a bee
+	Quote string `json:"quote"`
+	// Whether the quote is in icelandic
+	// example: false
+	Isicelandic bool `json:"isicelandic"`
+}
+
 // swagger:model OfTheDayModel
 type ofTheDayModel struct {
 	// The id of the author / quote
@@ -54,4 +78,22 @@ type ofTheDayModel struct {
 	// Default: English
 	// Example: icelandic
 	Language string `json:"language"`
+}
+
+// swagger:model OrderConfiguration
+type orderConfigListQuotesModel struct {
+	// What to order by, 'quoteId', 'popularity' or 'length'
+	// example: popularity
+	OrderBy string `json:"orderBy"`
+	// Where to start the ordering (if empty it starts from beginning, for example start at 1 for quoteid ascending order).
+	// Note this key is always a string.
+	// example: 10
+	Minimum string `json:"minimum"`
+	// Where to end the ordering (if empty it ends at the logical end, for example end at the highest quoteid for quoteid ascending order).
+	// Note this key is always a string.
+	// example: 11
+	Maximum string `json:"maximum"`
+	// Whether to order the list in reverse or not (true is Descending and false is Ascending, false is default)
+	// example: true
+	Reverse bool `json:"reverse"`
 }

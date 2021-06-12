@@ -18,6 +18,38 @@ type randomAuthorResponseWrapper struct {
 	Body []baseQuotesResponseModel //model
 }
 
+// Data structure representing the response for the quotes
+// swagger:response quotesResponse
+type quotesResponseWrapper struct {
+	// A quote struct
+	// in: body
+	Body []baseQuotesResponseModel //model
+}
+
+// Data structure representing the response for a quote
+// swagger:response randomQuoteResponse
+type quoteResponseWrapper struct {
+	// A quote struct
+	// in: body
+	Body structs.QuoteView
+}
+
+// Data structure representing the response for the quote of the day
+// swagger:response quoteOfTheDayResponse
+type quoteOfTheDayResponseWrapper struct {
+	// The response to the author of the day request
+	// in: body
+	Body qodResponseModel
+}
+
+// Data structure representing the response for the history of QODS
+// swagger:response qodHistoryResponse
+type qodHistoryResponseWrapper struct {
+	// The response to the author of the day request
+	// in: body
+	Body []qodResponseModel
+}
+
 // Data structure representing the response for the author of the day
 // swagger:response authorOfTheDayResponse
 type authorOfTheDayResponseWrapper struct {

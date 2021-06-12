@@ -60,12 +60,12 @@ type randomAuthorWrapper struct {
 	}
 }
 
-// swagger:parameters GetAuthorOfTheDay
-type authorOfTheDayWrapper struct {
-	// The structure of the request for getting the author of the day
+// swagger:parameters GetAuthorOfTheDay GetQuoteOfTheDay
+type ofTheDayWrapper struct {
+	// The structure of the request for getting the author / quote of the day
 	// in: body
 	Body struct {
-		// Get the author of the day for the given language ("icelandic" or "english")
+		// Get the author / quote of the day for the given language ("icelandic" or "english")
 		//
 		// Default: English
 		// Example: English
@@ -73,17 +73,17 @@ type authorOfTheDayWrapper struct {
 	}
 }
 
-// swagger:parameters GetAODHistory
+// swagger:parameters GetAODHistory GetQODHistory
 type historyAODWrapper struct {
-	// The structure of the request for getting the history of AODs
+	// The structure of the request for getting the history of AODs / QODs
 	// in: body
 	Body []struct {
-		// Get the history of theAODS for the given language ("icelandic" or "english")
+		// Get the history of the AODS / QODs for the given language ("icelandic" or "english")
 		//
 		// Default: English
 		// Example: icelandic
 		Language string `json:"language"`
-		// The earliest date to return. All authors between minimum and today will be returned.
+		// The earliest date to return. All authors / quotes between minimum and today will be returned.
 		// Example: 2020-12-21
 		Minimum string `json:"minimum"`
 	}
@@ -95,5 +95,93 @@ type setAODWrapper struct {
 	// in: body
 	Body []struct {
 		Aods []ofTheDayModel
+	}
+}
+
+// swagger:parameters SetQuoteOfTheDay
+type setQuoteOfTheDayWrapper struct {
+	// The structure of the request for setting the QOD
+	// in: body
+	Body struct {
+		Qods []ofTheDayModel
+	}
+}
+
+// swagger:parameters GetQuotes
+type getQuotesByWrapper struct {
+	// The structure of the request to get quotes. There are two ways to use this route. 1. Send the ids of the quotes to be
+	// retrieved or 2. send the id of the author of the quotes you want (if you use this option the quotes are paginated)
+	// in: body
+	// required: true
+	Body struct {
+		// The list of quotes's ids you want
+		//
+		// Example: [582676,443976]
+		Ids []int `json:"ids"`
+		// The id of the author of the quotes you want.
+		// Example: 24952
+		AuthorId int `json:"authorId"`
+		// If using authorId the response is paged. This parameter controls the number of Authors to be returned on each "page"
+		//
+		// Maximum: 200
+		// Minimum: 1
+		// Default: 25
+		// Example: 30
+		PageSize int `json:"pageSize"`
+		// If using authorId the response is paged. This parameter controls the page you are asking for, starts with 0.
+		//
+		// Minimum: 0
+		// Example: 0
+		Page int `json:"page"`
+	}
+}
+
+// swagger:parameters GetQuotesList
+type quotesListWrapper struct {
+	// The structure of the request for getting a list of quotes
+	// in: body
+	Body struct {
+		// Response is paged. This parameter controls the number of Quotes to be returned on each "page"
+		//
+		// Maximum: 200
+		// Minimum: 1
+		// Default: 25
+		// Example: 30
+		PageSize int `json:"pageSize"`
+		// Response is paged. This parameter controls the page you are asking for, starts with 0.
+		//
+		// Minimum: 0
+		// Example: 0
+		Page int `json:"page"`
+		// Only return quotes that have quotes in the given language ("english" or "icelandic") if left empty then no constraint
+		// is set on the quotes' language.
+		// Example: English
+		Language string `json:"language"`
+		//Model
+		OrderConfig orderConfigListQuotesModel
+	}
+}
+
+// swagger:parameters GetRandomQuote
+type getRandomQuoteResponseWrapper struct {
+	// The structure of the request for a random quote
+	// in: body
+	Body struct {
+		// The random quote returned must be in the given language
+		//
+		// Example: English
+		Language string `json:"language"`
+		// The random quote returned must contain a match with the searchstring
+		//
+		// Example: float
+		SearchString string `json:"searchString"`
+		// The random quote returned must be a part of the topic with the given topicId
+		//
+		// Example: 10
+		TopicId string `json:"topicId"`
+		// The random quote returned must be from the author with the given authorId
+		//
+		//example: 24952
+		Authorid int `json:"authorid"`
 	}
 }

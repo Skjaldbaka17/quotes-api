@@ -27,52 +27,6 @@
 // swagger:meta
 package docs
 
-import "github.com/Skjaldbaka17/quotes-api/structs"
-
-// swagger:response qodHistoryResponse
-type qodHistoryResponseWrapper struct {
-	// The structure of the request for listing topics
-	// in: body
-	Body []struct {
-		// The author's id
-		//Unique: true
-		//example: 24952
-		Authorid int `json:"authorid"`
-		// Name of author
-		//example: Muhammad Ali
-		Name string `json:"name"`
-		// The quote's id
-		//Unique: true
-		//example: 582676
-		Quoteid int `json:"quoteid" `
-		// The quote
-		//example: Float like a butterfly, sting like a bee.
-		Quote string `json:"quote"`
-		// Whether or not this quote is in Icelandic or not
-		// example: false
-		Isicelandic bool `json:"isicelandic"`
-		//The date for which this quote was the QOD
-		//example: 2021-06-07T00:00:00Z
-		Date string `json:"date"`
-	}
-}
-
-// Data structure representing most responses
-// swagger:response multipleQuotesResponse
-type multipleResponseWrapper struct {
-	// List of authors / quotes
-	// in: body
-	Body []structs.QuoteView
-}
-
-// Data structure representing the response for a random quote
-// swagger:response randomQuoteResponse
-type randomQuoteResponseWrapper struct {
-	// A quote struct
-	// in: body
-	Body structs.QuoteView
-}
-
 // Data structure representing topic quotes response
 // swagger:response multipleQuotesTopicResponse
 type multipleQuotesTopicResponseWrapper struct {
@@ -120,20 +74,6 @@ type listTopicsResponseWrapper struct {
 		// Boolean whether or not this quote is in icelandic
 		// example: true
 		Isicelandic bool `json:"isicelandic"`
-	}
-}
-
-// swagger:parameters getQuotes
-type getQuotesByWrapper struct {
-	// The structure of the request for quotes by their ids
-	// in: body
-	// required: true
-	Body struct {
-		// The list of quotes's ids you want
-		//
-		// Required: true
-		// Example: [582676,443976]
-		Ids []int `json:"ids"`
 	}
 }
 
@@ -207,18 +147,6 @@ type listTopicsWrapper struct {
 	}
 }
 
-// swagger:parameters getQuoteOfTheDay
-type getQuoteOfTheDayWrapper struct {
-	// The structure of the request for getting the QOD
-	// in: body
-	Body struct {
-		// The language of the QOD. If left empty the english QOD is returned
-		//
-		// Example: English
-		Language string `json:"language"`
-	}
-}
-
 // swagger:parameters getQODHistory
 type getQODHistoryWrapper struct {
 	// The structure of the request for getting the QOD history
@@ -231,9 +159,6 @@ type getQODHistoryWrapper struct {
 		//The minimum date to retrieve the history
 		// example: 2020-06-21
 		Minimum string `json:"minimum"`
-		//The maximum date to retrieve the history
-		// example: 2021-06-17
-		Maximum string `json:"maximum"`
 	}
 }
 
@@ -263,38 +188,5 @@ type quotesFromTopicWrapper struct {
 		// Minimum: 0
 		// Example: 0
 		Page int `json:"page"`
-	}
-}
-
-// swagger:parameters getRandomQuote
-type getRandomQuoteResponseWrapper struct {
-	// The structure of the response to random Quote post request
-	// in: body
-	Body struct {
-		// The random quote returned must be in the given language
-		//
-		// Example: English
-		Language string `json:"language"`
-		// The random quote returned must contain a match with the searchstring
-		//
-		// Example: float
-		SearchString string `json:"searchString"`
-		// The random quote returned must be a part of the topic with the given topicId
-		//
-		// Example: 10
-		TopicId string `json:"topicId"`
-		// The random quote returned must be from the author with the given authorId
-		//
-		//example: 24952
-		Authorid int `json:"authorid"`
-	}
-}
-
-// swagger:parameters setQuoteOfTheDay
-type setQuoteOfTheDayWrapper struct {
-	// The structure of the request for setting the QOD
-	// in: body
-	Body struct {
-		Qods []structs.Qod
 	}
 }

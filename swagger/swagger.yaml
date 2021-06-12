@@ -89,27 +89,6 @@ definitions:
     type: object
     x-go-name: orderConfigListAuthorsModel
     x-go-package: github.com/Skjaldbaka17/quotes-api/swagger
-  Qod:
-    properties:
-      date:
-        description: the date for which this quote is the QOD, if left empty this
-          quote is today's QOD.
-        example: 12-22-2020
-        type: string
-        x-go-name: Date
-      id:
-        description: The id of the quote to be set as this dates QOD
-        example: 1
-        format: int64
-        type: integer
-        x-go-name: Id
-      language:
-        description: The language of the QOD
-        example: icelandic
-        type: string
-        x-go-name: Language
-    type: object
-    x-go-package: github.com/Skjaldbaka17/quotes-api/structs
   QuoteView:
     properties:
       authorid:
@@ -156,6 +135,44 @@ definitions:
         x-go-name: Topicname
     type: object
     x-go-package: github.com/Skjaldbaka17/quotes-api/structs
+  qodResponseModel:
+    properties:
+      authorid:
+        description: The author's id
+        example: 24952
+        format: int64
+        type: integer
+        uniqueItems: true
+        x-go-name: Authorid
+      date:
+        description: The date when this author was the author of the day
+        example: "2021-06-12T00:00:00Z"
+        type: string
+        x-go-name: Date
+      isicelandic:
+        description: Whether the quote is in icelandic
+        example: false
+        type: boolean
+        x-go-name: Isicelandic
+      name:
+        description: Name of the author
+        example: Muhammad Ali
+        type: string
+        x-go-name: Name
+      quote:
+        description: The quote for the day
+        example: Float like a butterfly, sting like a bee
+        type: string
+        x-go-name: Quote
+      quoteid:
+        description: The quote's id
+        example: 582676
+        format: int64
+        type: integer
+        uniqueItems: true
+        x-go-name: Quoteid
+    type: object
+    x-go-package: github.com/Skjaldbaka17/quotes-api/swagger
   quotesResponse:
     properties:
       authorid:
@@ -237,15 +254,16 @@ paths:
       description: Gets the author of the day
       operationId: GetAuthorOfTheDay
       parameters:
-      - description: The structure of the request for getting the author of the day
+      - description: The structure of the request for getting the author / quote of
+          the day
         in: body
         name: Body
         schema:
           properties:
             language:
               default: English
-              description: Get the author of the day for the given language ("icelandic"
-                or "english")
+              description: Get the author / quote of the day for the given language
+                ("icelandic" or "english")
               example: English
               type: string
               x-go-name: Language
@@ -261,6 +279,7 @@ paths:
       operationId: GetAODHistory
       parameters:
       - description: The structure of the request for getting the history of AODs
+          / QODs
         in: body
         name: Body
         schema:
@@ -268,14 +287,14 @@ paths:
             properties:
               language:
                 default: English
-                description: Get the history of theAODS for the given language ("icelandic"
-                  or "english")
+                description: Get the history of the AODS / QODs for the given language
+                  ("icelandic" or "english")
                 example: icelandic
                 type: string
                 x-go-name: Language
               minimum:
-                description: The earliest date to return. All authors between minimum
-                  and today will be returned.
+                description: The earliest date to return. All authors / quotes between
+                  minimum and today will be returned.
                 example: "2020-12-21"
                 type: string
                 x-go-name: Minimum
@@ -396,14 +415,22 @@ paths:
   /quotes:
     post:
       description: Get quotes by their ids
-      operationId: getQuotes
+      operationId: GetQuotes
       parameters:
-      - description: The structure of the request for quotes by their ids
+      - description: |-
+          The structure of the request to get quotes. There are two ways to use this route. 1. Send the ids of the quotes to be
+          retrieved or 2. send the id of the author of the quotes you want (if you use this option the quotes are paginated)
         in: body
         name: Body
         required: true
         schema:
           properties:
+            authorId:
+              description: The id of the author of the quotes you want.
+              example: 24952
+              format: int64
+              type: integer
+              x-go-name: AuthorId
             ids:
               description: The list of quotes's ids you want
               example:
@@ -414,50 +441,100 @@ paths:
                 type: integer
               type: array
               x-go-name: Ids
-          required:
-          - ids
+            page:
+              description: If using authorId the response is paged. This parameter
+                controls the page you are asking for, starts with 0.
+              example: 0
+              format: int64
+              minimum: 0
+              type: integer
+              x-go-name: Page
+            pageSize:
+              default: 25
+              description: If using authorId the response is paged. This parameter
+                controls the number of Authors to be returned on each "page"
+              example: 30
+              format: int64
+              maximum: 200
+              minimum: 1
+              type: integer
+              x-go-name: PageSize
           type: object
       responses:
         "200":
-          $ref: '#/responses/multipleQuotesResponse'
+          $ref: '#/responses/quotesResponse'
       tags:
       - QUOTES
   /quotes/list:
     post:
       description: Get list of quotes according to some ordering / parameters
-      operationId: getQuotesList
+      operationId: GetQuotesList
+      parameters:
+      - description: The structure of the request for getting a list of quotes
+        in: body
+        name: Body
+        schema:
+          properties:
+            OrderConfig:
+              $ref: '#/definitions/OrderConfiguration'
+            language:
+              description: |-
+                Only return quotes that have quotes in the given language ("english" or "icelandic") if left empty then no constraint
+                is set on the quotes' language.
+              example: English
+              type: string
+              x-go-name: Language
+            page:
+              description: Response is paged. This parameter controls the page you
+                are asking for, starts with 0.
+              example: 0
+              format: int64
+              minimum: 0
+              type: integer
+              x-go-name: Page
+            pageSize:
+              default: 25
+              description: Response is paged. This parameter controls the number of
+                Quotes to be returned on each "page"
+              example: 30
+              format: int64
+              maximum: 200
+              minimum: 1
+              type: integer
+              x-go-name: PageSize
+          type: object
       responses:
         "200":
-          $ref: '#/responses/multipleQuoteResponse'
+          $ref: '#/responses/quotesResponse'
       tags:
       - QUOTES
   /quotes/qod:
     post:
       description: Gets the history for the quotes of the day
-      operationId: getQODHistory
+      operationId: GetQODHistory
       parameters:
-      - description: The structure of the request for getting the QOD history
+      - description: The structure of the request for getting the history of AODs
+          / QODs
         in: body
         name: Body
         schema:
-          properties:
-            language:
-              description: The language of the QOD. If left empty the english QOD
-                is returned
-              example: English
-              type: string
-              x-go-name: Language
-            maximum:
-              description: The maximum date to retrieve the history
-              example: "2021-06-17"
-              type: string
-              x-go-name: Maximum
-            minimum:
-              description: The minimum date to retrieve the history
-              example: "2020-06-21"
-              type: string
-              x-go-name: Minimum
-          type: object
+          items:
+            properties:
+              language:
+                default: English
+                description: Get the history of the AODS / QODs for the given language
+                  ("icelandic" or "english")
+                example: icelandic
+                type: string
+                x-go-name: Language
+              minimum:
+                description: The earliest date to return. All authors / quotes between
+                  minimum and today will be returned.
+                example: "2020-12-21"
+                type: string
+                x-go-name: Minimum
+            type: object
+          type: array
       responses:
         "200":
           $ref: '#/responses/qodHistoryResponse'
@@ -465,9 +542,8 @@ paths:
       - QUOTES
   /quotes/qod/new:
     post:
-      description: 'Sets the quote of the day for the given date. It Is password protected
-        TODO: Put in privacy swagger'
-      operationId: setQuoteOfTheDay
+      description: Sets the quote of the day for the given dates
+      operationId: SetQuoteOfTheDay
       parameters:
       - description: The structure of the request for setting the QOD
         in: body
@@ -476,7 +552,7 @@ paths:
           properties:
             Qods:
               items:
-                $ref: '#/definitions/Qod'
+                $ref: '#/definitions/OfTheDayModel'
               type: array
           type: object
       responses:
@@ -487,9 +563,9 @@ paths:
   /quotes/random:
     post:
       description: Get a random quote according to the given parameters
-      operationId: getRandomQuote
+      operationId: GetRandomQuote
       parameters:
-      - description: The structure of the response to random Quote post request
+      - description: The structure of the request for a random quote
         in: body
         name: Body
         schema:
@@ -818,12 +894,6 @@ responses:
             x-go-name: Name
         type: object
       type: array
-  multipleQuotesResponse:
-    description: Data structure representing most responses
-    schema:
-      items:
-        $ref: '#/definitions/QuoteView'
-      type: array
   multipleQuotesTopicResponse:
     description: Data structure representing topic quotes response
     schema:
@@ -870,45 +940,20 @@ responses:
         type: object
       type: array
   qodHistoryResponse:
-    description: ""
+    description: Data structure representing the response for the history of QODS
     schema:
       items:
-        properties:
-          authorid:
-            description: The author's id
-            example: 24952
-            format: int64
-            type: integer
-            uniqueItems: true
-            x-go-name: Authorid
-          date:
-            description: The date for which this quote was the QOD
-            example: "2021-06-07T00:00:00Z"
-            type: string
-            x-go-name: Date
-          isicelandic:
-            description: Whether or not this quote is in Icelandic or not
-            example: false
-            type: boolean
-            x-go-name: Isicelandic
-          name:
-            description: Name of author
-            example: Muhammad Ali
-            type: string
-            x-go-name: Name
-          quote:
-            description: The quote
-            example: Float like a butterfly, sting like a bee.
-            type: string
-            x-go-name: Quote
-          quoteid:
-            description: The quote's id
-            example: 582676
-            format: int64
-            type: integer
-            uniqueItems: true
-            x-go-name: Quoteid
-        type: object
+        $ref: '#/definitions/qodResponseModel'
+      type: array
+  quoteOfTheDayResponse:
+    description: Data structure representing the response for the quote of the day
+    schema:
+      $ref: '#/definitions/qodResponseModel'
+  quotesResponse:
+    description: Data structure representing the response for the quotes
+    schema:
+      items:
+        $ref: '#/definitions/quotesResponse'
       type: array
   randomAuthorResponse:
     description: Data structure representing the response for a random author
@@ -917,7 +962,7 @@ responses:
         $ref: '#/definitions/quotesResponse'
       type: array
   randomQuoteResponse:
-    description: Data structure representing the response for a random quote
+    description: Data structure representing the response for a quote
     schema:
       $ref: '#/definitions/QuoteView'
   successResponse:
