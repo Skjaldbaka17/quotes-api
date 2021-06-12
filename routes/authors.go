@@ -230,11 +230,14 @@ func GetAODHistory(rw http.ResponseWriter, r *http.Request) {
 	if requestBody.Language == "" {
 		requestBody.Language = "English"
 	}
-	var authors []structs.QuoteView
+	var authors []structs.AuthorsView
 	var err error
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	dbPointer := aodLanguageSQL(requestBody.Language)
 
+	if requestBody.Minimum == "" {
+		requestBody.Minimum = "1900-12-21"
+	}
 	now := time.Now()
 	minDate, err := time.Parse("2006-01-02", requestBody.Minimum)
 

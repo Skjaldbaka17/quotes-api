@@ -1,7 +1,5 @@
 # TODOS
 
-- [ ] only return keys, in the response-json, that are relevant to the request
-
 - [ ] Error handling + Tests
 - [ ] Make error tests (i.e. made-to-fail-tests)
 - [ ] Add error response to Swagger
@@ -9,6 +7,8 @@
 
 - [ ] Add password protection / protected routes capability (at least for SetQuoteOfTheyDay route )
 - [ ] Add authentication for access to the api + Creating apiKeys + Documenting usage + admin access vs normal access
+
+- [ ] only return keys, in the response-json, that are relevant to the request
 
 - [ ] create type handler around the *gorm.DB so that you can create specific methods for building the sql-queries
 
