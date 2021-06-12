@@ -99,7 +99,7 @@ func GetRequestBody(rw http.ResponseWriter, r *http.Request, requestBody *struct
 
 	if requestBody.Minimum != "" {
 
-		parseDate, err := time.Parse(layout, requestBody.Minimum)
+		_, err := time.Parse(layout, requestBody.Minimum)
 		if err != nil {
 			log.Printf("Got error when decoding: %s", err)
 			err = fmt.Errorf("the minimum date is not structured correctly, should be in %s format", layout)
@@ -107,7 +107,7 @@ func GetRequestBody(rw http.ResponseWriter, r *http.Request, requestBody *struct
 			json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: err.Error()})
 			return err
 		}
-		requestBody.Minimum = parseDate.Format("01-02-2006")
+		// requestBody.Minimum = parseDate.Format("01-02-2006")
 	}
 
 	if requestBody.Maximum != "" {

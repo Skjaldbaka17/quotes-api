@@ -1,5 +1,4 @@
 # TODOS
-- [ ] Review /authors for Swagger 
 - [ ] Review /meta for Swagger 
 - [ ] Review /quotes for Swagger 
 - [ ] Review /search for Swagger 
@@ -23,6 +22,8 @@
 
 - [ ] Add .env variables (i.e. for names of tables etc.)
 
+- [ ] Change to Use Gorm to the fullest, oooooooorrr just change returned json to : {"name":"authorName", "id":authorId, "hasIcelandicQuotes":true/false, "nrOfEnglishQuoes":int, "nrOfIcelandicQuotes":int, "quotes":[{"quote": "theQuote", "id":quoteId, "isIcelandic": true/false}]}
+
 - [ ] Insert Quote for created author or for a 'real' author (private and public)
 - [ ] update inserted quote (priv and pub)
 - [ ] Create new Author (private and public)
@@ -42,7 +43,7 @@
 - [ ] Look into payment for some privileges
 - [ ] New crawler for new quotes / authors
  --------------
-
+- [x] Review /authors for Swagger 
 - [x] Clean up get/set QOD/AOD
 - [x] Pagination Everywhere where needed
 - [x] Clean up routes files

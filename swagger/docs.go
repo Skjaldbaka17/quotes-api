@@ -57,22 +57,6 @@ type qodHistoryResponseWrapper struct {
 	}
 }
 
-// swagger:response successResponse
-type successResponseWrapper struct {
-	// The successful response to a successful setting of a QOD
-	// in: body
-	Body struct {
-		// the date for which this quote is the QOD, if left empty this quote is today's QOD
-		//
-		// Example: Successfully inserted quote of the day!
-		Message string `json:"message"`
-		// HTTP status code
-		//
-		// Example: 200
-		StatusCode int `json:"statusCode"`
-	}
-}
-
 // Data structure representing most responses
 // swagger:response multipleQuotesResponse
 type multipleResponseWrapper struct {
@@ -136,18 +120,6 @@ type listTopicsResponseWrapper struct {
 		// Boolean whether or not this quote is in icelandic
 		// example: true
 		Isicelandic bool `json:"isicelandic"`
-	}
-}
-
-// Data structure for a list of strings
-// swagger:response listOfStrings
-type listOfStringsWrapper struct {
-	// List of languages supported by the api
-	// in: body
-	Body []struct {
-		// The languages supported
-		// example: ["English", "Icelandic"]
-		Languages []string `json:"languages"`
 	}
 }
 

@@ -59,3 +59,41 @@ type randomAuthorWrapper struct {
 		MaxQuotes int `json:"maxQuotes"`
 	}
 }
+
+// swagger:parameters GetAuthorOfTheDay
+type authorOfTheDayWrapper struct {
+	// The structure of the request for getting the author of the day
+	// in: body
+	Body struct {
+		// Get the author of the day for the given language ("icelandic" or "english")
+		//
+		// Default: English
+		// Example: English
+		Language string `json:"language"`
+	}
+}
+
+// swagger:parameters GetAODHistory
+type historyAODWrapper struct {
+	// The structure of the request for getting the history of AODs
+	// in: body
+	Body []struct {
+		// Get the history of theAODS for the given language ("icelandic" or "english")
+		//
+		// Default: English
+		// Example: icelandic
+		Language string `json:"language"`
+		// The earliest date to return. All authors between minimum and today will be returned.
+		// Example: 2020-12-21
+		Minimum string `json:"minimum"`
+	}
+}
+
+// swagger:parameters SetAuthorOfTheDay
+type setAODWrapper struct {
+	// The structure of the request for setting AODs
+	// in: body
+	Body []struct {
+		Aods []ofTheDayModel
+	}
+}

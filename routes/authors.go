@@ -138,7 +138,7 @@ func GetRandomAuthor(rw http.ResponseWriter, r *http.Request) {
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 
 	//Get Random author
-	dbPointer := handlers.Db.Table("authors").Where("random() < 0.01")
+	dbPointer := handlers.Db.Table("authors").Order("random()")
 
 	//author from a particular language
 	dbPointer = authorLanguageSQL(requestBody.Language, dbPointer)
@@ -168,12 +168,10 @@ func GetRandomAuthor(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(result)
 }
 
-// I AM HERE!!!!!
-
-// swagger:route POST /quotes/qod AUTHORS getAuthorOfTheDay
+// swagger:route POST /authors/aod AUTHORS GetAuthorOfTheDay
 // Gets the author of the day
 // responses:
-//	200: randomQuoteResponse
+//	200: authorOfTheDayResponse
 
 //GetAuthorOfTheDay gets the author of the day
 func GetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
@@ -185,7 +183,7 @@ func GetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
 		requestBody.Language = "English"
 	}
 
-	var author structs.QuoteView
+	var author structs.AuthorsView
 	var err error
 
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
@@ -203,7 +201,7 @@ func GetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if (structs.QuoteView{}) == author {
+	if (structs.AuthorsView{}) == author {
 		err = setNewRandomAOD(requestBody.Language)
 		if err != nil {
 			//TODO: Respond with better error -- and put into swagger -- and add tests
@@ -218,10 +216,10 @@ func GetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(author)
 }
 
-// swagger:route POST /quotes/qod AUTHORS getAODHistory
+// swagger:route POST /authors/aod/history AUTHORS GetAODHistory
 // Gets the history for the authors of the day
 // responses:
-//	200: qodHistoryResponse
+//	200: aodHistoryResponse
 
 //GetAODHistory gets Aod history starting from some point
 func GetAODHistory(rw http.ResponseWriter, r *http.Request) {
@@ -236,6 +234,21 @@ func GetAODHistory(rw http.ResponseWriter, r *http.Request) {
 	var err error
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	dbPointer := aodLanguageSQL(requestBody.Language)
+
+	now := time.Now()
+	minDate, err := time.Parse("2006-01-02", requestBody.Minimum)
+
+	if err != nil {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if !now.After(minDate) {
+		//TODO: Respond with better error -- and put into swagger -- and add tests
+		http.Error(rw, "Please send a minimum date that is before today", http.StatusBadRequest)
+		return
+	}
 
 	//Not maximum because then possibility of endless cycle with the if statement below!
 	if requestBody.Minimum != "" {
@@ -252,6 +265,7 @@ func GetAODHistory(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	reg := regexp.MustCompile(time.Now().Format("2006-01-02"))
+
 	if len(authors) == 0 || !reg.Match([]byte(authors[0].Date)) {
 		err = setNewRandomAOD(requestBody.Language)
 		if err != nil {
@@ -268,12 +282,14 @@ func GetAODHistory(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(authors)
 }
 
-// swagger:route POST /quotes/aod/new AUTHORS setAuthorsOfTheDay
-// Sets the author of the day for the given date. It Is password protected TODO: Put in privacy swagger
+// swagger:route POST /authors/aod/new AUTHORS SetAuthorOfTheDay
+//
+// sets the author of the day for the given dates
+//
 // responses:
 //	200: successResponse
 
-//SetAuthorOfTheDay sets the author of the day (is password protected)
+//SetAuthorOfTheDay sets the author of the day.
 func SetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	var requestBody structs.Request
 	if err := handlers.GetRequestBody(rw, r, &requestBody); err != nil {

@@ -17,3 +17,67 @@ type randomAuthorResponseWrapper struct {
 	// in: body
 	Body []baseQuotesResponseModel //model
 }
+
+// Data structure representing the response for the author of the day
+// swagger:response authorOfTheDayResponse
+type authorOfTheDayResponseWrapper struct {
+	// The response to the author of the day request
+	// in: body
+	Body struct {
+		// The author's id
+		//Unique: true
+		//example: 24952
+		Id int `json:"id"`
+		// Name of the author
+		//example: Muhammad Ali
+		Name string `json:"name"`
+		// The date when this author was the author of the day
+		// example: 2021-06-12T00:00:00Z
+		Date string `json:"date"`
+	}
+}
+
+// Data structure representing the response for the history of AODs
+// swagger:response aodHistoryResponse
+type aodHistoryResponseWrapper struct {
+	// The response to the author of the day request
+	// in: body
+	Body []struct {
+		// The author's id
+		//Unique: true
+		//example: 24952
+		Id int `json:"id"`
+		// Name of the author
+		//example: Muhammad Ali
+		Name string `json:"name"`
+		// The date when this author was the author of the day
+		// example: 2021-06-12T00:00:00Z
+		Date string `json:"date"`
+	}
+}
+
+// swagger:response successResponse
+type successResponseWrapper struct {
+	// The successful response to a successful setting of a QOD
+	// in: body
+	Body struct {
+		// Example: This request was a success
+		Message string `json:"message"`
+		// HTTP status code
+		//
+		// Example: 200
+		StatusCode int `json:"statusCode"`
+	}
+}
+
+// Data structure for supported languages information
+// swagger:response listOfStrings
+type listOfStringsWrapper struct {
+	// The languages supported by the api
+	// in: body
+	Body []struct {
+		// The languages supported
+		// example: ["English", "Icelandic"]
+		Languages []string `json:"languages"`
+	}
+}

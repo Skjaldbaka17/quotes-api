@@ -35,6 +35,28 @@ definitions:
         x-go-name: Nroficelandicquotes
     type: object
     x-go-package: github.com/Skjaldbaka17/quotes-api/structs
+  OfTheDayModel:
+    properties:
+      date:
+        description: The date when this author / quote should be 'of the day'
+        example: "2020-06-12"
+        type: string
+        x-go-name: Date
+      id:
+        description: The id of the author / quote
+        example: 1
+        format: int64
+        type: integer
+        x-go-name: Id
+      language:
+        default: English
+        description: The language of this author / quote
+        example: icelandic
+        type: string
+        x-go-name: Language
+    type: object
+    x-go-name: ofTheDayModel
+    x-go-package: github.com/Skjaldbaka17/quotes-api/swagger
   OrderConfiguration:
     properties:
       maximum:
@@ -210,6 +232,82 @@ paths:
           $ref: '#/responses/authorsResponse'
       tags:
       - AUTHORS
+  /authors/aod:
+    post:
+      description: Gets the author of the day
+      operationId: GetAuthorOfTheDay
+      parameters:
+      - description: The structure of the request for getting the author of the day
+        in: body
+        name: Body
+        schema:
+          properties:
+            language:
+              default: English
+              description: Get the author of the day for the given language ("icelandic"
+                or "english")
+              example: English
+              type: string
+              x-go-name: Language
+          type: object
+      responses:
+        "200":
+          $ref: '#/responses/authorOfTheDayResponse'
+      tags:
+      - AUTHORS
+  /authors/aod/history:
+    post:
+      description: Gets the history for the authors of the day
+      operationId: GetAODHistory
+      parameters:
+      - description: The structure of the request for getting the history of AODs
+        in: body
+        name: Body
+        schema:
+          items:
+            properties:
+              language:
+                default: English
+                description: Get the history of theAODS for the given language ("icelandic"
+                  or "english")
+                example: icelandic
+                type: string
+                x-go-name: Language
+              minimum:
+                description: The earliest date to return. All authors between minimum
+                  and today will be returned.
+                example: "2020-12-21"
+                type: string
+                x-go-name: Minimum
+            type: object
+          type: array
+      responses:
+        "200":
+          $ref: '#/responses/aodHistoryResponse'
+      tags:
+      - AUTHORS
+  /authors/aod/new:
+    post:
+      description: sets the author of the day for the given dates
+      operationId: SetAuthorOfTheDay
+      parameters:
+      - description: The structure of the request for setting AODs
+        in: body
+        name: Body
+        schema:
+          items:
+            properties:
+              Aods:
+                items:
+                  $ref: '#/definitions/OfTheDayModel'
+                type: array
+            type: object
+          type: array
+      responses:
+        "200":
+          $ref: '#/responses/successResponse'
+      tags:
+      - AUTHORS
   /authors/list:
     post:
       description: Get a list of authors according to some ordering / parameters
@@ -231,7 +329,8 @@ paths:
               type: string
               x-go-name: Language
             page:
-              description: The page you are asking for, starts with 0.
+              description: Response is paged. This parameter controls the page you
+                are asking for, starts with 0.
               example: 0
               format: int64
               minimum: 0
@@ -239,7 +338,8 @@ paths:
               x-go-name: Page
             pageSize:
               default: 25
-              description: The number of Authors to be returned on each "page"
+              description: Response is paged. This parameter controls the number of
+                Authors to be returned on each "page"
               example: 30
               format: int64
               maximum: 200
@@ -287,7 +387,7 @@ paths:
   /languages:
     get:
       description: Get languages supported by the api
-      operationId: getLanguages
+      operationId: GetLanguages
       responses:
         "200":
           $ref: '#/responses/listOfStrings'
@@ -322,16 +422,6 @@ paths:
           $ref: '#/responses/multipleQuotesResponse'
       tags:
       - QUOTES
-  /quotes/aod/new:
-    post:
-      description: 'Sets the author of the day for the given date. It Is password
-        protected TODO: Put in privacy swagger'
-      operationId: setAuthorsOfTheDay
-      responses:
-        "200":
-          $ref: '#/responses/successResponse'
-      tags:
-      - AUTHORS
   /quotes/list:
     post:
       description: Get list of quotes according to some ordering / parameters
@@ -637,6 +727,52 @@ paths:
 produces:
 - application/json
 responses:
+  aodHistoryResponse:
+    description: Data structure representing the response for the history of AODs
+    schema:
+      items:
+        properties:
+          date:
+            description: The date when this author was the author of the day
+            example: "2021-06-12T00:00:00Z"
+            type: string
+            x-go-name: Date
+          id:
+            description: The author's id
+            example: 24952
+            format: int64
+            type: integer
+            uniqueItems: true
+            x-go-name: Id
+          name:
+            description: Name of the author
+            example: Muhammad Ali
+            type: string
+            x-go-name: Name
+        type: object
+      type: array
+  authorOfTheDayResponse:
+    description: Data structure representing the response for the author of the day
+    schema:
+      properties:
+        date:
+          description: The date when this author was the author of the day
+          example: "2021-06-12T00:00:00Z"
+          type: string
+          x-go-name: Date
+        id:
+          description: The author's id
+          example: 24952
+          format: int64
+          type: integer
+          uniqueItems: true
+          x-go-name: Id
+        name:
+          description: Name of the author
+          example: Muhammad Ali
+          type: string
+          x-go-name: Name
+      type: object
   authorsResponse:
     description: Data structure representing the response for a authors
     schema:
@@ -644,7 +780,7 @@ responses:
         $ref: '#/definitions/AuthorsView'
       type: array
   listOfStrings:
-    description: Data structure for a list of strings
+    description: Data structure for supported languages information
     schema:
       items:
         properties:
@@ -789,9 +925,7 @@ responses:
     schema:
       properties:
         message:
-          description: the date for which this quote is the QOD, if left empty this
-            quote is today's QOD
-          example: Successfully inserted quote of the day!
+          example: This request was a success
           type: string
           x-go-name: Message
         statusCode:

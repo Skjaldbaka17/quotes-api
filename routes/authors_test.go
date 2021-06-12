@@ -396,7 +396,7 @@ func TestAuthors(t *testing.T) {
 				t.Fatalf("Expected the author of the day but got an empty author %+v", author)
 			}
 
-			if author.Authorid == 0 {
+			if author.Id == 0 {
 				t.Fatalf("Expected the autho to have id > 0 but got: %+v", author)
 			}
 
@@ -432,7 +432,7 @@ func TestAuthors(t *testing.T) {
 			containsTodayAuthor := false
 			const layout = "2006-01-02T15:04:05Z" //The date needed for reference always
 			for _, author := range authors {
-				if author.Authorid == 0 {
+				if author.Id == 0 {
 					t.Fatalf("Expected all authors to have id > 0 but got: %+v", authors)
 				}
 				date, _ := time.Parse(layout, author.Date)
@@ -497,7 +497,7 @@ func TestAuthors(t *testing.T) {
 					containsFourthOfJuneAuthor = true
 				}
 
-				if author.Authorid == 0 {
+				if author.Id == 0 {
 					t.Fatalf("Expected all authors to have id > 0 but got: %+v", authors)
 				}
 

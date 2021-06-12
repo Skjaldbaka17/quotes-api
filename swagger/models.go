@@ -40,3 +40,18 @@ type baseQuotesResponseModel struct {
 	// example: false
 	Isicelandic bool `json:"isicelandic"`
 }
+
+// swagger:model OfTheDayModel
+type ofTheDayModel struct {
+	// The id of the author / quote
+	// example: 1
+	Id int `json:"id"`
+	// The date when this author / quote should be 'of the day'
+	// example: 2020-06-12
+	Date string `json:"date"`
+	// The language of this author / quote
+	//
+	// Default: English
+	// Example: icelandic
+	Language string `json:"language"`
+}
