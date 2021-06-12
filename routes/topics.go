@@ -15,6 +15,7 @@ import (
 // responses:
 //	200: listTopicsResponse
 //  400: incorrectBodyStructureResponse
+//  500: internalServerErrorResponse
 
 // GetTopics handles POST requests for listing the available quote-topics
 func GetTopics(rw http.ResponseWriter, r *http.Request) {
@@ -30,9 +31,9 @@ func GetTopics(rw http.ResponseWriter, r *http.Request) {
 	//** ---------- Paramatere configuratino for DB query ends ---------- **//
 	err := dbPointer.Find(&results).Error
 	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		log.Printf("Got error when decoding: %s", err)
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Got error when querying DB in GetTopics: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 		return
 	}
 
@@ -44,6 +45,7 @@ func GetTopics(rw http.ResponseWriter, r *http.Request) {
 // responses:
 //	200: multipleQuotesTopicResponse
 //  400: incorrectBodyStructureResponse
+//  500: internalServerErrorResponse
 
 // GetTopic handles POST requests for getting quotes from a particular topic
 func GetTopic(rw http.ResponseWriter, r *http.Request) {
@@ -68,9 +70,9 @@ func GetTopic(rw http.ResponseWriter, r *http.Request) {
 	err := pagination(requestBody, dbPoint).Find(&results).Error
 
 	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		log.Printf("Got error when decoding: %s", err)
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Got error when querying DB in GetTopic: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 		return
 	}
 

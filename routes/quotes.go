@@ -20,6 +20,7 @@ import (
 // responses:
 //	200: quotesResponse
 //  400: incorrectBodyStructureResponse
+//  500: internalServerErrorResponse
 
 // GetQuotes handles POST requests to get the quotes, and their authors, that have the given ids
 func GetQuotes(rw http.ResponseWriter, r *http.Request) {
@@ -43,9 +44,9 @@ func GetQuotes(rw http.ResponseWriter, r *http.Request) {
 	err := dbPointer.Find(&quotes).Error
 
 	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		log.Printf("Got error when decoding: %s", err)
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Got error when querying DB in GetQuotes: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 		return
 	}
 
@@ -62,6 +63,7 @@ func GetQuotes(rw http.ResponseWriter, r *http.Request) {
 // responses:
 //	200: quotesResponse
 //  400: incorrectBodyStructureResponse
+//  500: internalServerErrorResponse
 
 // GetQuotesList handles POST requests to get the quotes that fit the parameters
 
@@ -101,9 +103,9 @@ func GetQuotesList(rw http.ResponseWriter, r *http.Request) {
 		Error
 
 	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		log.Printf("Got error when decoding: %s", err)
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Got error when querying DB in GetQuotesList: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 		return
 	}
 
@@ -118,6 +120,7 @@ func GetQuotesList(rw http.ResponseWriter, r *http.Request) {
 // responses:
 //	200: randomQuoteResponse
 //  400: incorrectBodyStructureResponse
+//  500: internalServerErrorResponse
 
 // GetRandomQuote handles POST requests for getting a random quote
 func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
@@ -166,8 +169,9 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 
 	err := dbPointer.Limit(1).Find(&result).Error
 	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Got error when querying DB in GetRandomQuote: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 		return
 	}
 
@@ -179,6 +183,7 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 // responses:
 //	200: successResponse
 //  400: incorrectBodyStructureResponse
+//  500: internalServerErrorResponse
 
 //SetQuoteOfTheyDay sets the quote of the day (is password protected)
 func SetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
@@ -191,6 +196,8 @@ func SetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(requestBody.Qods) == 0 {
+		log.Println("Not QODS supplied when setting quote of the day")
+		rw.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: "Please supply some quotes", StatusCode: http.StatusBadRequest})
 		return
 	}
@@ -198,7 +205,7 @@ func SetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	for _, qod := range requestBody.Qods {
 		err := setQOD(requestBody.Language, qod.Date, qod.Id)
 		if err != nil {
-			log.Println(err)
+			log.Printf("Got error when settin the qod %+v as QOD: %s", qod, err)
 			json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: "Some of the quotes (ids) you supplied are not in " + requestBody.Language, StatusCode: http.StatusBadRequest})
 			return
 		}
@@ -212,6 +219,7 @@ func SetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 // responses:
 //	200: quoteOfTheDayResponse
 //  400: incorrectBodyStructureResponse
+//  500: internalServerErrorResponse
 
 //GetQuoteOfTheyDay gets the quote of the day
 func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
@@ -231,8 +239,9 @@ func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	err = dbPointer.Scan(&quote).Error
 
 	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Got error when querying DB in GetQODs: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 		return
 	}
 
@@ -240,8 +249,9 @@ func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 		fmt.Println("Setting a brand new QOD for today")
 		err = setNewRandomQOD(requestBody.Language)
 		if err != nil {
-			//TODO: Respond with better error -- and put into swagger -- and add tests
-			http.Error(rw, err.Error(), http.StatusBadRequest)
+			rw.WriteHeader(http.StatusInternalServerError)
+			log.Printf("Got error when setting new random qod: %s", err)
+			json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 			return
 		}
 
@@ -257,6 +267,7 @@ func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 // responses:
 //	200: qodHistoryResponse
 //  400: incorrectBodyStructureResponse
+//  500: internalServerErrorResponse
 
 //GetQODHistory gets Qod history starting from some point
 func GetQODHistory(rw http.ResponseWriter, r *http.Request) {
@@ -282,16 +293,18 @@ func GetQODHistory(rw http.ResponseWriter, r *http.Request) {
 	err = dbPointer.Find(&quotes).Error
 
 	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Got error when querying DB in GetQODHistory: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 		return
 	}
 
 	if len(quotes) == 0 {
 		err = setNewRandomQOD(requestBody.Language)
 		if err != nil {
-			//TODO: Respond with better error -- and put into swagger -- and add tests
-			http.Error(rw, err.Error(), http.StatusBadRequest)
+			rw.WriteHeader(http.StatusInternalServerError)
+			log.Printf("Got error when querying setting new Random QOD in history: %s", err)
+			json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 			return
 		}
 		GetQODHistory(rw, r)

@@ -18,6 +18,7 @@ import (
 // responses:
 //	200: quotesResponse
 //  400: incorrectBodyStructureResponse
+//  500: internalServerErrorResponse
 
 // SearchByString handles POST requests to search for quotes / authors by a search-string
 func SearchByString(rw http.ResponseWriter, r *http.Request) {
@@ -43,9 +44,9 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 		Find(&results).Error
 
 	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		log.Printf("Got error when decoding: %s", err)
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Got error when querying DB in SearchByString: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 		return
 	}
 
@@ -62,6 +63,7 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 // responses:
 //	200: authorsResponse
 //  400: incorrectBodyStructureResponse
+//  500: internalServerErrorResponse
 
 // SearchAuthorsByString handles POST requests to search for authors by a search-string
 func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
@@ -85,11 +87,11 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 	//** ---------- Paramatere configuratino for DB query ends ---------- **//
 	err := pagination(requestBody, dbPointer).
 		Find(&results).Error
+	//  500: internalServerErrorResponse
 	if err != nil {
-
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		log.Printf("Got error when decoding: %s", err)
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Got error when querying DB in SearchAuthorsByString: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 		return
 	}
 
@@ -104,6 +106,7 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 // responses:
 //	200: quotesResponse
 //  400: incorrectBodyStructureResponse
+//  500: internalServerErrorResponse
 
 // SearchQuotesByString handles POST requests to search for quotes by a search-string
 func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
@@ -134,9 +137,9 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 		Find(&results).Error
 
 	if err != nil {
-		//TODO: Respond with better error -- and put into swagger -- and add tests
-		log.Printf("Got error when decoding: %s", err)
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Got error when querying DB in SearchQuotesByString: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
 		return
 	}
 
