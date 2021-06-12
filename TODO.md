@@ -1,17 +1,12 @@
 # TODOS
 
-- [ ] Error handling + Tests
-- [ ] Make error tests (i.e. made-to-fail-tests)
-- [ ] Add error response to Swagger
-- [ ] Go over Swagger + Clean it up and make pretty
-
+- [ ] Add Users (GOD vs ...)
 - [ ] Add password protection / protected routes capability (at least for SetQuoteOfTheyDay route )
 - [ ] Add authentication for access to the api + Creating apiKeys + Documenting usage + admin access vs normal access
 
 - [ ] only return keys, in the response-json, that are relevant to the request
 
 - [ ] create type handler around the *gorm.DB so that you can create specific methods for building the sql-queries
-
 
 - [ ] Add .env variables (i.e. for names of tables etc.)
 
@@ -37,6 +32,9 @@
 - [ ] New crawler for new quotes / authors
  --------------
 
+- [x] Error handling
+- [x] Add error response to Swagger
+- [x] Go over Swagger + Clean it up and make pretty
 - [x] Clean up Documentation look (Swagger)
 - [x] Review /topics for Swagger 
 - [x] Review /search for Swagger 
