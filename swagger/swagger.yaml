@@ -61,22 +61,20 @@ definitions:
     properties:
       maximum:
         description: |-
-          Where to end the ordering (if empty it ends at the logical end, for example end at 'Z' for alphabetical ascending order).
-          Note this key is always a string, for example if ordering by nrOfQuotes (or popularity) of maximum 11 quotes you need to
-          set "maximum":"11" in the request body
+          Where to end the ordering (if empty it ends at the logical end, for example end at the highest quoteid for quoteid ascending order).
+          Note this key is always a string.
         example: "11"
         type: string
         x-go-name: Maximum
       minimum:
         description: |-
-          Where to start the ordering (if empty it starts from beginning, for example start at 'A' for alphabetical ascending order).
-          Note this key is always a string, for example if ordering by nrOfQuotes (or popularity) of minimum 10 quotes you need to
-          set "minimum":"10" in the request body
+          Where to start the ordering (if empty it starts from beginning, for example start at 1 for quoteid ascending order).
+          Note this key is always a string.
         example: "10"
         type: string
         x-go-name: Minimum
       orderBy:
-        description: What to order by, 'alphabetical', 'popularity' or 'nrOfQuotes'
+        description: What to order by, 'quoteId', 'popularity' or 'length'
         example: popularity
         type: string
         x-go-name: OrderBy
@@ -87,7 +85,7 @@ definitions:
         type: boolean
         x-go-name: Reverse
     type: object
-    x-go-name: orderConfigListAuthorsModel
+    x-go-name: orderConfigListQuotesModel
     x-go-package: github.com/Skjaldbaka17/quotes-api/swagger
   QuoteView:
     properties:
@@ -213,10 +211,8 @@ info:
     email: skjaldbaka17@gmail.com
     name: Þórður Ágústsson
   description: |-
-    Documentation of our quotes API.
-    tags:
-    name: QUOTES
-    description: Access random quote service. Use this to get random quotes , quotes filtered by authors or tags etc.
+    Quotel API offers a complete feature rich REST API access to all your quotes needs. This is the documentation of our quotes API.
+    To use it you first need to sign up here https://somethingsomethingdarkside.com to get an authentication api key.
   title: quotes-api.
   version: 1.0.0
 paths:
@@ -985,8 +981,12 @@ responses:
 schemes:
 - http
 securityDefinitions:
-  basic:
-    type: basic
+  apikey:
+    description: To use the api you need an access key. The basic access key lets
+      you make up to 100 requests an hour.
+    in: body
+    name: accessKey
+    type: apiKey
 swagger: "2.0"
 tags:
 - description: Using text search for finding authors and quotes.

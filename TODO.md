@@ -1,7 +1,4 @@
 # TODOS
-- [ ] Review Swagger 
-- [ ] Clean up swagger in code
-- [ ] Clean up Documentation look (Swagger)
 
 - [ ] only return keys, in the response-json, that are relevant to the request
 
@@ -40,6 +37,7 @@
 - [ ] New crawler for new quotes / authors
  --------------
 
+- [x] Clean up Documentation look (Swagger)
 - [x] Review /topics for Swagger 
 - [x] Review /search for Swagger 
 - [x] Review /quotes for Swagger 

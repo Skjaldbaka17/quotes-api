@@ -1,9 +1,7 @@
 // Package classification quotes-api.
 //
-// Documentation of our quotes API.
-//	tags:
-//		-name: QUOTES
-//		description: Access random quote service. Use this to get random quotes , quotes filtered by authors or tags etc.
+// Quotel API offers a complete feature rich REST API access to all your quotes needs. This is the documentation of our quotes API.
+// To use it you first need to sign up here https://somethingsomethingdarkside.com to get an authentication api key.
 //
 //     Schemes: http
 //     BasePath: /api/
@@ -18,26 +16,15 @@
 //     - application/json
 //
 //     Security:
-//     - basic
+//     - apikey
 //
 //    SecurityDefinitions:
-//    basic:
-//      type: basic
+//    apikey:
+//      type: apiKey
+//      in: body
+//      name: accessKey
+//      description: To use the api you need an access key. The basic access key lets you make up to 100 requests an hour.
+//
 //
 // swagger:meta
 package docs
-
-// swagger:parameters getQODHistory
-type getQODHistoryWrapper struct {
-	// The structure of the request for getting the QOD history
-	// in: body
-	Body struct {
-		// The language of the QOD. If left empty the english QOD is returned
-		//
-		// Example: English
-		Language string `json:"language"`
-		//The minimum date to retrieve the history
-		// example: 2020-06-21
-		Minimum string `json:"minimum"`
-	}
-}
