@@ -121,9 +121,8 @@ type UserRequest struct {
 }
 
 type User struct {
-	ApiKey       string `json:"api_key"`
 	Id           int    `json:"id"`
-	ApiKeyHash   string `json:"api_key_hash"`
+	ApiKey       string `json:"api_key"`
 	Message      string `json:"message"`
 	PasswordHash string `json:"password_hash"`
 	Tier         string `json:"tier"`

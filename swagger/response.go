@@ -117,11 +117,23 @@ type incorrectBodyStructureResponseWrapper struct {
 // Data structure representing the error response to an internal server error
 // swagger:response internalServerErrorResponse
 type internalServerErrorResponseWrapper struct {
-	// The error response to a wrongly structured request body
+	// The error response to an internal server
 	// in: body
 	Body struct {
 		// The error message
 		// Example: Please try again later.
+		Message string `json:"message"`
+	}
+}
+
+// Data structure representing the error response to an incorrect Credentials error
+// swagger:response incorrectCredentialsResponse
+type incorrectCredentialsResponseWrapper struct {
+	// The error response to an unothorized access
+	// in: body
+	Body struct {
+		// The error message
+		// Example: Valar Dohaeris
 		Message string `json:"message"`
 	}
 }

@@ -871,7 +871,39 @@ paths:
           $ref: '#/responses/internalServerErrorResponse'
       tags:
       - TOPICS
-  /users:
+  /users/login:
+    post:
+      description: Login to get the api_key for the user
+      operationId: Login
+      parameters:
+      - description: The structure of the Login request
+        in: body
+        name: Body
+        schema:
+          properties:
+            email:
+              description: The email for the user you want to login
+              example: example@gmail.com
+              type: string
+              x-go-name: Email
+            password:
+              description: The password for the user
+              example: "1234567890"
+              type: string
+              x-go-name: Password
+          type: object
+      responses:
+        "200":
+          $ref: '#/responses/userResponse'
+        "400":
+          $ref: '#/responses/incorrectBodyStructureResponse'
+        "401":
+          $ref: '#/responses/incorrectCredentialsResponse'
+        "500":
+          $ref: '#/responses/internalServerErrorResponse'
+      tags:
+      - USERS
+  /users/signup:
     post:
       description: Create A user to get a free ApiKey
       operationId: SignUp
@@ -976,6 +1008,17 @@ responses:
         message:
           description: The error message
           example: request body is not structured correctly.
+          type: string
+          x-go-name: Message
+      type: object
+  incorrectCredentialsResponse:
+    description: Data structure representing the error response to an incorrect Credentials
+      error
+    schema:
+      properties:
+        message:
+          description: The error message
+          example: Valar Dohaeris
           type: string
           x-go-name: Message
       type: object

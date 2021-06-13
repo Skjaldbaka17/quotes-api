@@ -17,7 +17,7 @@ import (
 var requestsPerHour = map[string]int{"free": 100, "basic": 1000, "lilleBoy": 100000, "GOD": -1}
 var TIERS = []string{"free", "basic", "lilleBoy", "GOD"}
 
-// swagger:route POST /users USERS SignUp
+// swagger:route POST /users/signup USERS SignUp
 // Create A user to get a free ApiKey
 // responses:
 //	200: userResponse
@@ -35,14 +35,14 @@ func CreateUser(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	apiKey, _ := uuid.NewRandom()
+	uuid, _ := uuid.NewRandom()
+	apiKey := uuid.String()
 	passHash, _ := bcrypt.GenerateFromPassword([]byte(requestBody.Password), bcrypt.DefaultCost)
-	apiKeyHash := hash(apiKey.String())
 	requestBody.Tier = "lilleBoy"
+	log.Println("The created apikey:", apiKey)
+	user := structs.User{Name: requestBody.Name, ApiKey: apiKey, Tier: requestBody.Tier, Email: requestBody.Email, PasswordHash: string(passHash)}
 
-	user := structs.User{Name: requestBody.Name, ApiKeyHash: apiKeyHash, Tier: requestBody.Tier, Email: requestBody.Email, PasswordHash: string(passHash)}
-
-	result := handlers.Db.Table("users").Select("name", "api_key_hash", "tier", "email", "password_hash").Create(&user)
+	result := handlers.Db.Table("users").Select("name", "api_key", "tier", "email", "password_hash").Create(&user)
 
 	//Error handle
 	if result.Error != nil {
@@ -64,19 +64,50 @@ func CreateUser(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(rw).Encode(structs.User{Id: user.Id, ApiKey: apiKey.String()})
+	json.NewEncoder(rw).Encode(structs.User{Id: user.Id, ApiKey: user.ApiKey})
 }
 
+// swagger:route POST /users/login USERS Login
+// Login to get the api_key for the user
+// responses:
+//	200: userResponse
+//  400: incorrectBodyStructureResponse
+//  401: incorrectCredentialsResponse
+//  500: internalServerErrorResponse
+
+// Login handles post requests to login to a user and receive his ApiKey
 func Login(rw http.ResponseWriter, r *http.Request) {
 	var requestBody structs.UserRequest
 	if err := handlers.GetUserRequestBody(rw, r, &requestBody); err != nil {
 		return
 	}
+
+	var user structs.User
+	if err := handlers.Db.Table("users").Where("email = ?", requestBody.Email).First(&user).Error; err != nil {
+		rw.WriteHeader(http.StatusBadRequest)
+		log.Printf("Got error when login/fetching user: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: "No user with the given email address. Maybe try WindsOfWinterWillNeverBeFinished@WeAreAllSinnersBeforeTheSeven.com"})
+		return
+	}
+
+	//Compare passwords / Check correct password
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(requestBody.Password)); err != nil {
+		rw.WriteHeader(http.StatusUnauthorized)
+		log.Printf("Got error when comparing passwords in login: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: "Credentials not correct. Shame. Shame. Shame is the name of the game."})
+		return
+	}
+
+	json.NewEncoder(rw).Encode(structs.UserResponse{ApiKey: user.ApiKey})
 }
 
 func UpgradeTier(rw http.ResponseWriter, r *http.Request) {}
 
 func DowngradeTier(rw http.ResponseWriter, r *http.Request) {}
+
+func UpdateUser(rw http.ResponseWriter, r *http.Request) {}
+
+func ReplaceApiKey(rw http.ResponseWriter, r *http.Request) {}
 
 func DeleteUser(rw http.ResponseWriter, r *http.Request) {}
 

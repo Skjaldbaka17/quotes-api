@@ -304,3 +304,17 @@ type signUpParameterWrapper struct {
 		PasswordConfirmation string `json:"passwordConfirmation"`
 	}
 }
+
+// swagger:parameters Login
+type LoginParameterWrapper struct {
+	// The structure of the Login request
+	// in: body
+	Body struct {
+		// The email for the user you want to login
+		// example: example@gmail.com
+		Email string `json:"email"`
+		// The password for the user
+		// example: 1234567890
+		Password string `json:"password"`
+	}
+}
