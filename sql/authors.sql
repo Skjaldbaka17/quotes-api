@@ -2,7 +2,7 @@ CREATE TABLE authors(
    id SERIAL PRIMARY KEY,
    name VARCHAR NOT NULL UNIQUE,
    count integer default 0,
-   createdat timestamptz,
+   created_at timestamptz default current_timestamp,
    updatedat timestamptz,
    deletedat timestamptz,
    nrofenglishquotes integer default 0,

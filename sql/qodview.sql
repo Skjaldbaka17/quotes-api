@@ -3,7 +3,8 @@ select q.id as quoteid,
         authors.name as name,
         q.quote as quote,
        authors.id as authorid,
-       qod.date as date
+       qod.date as date,
+       q.isicelandic as isicelandic
 from authors
    inner join quotes q
       on authors.id = q.authorid

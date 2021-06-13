@@ -4,7 +4,7 @@ CREATE TABLE quotes(
    quote text NOT NULL unique,
    count integer default 0,
    isIcelandic boolean default false,
-   createdat timestamptz,
+   created_at timestamptz default current_timestamp,
    updatedat timestamptz,
    deletedat timestamptz,
    tsv tsvector,

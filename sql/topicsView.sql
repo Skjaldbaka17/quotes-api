@@ -1,4 +1,4 @@
-create or replace view TopicsView as 
+create or replace view topicsView as 
 select authors.id as authorid,
        authors.name,
        q.id as quoteid,

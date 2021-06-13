@@ -35,6 +35,7 @@ func main() {
 	posts.HandleFunc("/api/topic", routes.GetTopic)
 
 	posts.HandleFunc("/api/users/signup", routes.CreateUser)
+	posts.HandleFunc("/api/users/login", routes.Login)
 
 	// handler for documentation
 	opts := middleware.RedocOpts{SpecURL: "/swagger/swagger.yaml"}

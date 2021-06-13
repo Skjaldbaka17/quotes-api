@@ -108,6 +108,7 @@ type Request struct {
 	Maximum      string      `json:"maximum"`
 	Qods         []Qod       `json:"qods"`
 	Aods         []Qod       `json:"aods"`
+	ApiKey       string      `json:"apiKey"`
 }
 
 type UserRequest struct {
@@ -128,6 +129,23 @@ type User struct {
 	Tier         string `json:"tier"`
 	Name         string `json:"name"`
 	Email        string `json:"email"`
+}
+
+type RequestEvent struct {
+	Id          int    `json:"id"`
+	UserId      int    `json:"user_id"`
+	Route       string `json:"route"`
+	RequestBody string `json:"request_body"`
+	ApiKey      string `json:"api_key"`
+}
+
+type ErrorEvent struct {
+	Id           int    `json:"id"`
+	UserId       int    `json:"user_id"`
+	Route        string `json:"route"`
+	RequestBody  string `json:"request_body"`
+	ErrorMessage string `json:"error_message"`
+	ExtraInfo    string `json:"extra_info"`
 }
 
 type UserResponse struct {

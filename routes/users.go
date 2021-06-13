@@ -14,9 +14,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var requestsPerHour = map[string]int{"free": 100, "basic": 1000, "lilleBoy": 100000, "GOD": -1}
-var TIERS = []string{"free", "basic", "lilleBoy", "GOD"}
-
 // swagger:route POST /users/signup USERS SignUp
 // Create A user to get a free ApiKey
 // responses:
@@ -38,7 +35,7 @@ func CreateUser(rw http.ResponseWriter, r *http.Request) {
 	uuid, _ := uuid.NewRandom()
 	apiKey := uuid.String()
 	passHash, _ := bcrypt.GenerateFromPassword([]byte(requestBody.Password), bcrypt.DefaultCost)
-	requestBody.Tier = "lilleBoy"
+	requestBody.Tier = handlers.TIERS[0]
 	log.Println("The created apikey:", apiKey)
 	user := structs.User{Name: requestBody.Name, ApiKey: apiKey, Tier: requestBody.Tier, Email: requestBody.Email, PasswordHash: string(passHash)}
 

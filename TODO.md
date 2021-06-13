@@ -1,10 +1,11 @@
 # TODOS
 
-- [ ] Add Users (GOD vs ...)
 - [ ] Add password protection / protected routes capability (at least for SetQuoteOfTheyDay route )
 - [ ] Add authentication for access to the api + Creating apiKeys + Documenting usage + admin access vs normal access
 - [ ] Save History of requests
 - [ ] Save History of errors (i.e. error logs)?
+
+- [ ] Optimize ApiKey Validation queries (index created_at dates-column?)
 
 - [ ] Created at for all tables automatically and updated?!
 - [ ] Coordinate naming conventino (apiKey vs api_key vs apikey etc)
@@ -37,6 +38,7 @@
 - [ ] New crawler for new quotes / authors
  --------------
 
+- [x] Add Users (GOD vs ...)
 - [x] Error handling
 - [x] Add error response to Swagger
 - [x] Go over Swagger + Clean it up and make pretty
