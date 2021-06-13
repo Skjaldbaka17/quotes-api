@@ -7,15 +7,29 @@ import (
 	"time"
 
 	"github.com/Skjaldbaka17/quotes-api/handlers"
+	"github.com/Skjaldbaka17/quotes-api/structs"
+	"github.com/google/uuid"
 )
 
+func createUser() structs.UserResponse {
+	password := "1234567890"
+	passwordConfirmation := "1234567890"
+	random, _ := uuid.NewRandom()
+	name := "Þórður Ágústsson"
+	email := random.String() + "@gmail.com"
+	var jsonStr = []byte(fmt.Sprintf(`{"name":"%s", "password":"%s", "passwordConfirmation":"%s", "email":"%s"}`, name, password, passwordConfirmation, email))
+	userResponse, _ := basicRequestReturnSingle(jsonStr, CreateUser)
+	return userResponse
+}
+
 func TestAuthors(t *testing.T) {
+	user := createUser()
 
 	t.Run("Get authors", func(t *testing.T) {
 		t.Run("should return Author with id 1", func(t *testing.T) {
 
 			authorId := Set{1}
-			var jsonStr = []byte(fmt.Sprintf(`{"ids": [%s]}`, authorId.toString()))
+			var jsonStr = []byte(fmt.Sprintf(`{"ids": [%s], "apiKey":"%s"}`, authorId.toString(), user.ApiKey))
 
 			respObj, _ := requestAndReturnArray(jsonStr, GetAuthorsById)
 			firstAuthor := respObj[0]
@@ -26,7 +40,7 @@ func TestAuthors(t *testing.T) {
 
 		t.Run("Should return 400 error, request body not structured correctly, the ids in body is array of strings", func(t *testing.T) {
 			authorId := []string{"1", "2", "3"}
-			var jsonStr = []byte(fmt.Sprintf(`{"ids": [%s]}`, authorId))
+			var jsonStr = []byte(fmt.Sprintf(`{"ids": [%s], "apiKey":"%s"}`, authorId, user.ApiKey))
 
 			_, response := requestAndReturnArray(jsonStr, GetAuthorsById)
 			if response.StatusCode != 400 {
@@ -41,7 +55,7 @@ func TestAuthors(t *testing.T) {
 		t.Run("Should return first 50 authors (alphabetically)", func(t *testing.T) {
 
 			pageSize := 50
-			var jsonStr = []byte(fmt.Sprintf(`{"pageSize": %d}`, pageSize))
+			var jsonStr = []byte(fmt.Sprintf(`{"pageSize": %d,"apiKey":"%s"}`, pageSize, user.ApiKey))
 
 			respObj, _ := requestAndReturnArray(jsonStr, GetAuthorsList)
 
@@ -59,7 +73,7 @@ func TestAuthors(t *testing.T) {
 		t.Run("Should return first authors, with only English quotes, (alphabetically)", func(t *testing.T) {
 
 			language := "english"
-			var jsonStr = []byte(fmt.Sprintf(`{"language": "%s"}`, language))
+			var jsonStr = []byte(fmt.Sprintf(`{"language": "%s","apiKey":"%s"}`, language, user.ApiKey))
 
 			respObj, errResponse := requestAndReturnArray(jsonStr, GetAuthorsList)
 
@@ -82,7 +96,7 @@ func TestAuthors(t *testing.T) {
 		t.Run("Should return first English authors in reverse alphabetical order (i.e. first author starts with Z)", func(t *testing.T) {
 
 			language := "english"
-			var jsonStr = []byte(fmt.Sprintf(`{"language": "%s", "orderConfig":{"orderBy":"alphabetical", "reverse":true}}`, language))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","language": "%s", "orderConfig":{"orderBy":"alphabetical", "reverse":true}}`, user.ApiKey, language))
 
 			respObj, errResponse := requestAndReturnArray(jsonStr, GetAuthorsList)
 
@@ -105,7 +119,7 @@ func TestAuthors(t *testing.T) {
 		t.Run("Should return first authors starting from 'F' (i.e. greater than or equal to 'F' alphabetically)", func(t *testing.T) {
 			language := "english"
 			minimum := "f"
-			var jsonStr = []byte(fmt.Sprintf(`{"language": "%s", "orderConfig":{"orderBy":"alphabetical","minimum":"%s"}}`, language, minimum))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","language": "%s", "orderConfig":{"orderBy":"alphabetical","minimum":"%s"}}`, user.ApiKey, language, minimum))
 
 			respObj, errResponse := requestAndReturnArray(jsonStr, GetAuthorsList)
 
@@ -132,7 +146,7 @@ func TestAuthors(t *testing.T) {
 		t.Run("Should return authors with less than or equal to 1 quotes in total", func(t *testing.T) {
 
 			maximum := 1
-			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"nrOfQuotes","maximum":"%d"}}`, maximum))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s", "orderConfig":{"orderBy":"nrOfQuotes","maximum":"%d"}}`, user.ApiKey, maximum))
 
 			respObj, errResponse := requestAndReturnArray(jsonStr, GetAuthorsList)
 
@@ -152,7 +166,7 @@ func TestAuthors(t *testing.T) {
 
 			minimum := 10
 			maximum := 11
-			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"nrOfQuotes","maximum":"%d", "minimum":"%d"}}`, maximum, minimum))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","orderConfig":{"orderBy":"nrOfQuotes","maximum":"%d", "minimum":"%d"}}`, user.ApiKey, maximum, minimum))
 
 			respObj, errResponse := requestAndReturnArray(jsonStr, GetAuthorsList)
 
@@ -171,7 +185,7 @@ func TestAuthors(t *testing.T) {
 		t.Run("Should return first authors with less than 10 quotes in total in reversed order (start with those with 10 quotes)", func(t *testing.T) {
 
 			maximum := 10
-			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"nrOfQuotes","maximum":"%d","reverse":true}}`, maximum))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","orderConfig":{"orderBy":"nrOfQuotes","maximum":"%d","reverse":true}}`, user.ApiKey, maximum))
 
 			respObj, errResponse := requestAndReturnArray(jsonStr, GetAuthorsList)
 
@@ -189,7 +203,7 @@ func TestAuthors(t *testing.T) {
 
 		t.Run("Should return first authors (reverse order DESC by nr of quotes) only icelandic quotes", func(t *testing.T) {
 			language := "icelandic"
-			var jsonStr = []byte(fmt.Sprintf(`{"language":"%s", "orderConfig":{"orderBy":"nrOfQuotes","reverse":true}}`, language))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","language":"%s", "orderConfig":{"orderBy":"nrOfQuotes","reverse":true}}`, user.ApiKey, language))
 
 			respObj, errResponse := requestAndReturnArray(jsonStr, GetAuthorsList)
 
@@ -207,7 +221,7 @@ func TestAuthors(t *testing.T) {
 		t.Run("Should return first 50 authors (ordered by most popular, i.e. DESC count)", func(t *testing.T) {
 			handlers.DirectFetchAuthorsCountIncrement([]int{1})
 
-			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"%s"}}`, "popularity"))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","orderConfig":{"orderBy":"%s"}}`, user.ApiKey, "popularity"))
 
 			respObj, errResponse := requestAndReturnArrayAuthors(jsonStr, GetAuthorsList)
 
@@ -225,7 +239,7 @@ func TestAuthors(t *testing.T) {
 
 		t.Run("Should return first 50 authors in reverse popularity order (i.e. least popular first i.e. ASC count)", func(t *testing.T) {
 
-			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"%s","reverse":true}}`, "popularity"))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","orderConfig":{"orderBy":"%s","reverse":true}}`, user.ApiKey, "popularity"))
 
 			respObj, errResponse := requestAndReturnArrayAuthors(jsonStr, GetAuthorsList)
 
@@ -243,7 +257,7 @@ func TestAuthors(t *testing.T) {
 
 		t.Run("Should return first 100 authors", func(t *testing.T) {
 			pageSize := 100
-			var jsonStr = []byte(fmt.Sprintf(`{"pageSize":%d}}`, pageSize))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","pageSize":%d}}`, user.ApiKey, pageSize))
 
 			respObj, errResponse := requestAndReturnArray(jsonStr, GetAuthorsList)
 
@@ -260,7 +274,7 @@ func TestAuthors(t *testing.T) {
 
 			pageSize := 100
 			minimum := "F"
-			var jsonStr = []byte(fmt.Sprintf(`{"pageSize":%d, "orderConfig":{"minimum":"%s"}}}`, pageSize, minimum))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","pageSize":%d, "orderConfig":{"minimum":"%s"}}}`, user.ApiKey, pageSize, minimum))
 
 			respObj, errResponse := requestAndReturnArray(jsonStr, GetAuthorsList)
 
@@ -276,7 +290,7 @@ func TestAuthors(t *testing.T) {
 
 			pageSize = 50
 			page := 1
-			jsonStr = []byte(fmt.Sprintf(`{"pageSize":%d, "page":%d, "orderConfig":{"minimum":"%s"}}}`, pageSize, page, minimum))
+			jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s", "pageSize":%d, "page":%d, "orderConfig":{"minimum":"%s"}}}`, user.ApiKey, pageSize, page, minimum))
 
 			respObj, errResponse = requestAndReturnArray(jsonStr, GetAuthorsList)
 
@@ -291,7 +305,7 @@ func TestAuthors(t *testing.T) {
 	t.Run("Random author", func(t *testing.T) {
 		t.Run("Should return a random author with only a single quote (i.e. default)", func(t *testing.T) {
 
-			var jsonStr = []byte(`{}`)
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s"}`, user.ApiKey))
 			firstRespObj, _ := requestAndReturnArray(jsonStr, GetRandomAuthor)
 
 			if len(firstRespObj) != 1 {
@@ -313,7 +327,7 @@ func TestAuthors(t *testing.T) {
 
 		t.Run("Should return a random Author with only quotes from him in Icelandic", func(t *testing.T) {
 			language := "icelandic"
-			var jsonStr = []byte(fmt.Sprintf(`{"language":"%s"}`, language))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","language":"%s"}`, user.ApiKey, language))
 			firstRespObj, _ := requestAndReturnArray(jsonStr, GetRandomAuthor)
 
 			firstAuthor := firstRespObj[0]
@@ -335,7 +349,7 @@ func TestAuthors(t *testing.T) {
 		t.Run("Should return a random Author with only quotes from him in English", func(t *testing.T) {
 
 			language := "english"
-			var jsonStr = []byte(fmt.Sprintf(`{"language":"%s"}`, language))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","language":"%s"}`, user.ApiKey, language))
 			firstRespObj, _ := requestAndReturnArray(jsonStr, GetRandomAuthor)
 
 			firstAuthor := firstRespObj[0]
@@ -357,7 +371,7 @@ func TestAuthors(t *testing.T) {
 
 		t.Run("Should return author with a maximum of 2 of his quotes", func(t *testing.T) {
 			maxQuotes := 2
-			var jsonStr = []byte(fmt.Sprintf(`{"maxQuotes":%d}`, maxQuotes))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","maxQuotes":%d}`, user.ApiKey, maxQuotes))
 			firstRespObj, _ := requestAndReturnArray(jsonStr, GetRandomAuthor)
 
 			firstAuthor := firstRespObj[0]
@@ -377,7 +391,7 @@ func TestAuthors(t *testing.T) {
 		t.Run("Should set / Overwrite Author of the day", func(t *testing.T) {
 
 			authorId := 1
-			var jsonStr = []byte(fmt.Sprintf(`{"aods": [{"id":%d, "date":""}]}`, authorId))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s", "aods": [{"id":%d, "date":""}]}`, user.ApiKey, authorId))
 			_, response := requestAndReturnArray(jsonStr, SetAuthorOfTheDay)
 			if response.StatusCode != 200 {
 				t.Fatalf("Expected a succesful insert but got %+v", response)
@@ -391,7 +405,7 @@ func TestAuthors(t *testing.T) {
 			date1 := "2020-12-22"
 			date2 := "2020-12-21"
 			authorId2 := 3
-			var jsonStr = []byte(fmt.Sprintf(`{"aods": [{"id":%d, "date":"%s"},{"id":%d, "date":"%s"}]}`, authorId1, date1, authorId2, date2))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s", "aods": [{"id":%d, "date":"%s"},{"id":%d, "date":"%s"}]}`, user.ApiKey, authorId1, date1, authorId2, date2))
 			_, response := requestAndReturnArray(jsonStr, SetAuthorOfTheDay)
 			if response.StatusCode != 200 {
 				t.Fatalf("Expected a succesful insert but got %+v", response)
@@ -401,7 +415,7 @@ func TestAuthors(t *testing.T) {
 
 		t.Run("Should get Author of the day", func(t *testing.T) {
 
-			var jsonStr = []byte(fmt.Sprintf(`{"language":"%s"}`, "english"))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s", "language":"%s"}`, user.ApiKey, "english"))
 			author := requestAndReturnSingle(jsonStr, GetAuthorOfTheDay)
 
 			if author.Name == "" {
@@ -425,7 +439,7 @@ func TestAuthors(t *testing.T) {
 			//Input a quote in history for testing
 			authorId := 1111
 			date := "1998-06-16"
-			var jsonStr = []byte(fmt.Sprintf(`{"aods": [{"id":%d, "date":"%s"}]}`, authorId, date))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s", "aods": [{"id":%d, "date":"%s"}]}`, user.ApiKey, authorId, date))
 			_, response := requestAndReturnArray(jsonStr, SetAuthorOfTheDay)
 			if response.StatusCode != 200 {
 				t.Fatalf("Expected a succesful insert but got %+v", response)
@@ -433,7 +447,7 @@ func TestAuthors(t *testing.T) {
 
 			//Get History:
 
-			jsonStr = []byte(fmt.Sprintf(`{"language":"%s"}`, "english"))
+			jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","language":"%s"}`, user.ApiKey, "english"))
 			authors, _ := requestAndReturnArray(jsonStr, GetAODHistory)
 
 			if len(authors) == 0 {
@@ -472,7 +486,7 @@ func TestAuthors(t *testing.T) {
 			//Input a quote in history for testing
 			authorId := 666
 			date := "2021-06-04"
-			var jsonStr = []byte(fmt.Sprintf(`{"aods": [{"id":%d, "date":"%s"}]}`, authorId, date))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","aods": [{"id":%d, "date":"%s"}]}`, user.ApiKey, authorId, date))
 			_, response := requestAndReturnArray(jsonStr, SetAuthorOfTheDay)
 			if response.StatusCode != 200 {
 				t.Fatalf("Expected a succesful insert but got %+v", response)
@@ -481,7 +495,7 @@ func TestAuthors(t *testing.T) {
 			//Get History:
 
 			minimum := "2021-06-04"
-			jsonStr = []byte(fmt.Sprintf(`{"language":"%s", "minimum":"%s"}`, "english", minimum))
+			jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","language":"%s", "minimum":"%s"}`, user.ApiKey, "english", minimum))
 			authors, _ := requestAndReturnArray(jsonStr, GetAODHistory)
 
 			if len(authors) == 0 {

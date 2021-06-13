@@ -21,11 +21,12 @@ type httpRequest func(http.ResponseWriter, *http.Request)
 type Set []int
 
 func TestQuotes(t *testing.T) {
+	user := createUser()
 	t.Run("Get Quotes", func(t *testing.T) {
 		t.Run("should return Quotes with id 1, 2 and 3...", func(t *testing.T) {
 
 			var quoteIds = Set{1, 2, 3}
-			var jsonStr = []byte(fmt.Sprintf(`{"ids":  [%s]}`, quoteIds.toString()))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","ids":  [%s]}`, user.ApiKey, quoteIds.toString()))
 			respObj, _ := requestAndReturnArray(jsonStr, GetQuotes)
 
 			if len(respObj) != len(quoteIds) {
@@ -41,7 +42,7 @@ func TestQuotes(t *testing.T) {
 
 		t.Run("should get Quotes for author with id 1", func(t *testing.T) {
 			authorId := 1
-			var jsonStr = []byte(fmt.Sprintf(`{"authorId":  %d}`, authorId))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","authorId":  %d}`, user.ApiKey, authorId))
 			respObj, _ := requestAndReturnArray(jsonStr, GetQuotes)
 
 			if len(respObj) == 0 {
@@ -59,7 +60,7 @@ func TestQuotes(t *testing.T) {
 		t.Run("Should return first 50 quotes (by quoteId)", func(t *testing.T) {
 
 			pageSize := 50
-			var jsonStr = []byte(fmt.Sprintf(`{"pageSize": %d}`, pageSize))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","pageSize": %d}`, user.ApiKey, pageSize))
 
 			respObj, _ := requestAndReturnArray(jsonStr, GetQuotesList)
 
@@ -77,7 +78,7 @@ func TestQuotes(t *testing.T) {
 		t.Run("Should return first quotes, in Icelandic", func(t *testing.T) {
 
 			language := "icelandic"
-			var jsonStr = []byte(fmt.Sprintf(`{"language": "%s"}`, language))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","language": "%s"}`, user.ApiKey, language))
 
 			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
 
@@ -95,7 +96,7 @@ func TestQuotes(t *testing.T) {
 
 		t.Run("Should return first quotes in reverse quoteId order (i.e. first quote has id larger than 639.028)", func(t *testing.T) {
 
-			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"reverse":%s}}`, "true"))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","orderConfig":{"reverse":%s}}`, user.ApiKey, "true"))
 
 			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
 
@@ -114,7 +115,7 @@ func TestQuotes(t *testing.T) {
 		t.Run("Should return first quotes starting from id 300.000  (i.e. greater than or equal to 300.000)", func(t *testing.T) {
 			minimum := 300000
 			orderBy := "id"
-			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"%s","minimum":"%d"}}`, orderBy, minimum))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","orderConfig":{"orderBy":"%s","minimum":"%d"}}`, user.ApiKey, orderBy, minimum))
 
 			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
 
@@ -133,7 +134,7 @@ func TestQuotes(t *testing.T) {
 		t.Run("Should return quotes with less than or equal to 5 letters in the quote", func(t *testing.T) {
 
 			maximum := 5
-			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"length","maximum":"%d"}}`, maximum))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","orderConfig":{"orderBy":"length","maximum":"%d"}}`, user.ApiKey, maximum))
 
 			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
 
@@ -153,7 +154,7 @@ func TestQuotes(t *testing.T) {
 
 			minimum := 10
 			maximum := 11
-			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"length","maximum":"%d", "minimum":"%d"}}`, maximum, minimum))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","orderConfig":{"orderBy":"length","maximum":"%d", "minimum":"%d"}}`, user.ApiKey, maximum, minimum))
 
 			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
 
@@ -172,7 +173,7 @@ func TestQuotes(t *testing.T) {
 		t.Run("Should return first Quotes with less than letters in the quote in total in reversed order (start with those quotes of length 10)", func(t *testing.T) {
 
 			maximum := 10
-			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"length","maximum":"%d","reverse":true}}`, maximum))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","orderConfig":{"orderBy":"length","maximum":"%d","reverse":true}}`, user.ApiKey, maximum))
 
 			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
 
@@ -191,7 +192,7 @@ func TestQuotes(t *testing.T) {
 		t.Run("Should return first 50 quotes (ordered by most popular, i.e. DESC count)", func(t *testing.T) {
 			handlers.DirectFetchQuotesCountIncrement([]int{1})
 
-			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"%s"}}`, "popularity"))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","orderConfig":{"orderBy":"%s"}}`, user.ApiKey, "popularity"))
 
 			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
 
@@ -209,7 +210,7 @@ func TestQuotes(t *testing.T) {
 
 		t.Run("Should return first 50 quotes in reverse popularity order (i.e. least popular first i.e. ASC count)", func(t *testing.T) {
 
-			var jsonStr = []byte(fmt.Sprintf(`{"orderConfig":{"orderBy":"%s","reverse":true}}`, "popularity"))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","orderConfig":{"orderBy":"%s","reverse":true}}`, user.ApiKey, "popularity"))
 
 			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
 
@@ -227,7 +228,7 @@ func TestQuotes(t *testing.T) {
 
 		t.Run("Should return first 100 Quotes", func(t *testing.T) {
 			pageSize := 100
-			var jsonStr = []byte(fmt.Sprintf(`{"pageSize":%d}}`, pageSize))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","pageSize":%d}}`, user.ApiKey, pageSize))
 
 			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
 
@@ -244,7 +245,7 @@ func TestQuotes(t *testing.T) {
 
 			pageSize := 100
 			minimum := 250000
-			var jsonStr = []byte(fmt.Sprintf(`{"pageSize":%d, "orderConfig":{"minimum":"%d"}}}`, pageSize, minimum))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","pageSize":%d, "orderConfig":{"minimum":"%d"}}}`, user.ApiKey, pageSize, minimum))
 
 			respObj, errResponse := requestAndReturnArray(jsonStr, GetQuotesList)
 
@@ -260,7 +261,7 @@ func TestQuotes(t *testing.T) {
 
 			pageSize = 50
 			page := 1
-			jsonStr = []byte(fmt.Sprintf(`{"pageSize":%d, "page":%d, "orderConfig":{"minimum":"%d"}}}`, pageSize, page, minimum))
+			jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","pageSize":%d, "page":%d, "orderConfig":{"minimum":"%d"}}}`, user.ApiKey, pageSize, page, minimum))
 
 			respObj, errResponse = requestAndReturnArray(jsonStr, GetQuotesList)
 
@@ -277,7 +278,7 @@ func TestQuotes(t *testing.T) {
 		t.Run("Should set / Overwrite Quote of the day", func(t *testing.T) {
 
 			quoteId := 1
-			var jsonStr = []byte(fmt.Sprintf(`{"qods": [{"id":%d, "date":""}]}`, quoteId))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","qods": [{"id":%d, "date":""}]}`, user.ApiKey, quoteId))
 			_, response := requestAndReturnArray(jsonStr, SetQuoteOfTheDay)
 			if response.StatusCode != 200 {
 				t.Fatalf("Expected a succesful insert but got %+v", response)
@@ -291,7 +292,7 @@ func TestQuotes(t *testing.T) {
 			date1 := "2020-12-22"
 			date2 := "2020-12-21"
 			quoteId2 := 3
-			var jsonStr = []byte(fmt.Sprintf(`{"qods": [{"id":%d, "date":"%s"},{"id":%d, "date":"%s"}]}`, quoteId1, date1, quoteId2, date2))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","qods": [{"id":%d, "date":"%s"},{"id":%d, "date":"%s"}]}`, user.ApiKey, quoteId1, date1, quoteId2, date2))
 			_, response := requestAndReturnArray(jsonStr, SetQuoteOfTheDay)
 			if response.StatusCode != 200 {
 				t.Fatalf("Expected a succesful insert but got %+v", response)
@@ -300,7 +301,7 @@ func TestQuotes(t *testing.T) {
 		})
 
 		t.Run("Should get Quote of the day", func(t *testing.T) {
-			var jsonStr = []byte(fmt.Sprintf(`{"language":"%s"}`, "english"))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","language":"%s"}`, user.ApiKey, "english"))
 			quote := requestAndReturnSingle(jsonStr, GetQuoteOfTheDay)
 
 			if quote.Quote == "" {
@@ -319,7 +320,7 @@ func TestQuotes(t *testing.T) {
 			//Input a quote in history for testing
 			quoteId := 1111
 			date := "1998-06-16"
-			var jsonStr = []byte(fmt.Sprintf(`{"qods": [{"id":%d, "date":"%s"}]}`, quoteId, date))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","qods": [{"id":%d, "date":"%s"}]}`, user.ApiKey, quoteId, date))
 			_, response := requestAndReturnArray(jsonStr, SetQuoteOfTheDay)
 			if response.StatusCode != 200 {
 				t.Fatalf("Expected a succesful insert but got %+v", response)
@@ -327,7 +328,7 @@ func TestQuotes(t *testing.T) {
 
 			//Get History:
 
-			jsonStr = []byte(fmt.Sprintf(`{"language":"%s"}`, "english"))
+			jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","language":"%s"}`, user.ApiKey, "english"))
 			quotes, _ := requestAndReturnArray(jsonStr, GetQODHistory)
 
 			if len(quotes) == 0 {
@@ -363,7 +364,7 @@ func TestQuotes(t *testing.T) {
 			//Input a quote in history for testing
 			quoteId := 666
 			date := "2021-06-04"
-			var jsonStr = []byte(fmt.Sprintf(`{"qods": [{"id":%d, "date":"%s"}]}`, quoteId, date))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","qods": [{"id":%d, "date":"%s"}]}`, user.ApiKey, quoteId, date))
 			_, response := requestAndReturnArray(jsonStr, SetQuoteOfTheDay)
 			if response.StatusCode != 200 {
 				t.Fatalf("Expected a succesful insert but got %+v", response)
@@ -372,7 +373,7 @@ func TestQuotes(t *testing.T) {
 			//Get History:
 
 			minimum := "2021-06-04"
-			jsonStr = []byte(fmt.Sprintf(`{"language":"%s", "minimum":"%s"}`, "english", minimum))
+			jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","language":"%s", "minimum":"%s"}`, user.ApiKey, "english", minimum))
 			quotes, _ := requestAndReturnArray(jsonStr, GetQODHistory)
 
 			if len(quotes) == 0 {
@@ -418,7 +419,7 @@ func TestQuotes(t *testing.T) {
 		//The test calls the function twice to test if the function returns two different quotes
 		t.Run("Should return a random quote", func(t *testing.T) {
 
-			var jsonStr = []byte(`{}`)
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s"}`, user.ApiKey))
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 
 			if firstRespObj.Quote == "" {
@@ -435,8 +436,8 @@ func TestQuotes(t *testing.T) {
 		t.Run("Should return a random quote from Teddy Roosevelt (given authorId)", func(t *testing.T) {
 
 			teddyName := "Theodore Roosevelt"
-			teddyAuthor := getAuthor(teddyName)
-			var jsonStr = []byte(fmt.Sprintf(`{"authorId": %d}`, teddyAuthor.Id))
+			teddyAuthor := getAuthor(teddyName, user.ApiKey)
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","authorId": %d}`, user.ApiKey, teddyAuthor.Id))
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 
 			if firstRespObj.Name != teddyName {
@@ -458,8 +459,8 @@ func TestQuotes(t *testing.T) {
 		t.Run("Should return a random quote from topic 'motivational' (given topicId)", func(t *testing.T) {
 
 			topicName := "motivational"
-			topicId := getTopicId(topicName)
-			var jsonStr = []byte(fmt.Sprintf(`{"topicId": %d}`, topicId))
+			topicId := getTopicId(topicName, user.ApiKey)
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","topicId": %d}`, user.ApiKey, topicId))
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 			if firstRespObj.Topicname != topicName {
 				t.Fatalf("got %s, expected %s", firstRespObj.Topicname, topicName)
@@ -477,7 +478,7 @@ func TestQuotes(t *testing.T) {
 		t.Run("Should return a random English quote", func(t *testing.T) {
 
 			language := "english"
-			var jsonStr = []byte(fmt.Sprintf(`{"language": "%s"}`, language))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","language": "%s"}`, user.ApiKey, language))
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 			if firstRespObj.Isicelandic {
 				t.Fatalf("first response, got an IcelandicQuote but expected an English quote")
@@ -495,7 +496,7 @@ func TestQuotes(t *testing.T) {
 		t.Run("Should return a random Icelandic quote", func(t *testing.T) {
 
 			language := "Icelandic"
-			var jsonStr = []byte(fmt.Sprintf(`{"language": "%s"}`, language))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","language": "%s"}`, user.ApiKey, language))
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 			if !firstRespObj.Isicelandic {
 				t.Fatalf("first response, got an EnglishQuote but expected an Icelandic quote")
@@ -513,7 +514,7 @@ func TestQuotes(t *testing.T) {
 		t.Run("Should return a random quote containing the searchString 'love'", func(t *testing.T) {
 
 			searchString := "love"
-			var jsonStr = []byte(fmt.Sprintf(`{"searchString":"%s"}`, searchString))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","searchString":"%s"}`, user.ApiKey, searchString))
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 			regexStub := searchString[:3]
 			m1 := regexp.MustCompile(regexStub)
@@ -535,7 +536,7 @@ func TestQuotes(t *testing.T) {
 		t.Run("Should return a random Icelandic quote containing the searchString 'þitt'", func(t *testing.T) {
 
 			searchString := "þitt"
-			var jsonStr = []byte(fmt.Sprintf(`{"searchString":"%s"}`, searchString))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","searchString":"%s"}`, user.ApiKey, searchString))
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 			m1 := regexp.MustCompile(searchString)
 			if !m1.Match([]byte(firstRespObj.Quote)) {
@@ -559,9 +560,9 @@ func TestQuotes(t *testing.T) {
 		t.Run("Should return a random quote containing the searchString 'strong' from the topic 'inspirational' (given topicId)", func(t *testing.T) {
 
 			topicName := "inspirational"
-			topicId := getTopicId(topicName)
+			topicId := getTopicId(topicName, user.ApiKey)
 			searchString := "strong"
-			var jsonStr = []byte(fmt.Sprintf(`{"searchString":"%s","topicId": %d}`, searchString, topicId))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","searchString":"%s","topicId": %d}`, user.ApiKey, searchString, topicId))
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 
 			if firstRespObj.Topicname != topicName {
@@ -590,9 +591,9 @@ func TestQuotes(t *testing.T) {
 	})
 }
 
-func getTopicId(topicName string) int {
+func getTopicId(topicName string, apiKey string) int {
 
-	var jsonStr = []byte(fmt.Sprintf(`{"topic": "%s"}`, topicName))
+	var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","topic": "%s"}`, apiKey, topicName))
 	request, _ := http.NewRequest(http.MethodPost, "/api", bytes.NewBuffer(jsonStr))
 	response := httptest.NewRecorder()
 
@@ -612,9 +613,9 @@ func (set *Set) toString() string {
 	return strings.Join(IDs, ", ")
 }
 
-func getAuthor(searchString string) structs.AuthorsView {
+func getAuthor(searchString string, apiKey string) structs.AuthorsView {
 
-	var jsonStr = []byte(fmt.Sprintf(`{"searchString": "%s"}`, searchString))
+	var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","searchString": "%s"}`, apiKey, searchString))
 	request, _ := http.NewRequest(http.MethodGet, "/api/search/authors", bytes.NewBuffer(jsonStr))
 	response := httptest.NewRecorder()
 
@@ -625,9 +626,9 @@ func getAuthor(searchString string) structs.AuthorsView {
 	return respObj[0]
 }
 
-func getAuthorsById(authorIds Set) []structs.AuthorsView {
+func getAuthorsById(authorIds Set, apiKey string) []structs.AuthorsView {
 
-	var jsonStr = []byte(fmt.Sprintf(`{"ids": [%s]}`, authorIds.toString()))
+	var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","ids": [%s]}`, apiKey, authorIds.toString()))
 	request, _ := http.NewRequest(http.MethodGet, "/api/search/authors", bytes.NewBuffer(jsonStr))
 	response := httptest.NewRecorder()
 
@@ -638,9 +639,9 @@ func getAuthorsById(authorIds Set) []structs.AuthorsView {
 	return respObj
 }
 
-func getQuotes(searchString string) []structs.QuoteView {
+func getQuotes(searchString string, apiKey string) []structs.QuoteView {
 
-	var jsonStr = []byte(fmt.Sprintf(`{"searchString": "%s"}`, searchString))
+	var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","searchString": "%s"}`, apiKey, searchString))
 	request, _ := http.NewRequest(http.MethodGet, "/api/search/quotes", bytes.NewBuffer(jsonStr))
 	response := httptest.NewRecorder()
 
@@ -658,9 +659,9 @@ func getRequestAndResponseForTest(jsonStr []byte) (*httptest.ResponseRecorder, *
 }
 
 //TODO: Give a better name,more intuitive
-func getObjNr26(searchString string, fn httpRequest) (structs.QuoteView, error) {
+func getObjNr26(searchString string, fn httpRequest, apiKey string) (structs.QuoteView, error) {
 	pageSize := 100
-	var jsonStr = []byte(fmt.Sprintf(`{"searchString": "%s", "pageSize":%d}`, searchString, pageSize))
+	var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","searchString": "%s", "pageSize":%d}`, apiKey, searchString, pageSize))
 	request, _ := http.NewRequest(http.MethodPost, "/api/search", bytes.NewBuffer(jsonStr))
 	response := httptest.NewRecorder()
 

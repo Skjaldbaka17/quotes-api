@@ -57,7 +57,6 @@ func TestUtils(t *testing.T) {
 				}
 			}
 		})
-
 		t.Run("Running all protected functions with existant ApiKey but all requests-per hour for this user are used, should return error for all", func(t *testing.T) {
 			user := getBasicUser()
 			var jsonStr = []byte(fmt.Sprintf(`{"name":"%s", "password":"%s", "passwordConfirmation":"%s", "email":"%s"}`, user.Name, user.Password, user.PasswordConfirmation, user.Email))
@@ -96,6 +95,8 @@ func TestUtils(t *testing.T) {
 			}
 		})
 
+		t.Run("Should save a requestEvent in requestHistory for all routes", func(t *testing.T) { t.Skip() })
+		t.Run("Should save a errorEvent in requestHistory for all routes, making errors happen", func(t *testing.T) { t.Skip() })
 	})
 }
 

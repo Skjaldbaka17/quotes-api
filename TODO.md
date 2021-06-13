@@ -5,6 +5,8 @@
 - [ ] Save History of requests
 - [ ] Save History of errors (i.e. error logs)?
 
+- [ ] CleanUp DB after tests
+
 - [ ] Optimize ApiKey Validation queries (index created_at dates-column?)
 
 - [ ] Created at for all tables automatically and updated?!
