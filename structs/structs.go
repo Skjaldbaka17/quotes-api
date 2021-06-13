@@ -110,6 +110,33 @@ type Request struct {
 	Aods         []Qod       `json:"aods"`
 }
 
+type UserRequest struct {
+	ApiKey               string `json:"apiKey"`
+	Id                   int    `json:"id"`
+	Email                string `json:"email"`
+	Name                 string `json:"name"`
+	Password             string `json:"password"`
+	PasswordConfirmation string `json:"passwordConfirmation"`
+	Tier                 string `json:"tier"`
+}
+
+type User struct {
+	ApiKey       string `json:"api_key"`
+	Id           int    `json:"id"`
+	ApiKeyHash   string `json:"api_key_hash"`
+	Message      string `json:"message"`
+	PasswordHash string `json:"password_hash"`
+	Tier         string `json:"tier"`
+	Name         string `json:"name"`
+	Email        string `json:"email"`
+}
+
+type UserResponse struct {
+	// The api-key that the user should send to get access to the api
+	// example: 1d8db1d2-6f5b-4254-8b74-44f5e5229add
+	ApiKey string `json:"api_key"`
+}
+
 type Qod struct {
 	// the date for which this quote is the QOD, if left empty this quote is today's QOD.
 	//

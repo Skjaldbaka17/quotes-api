@@ -3,6 +3,11 @@
 - [ ] Add Users (GOD vs ...)
 - [ ] Add password protection / protected routes capability (at least for SetQuoteOfTheyDay route )
 - [ ] Add authentication for access to the api + Creating apiKeys + Documenting usage + admin access vs normal access
+- [ ] Save History of requests
+- [ ] Save History of errors (i.e. error logs)?
+
+- [ ] Created at for all tables automatically and updated?!
+- [ ] Coordinate naming conventino (apiKey vs api_key vs apikey etc)
 
 - [ ] only return keys, in the response-json, that are relevant to the request
 

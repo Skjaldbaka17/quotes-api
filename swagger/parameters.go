@@ -284,3 +284,23 @@ type quotesFromTopicWrapper struct {
 		Page int `json:"page"`
 	}
 }
+
+// swagger:parameters SignUp
+type signUpParameterWrapper struct {
+	// The structure of the sign up request
+	// in: body
+	Body struct {
+		// The email for the created user (used for validation and password retrieval)
+		// example: example@gmail.com
+		Email string `json:"email"`
+		// The name of the creator
+		// example: Robert Huldars
+		Name string `json:"name"`
+		// The password for the user, used to get the ApiKey and look at stats (coming soon). Must be a relatively strong pass
+		// example: 1234567890
+		Password string `json:"password"`
+		// The confirmation for the password. Must be same as "password"
+		// example: 1234567890
+		PasswordConfirmation string `json:"passwordConfirmation"`
+	}
+}

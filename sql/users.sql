@@ -1,10 +1,11 @@
 CREATE TABLE users(
    id SERIAL PRIMARY KEY,
-   name VARCHAR NOT NULL UNIQUE,
-   passwordhash text not null,
-   email varchar,
+   email varchar not null unique,
+   name VARCHAR NOT NULL,
+   api_key_hash varchar not null unique,
+   password_hash text not null,
    tier varchar not null default 'free',
-   createdat timestamptz,
-   updatedat timestamptz,
-   deletedat timestamptz
+   create_dat timestamptz,
+   update_dat timestamptz,
+   delete_dat timestamptz
 );

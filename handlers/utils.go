@@ -125,3 +125,73 @@ func GetRequestBody(rw http.ResponseWriter, r *http.Request, requestBody *struct
 
 	return nil
 }
+
+//ValidateUserRequestBody takes in the request and validates all the input fields, returns an error with reason for validation-failure
+//if validation fails.
+//TODO: Make validation better! i.e. make it "real"
+func GetUserRequestBody(rw http.ResponseWriter, r *http.Request, requestBody *structs.UserRequest) error {
+	//Save the state back into the body for later use (Especially useful for getting the AOD/QOD because if the AOD has not been set a random AOD is set and the function called again)
+	buf, _ := ioutil.ReadAll(r.Body)
+	rdr1 := ioutil.NopCloser(bytes.NewBuffer(buf))
+	rdr2 := ioutil.NopCloser(bytes.NewBuffer(buf))
+
+	//Save the state back into the body for later use (Especially useful for getting the AOD/QOD because if the AOD has not been set a random AOD is set and the function called again)
+	r.Body = rdr2
+	err := json.NewDecoder(rdr1).Decode(&requestBody)
+
+	if err != nil {
+		log.Printf("Got error when decoding: %s", err)
+		err = errors.New("request body is not structured correctly. Please refer to the /docs page for information on how to structure the request body")
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: err.Error()})
+		return err
+	}
+
+	return nil
+}
+
+func ValidateUserInformation(rw http.ResponseWriter, r *http.Request, requestBody *structs.UserRequest) error {
+	//TODO: Add email validation
+	if requestBody.Email == "" {
+		err := errors.New("email should not be empty")
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: err.Error()})
+		return err
+	}
+
+	if requestBody.Name == "" {
+		err := errors.New("name should not be empty")
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: err.Error()})
+		return err
+	}
+
+	if requestBody.Password == "" {
+		err := errors.New("password should not be empty")
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: err.Error()})
+		return err
+	}
+
+	if len(requestBody.Password) < 8 {
+		err := errors.New("password should be at least 8 characters long")
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: err.Error()})
+		return err
+	}
+
+	if requestBody.PasswordConfirmation == "" {
+		err := errors.New("password confirmation should not be empty")
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: err.Error()})
+		return err
+	}
+
+	if requestBody.PasswordConfirmation != requestBody.Password {
+		err := errors.New("passwords do not match")
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: err.Error()})
+		return err
+	}
+	return nil
+}

@@ -16,6 +16,8 @@ import (
 	"github.com/Skjaldbaka17/quotes-api/structs"
 )
 
+type httpRequest func(http.ResponseWriter, *http.Request)
+
 type Set []int
 
 func TestQuotes(t *testing.T) {
@@ -587,8 +589,6 @@ func TestQuotes(t *testing.T) {
 
 	})
 }
-
-type httpRequest func(http.ResponseWriter, *http.Request)
 
 func getTopicId(topicName string) int {
 

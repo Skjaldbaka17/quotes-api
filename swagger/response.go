@@ -187,3 +187,11 @@ type multipleQuotesTopicResponseWrapper struct {
 		Isicelandic bool   `json:"-"`
 	}
 }
+
+// Data structure representing a user response
+// swagger:response userResponse
+type userResponseWrapper struct {
+	// The necessary data for the user
+	// in: body
+	Body structs.UserResponse
+}

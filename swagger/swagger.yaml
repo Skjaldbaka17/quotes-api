@@ -61,22 +61,20 @@ definitions:
     properties:
       maximum:
         description: |-
-          Where to end the ordering (if empty it ends at the logical end, for example end at 'Z' for alphabetical ascending order).
-          Note this key is always a string, for example if ordering by nrOfQuotes (or popularity) of maximum 11 quotes you need to
-          set "maximum":"11" in the request body
+          Where to end the ordering (if empty it ends at the logical end, for example end at the highest quoteid for quoteid ascending order).
+          Note this key is always a string.
         example: "11"
         type: string
         x-go-name: Maximum
       minimum:
         description: |-
-          Where to start the ordering (if empty it starts from beginning, for example start at 'A' for alphabetical ascending order).
-          Note this key is always a string, for example if ordering by nrOfQuotes (or popularity) of minimum 10 quotes you need to
-          set "minimum":"10" in the request body
+          Where to start the ordering (if empty it starts from beginning, for example start at 1 for quoteid ascending order).
+          Note this key is always a string.
         example: "10"
         type: string
         x-go-name: Minimum
       orderBy:
-        description: What to order by, 'alphabetical', 'popularity' or 'nrOfQuotes'
+        description: What to order by, 'quoteId', 'popularity' or 'length'
         example: popularity
         type: string
         x-go-name: OrderBy
@@ -87,7 +85,7 @@ definitions:
         type: boolean
         x-go-name: Reverse
     type: object
-    x-go-name: orderConfigListAuthorsModel
+    x-go-name: orderConfigListQuotesModel
     x-go-package: github.com/Skjaldbaka17/quotes-api/swagger
   QuoteView:
     properties:
@@ -133,6 +131,15 @@ definitions:
         type: string
         uniqueItems: true
         x-go-name: Topicname
+    type: object
+    x-go-package: github.com/Skjaldbaka17/quotes-api/structs
+  UserResponse:
+    properties:
+      api_key:
+        description: The api-key that the user should send to get access to the api
+        example: 1d8db1d2-6f5b-4254-8b74-44f5e5229add
+        type: string
+        x-go-name: ApiKey
     type: object
     x-go-package: github.com/Skjaldbaka17/quotes-api/structs
   qodResponseModel:
@@ -864,6 +871,48 @@ paths:
           $ref: '#/responses/internalServerErrorResponse'
       tags:
       - TOPICS
+  /users:
+    post:
+      description: Create A user to get a free ApiKey
+      operationId: SignUp
+      parameters:
+      - description: The structure of the sign up request
+        in: body
+        name: Body
+        schema:
+          properties:
+            email:
+              description: The email for the created user (used for validation and
+                password retrieval)
+              example: example@gmail.com
+              type: string
+              x-go-name: Email
+            name:
+              description: The name of the creator
+              example: Robert Huldars
+              type: string
+              x-go-name: Name
+            password:
+              description: The password for the user, used to get the ApiKey and look
+                at stats (coming soon). Must be a relatively strong pass
+              example: "1234567890"
+              type: string
+              x-go-name: Password
+            passwordConfirmation:
+              description: The confirmation for the password. Must be same as "password"
+              example: "1234567890"
+              type: string
+              x-go-name: PasswordConfirmation
+          type: object
+      responses:
+        "200":
+          $ref: '#/responses/userResponse'
+        "400":
+          $ref: '#/responses/incorrectBodyStructureResponse'
+        "500":
+          $ref: '#/responses/internalServerErrorResponse'
+      tags:
+      - USERS
 produces:
 - application/json
 responses:
@@ -1066,6 +1115,10 @@ responses:
           type: integer
           x-go-name: StatusCode
       type: object
+  userResponse:
+    description: Data structure representing a user response
+    schema:
+      $ref: '#/definitions/UserResponse'
 schemes:
 - http
 securityDefinitions:
