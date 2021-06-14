@@ -140,6 +140,12 @@ definitions:
         example: 1d8db1d2-6f5b-4254-8b74-44f5e5229add
         type: string
         x-go-name: ApiKey
+      id:
+        description: The user id
+        example: 1
+        format: int64
+        type: integer
+        x-go-name: Id
     type: object
     x-go-package: github.com/Skjaldbaka17/quotes-api/structs
   qodResponseModel:
@@ -236,6 +242,11 @@ paths:
         required: true
         schema:
           properties:
+            apiKey:
+              description: The api-key you use to access the api
+              example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+              type: string
+              x-go-name: ApiKey
             ids:
               description: A list of the authors's ids that you want
               example:
@@ -248,6 +259,7 @@ paths:
               x-go-name: Ids
           required:
           - ids
+          - apiKey
           type: object
       responses:
         "200":
@@ -269,6 +281,11 @@ paths:
         name: Body
         schema:
           properties:
+            apiKey:
+              description: The api-key you use to access the api
+              example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+              type: string
+              x-go-name: ApiKey
             language:
               default: English
               description: Get the author / quote of the day for the given language
@@ -276,6 +293,8 @@ paths:
               example: English
               type: string
               x-go-name: Language
+          required:
+          - apiKey
           type: object
       responses:
         "200":
@@ -298,6 +317,11 @@ paths:
         schema:
           items:
             properties:
+              apiKey:
+                description: The api-key you use to access the api
+                example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+                type: string
+                x-go-name: ApiKey
               language:
                 default: English
                 description: Get the history of the AODS / QODs for the given language
@@ -311,6 +335,8 @@ paths:
                 example: "2020-12-21"
                 type: string
                 x-go-name: Minimum
+            required:
+            - apiKey
             type: object
           type: array
       responses:
@@ -337,6 +363,13 @@ paths:
                 items:
                   $ref: '#/definitions/OfTheDayModel'
                 type: array
+              apiKey:
+                description: The api-key you use to access the api
+                example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+                type: string
+                x-go-name: ApiKey
+            required:
+            - apiKey
             type: object
           type: array
       responses:
@@ -360,6 +393,11 @@ paths:
           properties:
             OrderConfig:
               $ref: '#/definitions/OrderConfiguration'
+            apiKey:
+              description: The api-key you use to access the api
+              example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+              type: string
+              x-go-name: ApiKey
             language:
               description: |-
                 Only return authors that have quotes in the given language ("english" or "icelandic") if left empty then no constraint
@@ -386,6 +424,8 @@ paths:
               minimum: 1
               type: integer
               x-go-name: PageSize
+          required:
+          - apiKey
           type: object
       responses:
         "200":
@@ -407,6 +447,11 @@ paths:
         name: Body
         schema:
           properties:
+            apiKey:
+              description: The api-key you use to access the api
+              example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+              type: string
+              x-go-name: ApiKey
             language:
               description: |-
                 The random author must have quotes in the given language ("english" or "icelandic") if left empty then no
@@ -422,6 +467,8 @@ paths:
               maximum: 50
               type: integer
               x-go-name: MaxQuotes
+          required:
+          - apiKey
           type: object
       responses:
         "200":
@@ -454,6 +501,11 @@ paths:
         required: true
         schema:
           properties:
+            apiKey:
+              description: The api-key you use to access the api
+              example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+              type: string
+              x-go-name: ApiKey
             authorId:
               description: The id of the author of the quotes you want.
               example: 24952
@@ -488,6 +540,8 @@ paths:
               minimum: 1
               type: integer
               x-go-name: PageSize
+          required:
+          - apiKey
           type: object
       responses:
         "200":
@@ -510,6 +564,11 @@ paths:
           properties:
             OrderConfig:
               $ref: '#/definitions/OrderConfiguration'
+            apiKey:
+              description: The api-key you use to access the api
+              example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+              type: string
+              x-go-name: ApiKey
             language:
               description: |-
                 Only return quotes that have quotes in the given language ("english" or "icelandic") if left empty then no constraint
@@ -535,6 +594,8 @@ paths:
               minimum: 1
               type: integer
               x-go-name: PageSize
+          required:
+          - apiKey
           type: object
       responses:
         "200":
@@ -557,6 +618,11 @@ paths:
         schema:
           items:
             properties:
+              apiKey:
+                description: The api-key you use to access the api
+                example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+                type: string
+                x-go-name: ApiKey
               language:
                 default: English
                 description: Get the history of the AODS / QODs for the given language
@@ -570,6 +636,8 @@ paths:
                 example: "2020-12-21"
                 type: string
                 x-go-name: Minimum
+            required:
+            - apiKey
             type: object
           type: array
       responses:
@@ -595,6 +663,13 @@ paths:
               items:
                 $ref: '#/definitions/OfTheDayModel'
               type: array
+            apiKey:
+              description: The api-key you use to access the api
+              example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+              type: string
+              x-go-name: ApiKey
+          required:
+          - apiKey
           type: object
       responses:
         "200":
@@ -615,6 +690,11 @@ paths:
         name: Body
         schema:
           properties:
+            apiKey:
+              description: The api-key you use to access the api
+              example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+              type: string
+              x-go-name: ApiKey
             authorid:
               description: The random quote returned must be from the author with
                 the given authorId
@@ -640,6 +720,8 @@ paths:
               format: int64
               type: integer
               x-go-name: TopicId
+          required:
+          - apiKey
           type: object
       responses:
         "200":
@@ -662,6 +744,11 @@ paths:
         required: true
         schema:
           properties:
+            apiKey:
+              description: The api-key you use to access the api
+              example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+              type: string
+              x-go-name: ApiKey
             language:
               description: The particular language that the quote should be in
               example: English
@@ -689,6 +776,7 @@ paths:
               type: string
               x-go-name: SearchString
           required:
+          - apiKey
           - searchString
           type: object
       responses:
@@ -711,6 +799,11 @@ paths:
         required: true
         schema:
           properties:
+            apiKey:
+              description: The api-key you use to access the api
+              example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+              type: string
+              x-go-name: ApiKey
             language:
               description: The particular language that the quote should be in
               example: English
@@ -738,6 +831,7 @@ paths:
               type: string
               x-go-name: SearchString
           required:
+          - apiKey
           - searchString
           type: object
       responses:
@@ -760,6 +854,11 @@ paths:
         required: true
         schema:
           properties:
+            apiKey:
+              description: The api-key you use to access the api
+              example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+              type: string
+              x-go-name: ApiKey
             language:
               description: The particular language that the quote should be in
               example: English
@@ -787,6 +886,7 @@ paths:
               type: string
               x-go-name: SearchString
           required:
+          - apiKey
           - searchString
           type: object
       responses:
@@ -808,6 +908,11 @@ paths:
         name: Body
         schema:
           properties:
+            apiKey:
+              description: The api-key you use to access the api
+              example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+              type: string
+              x-go-name: ApiKey
             id:
               description: The topic's id, if left empty then the topic name is used
               example: 10
@@ -835,6 +940,8 @@ paths:
               example: Motivational
               type: string
               x-go-name: Topic
+          required:
+          - apiKey
           type: object
       responses:
         "200":

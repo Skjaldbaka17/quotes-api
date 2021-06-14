@@ -22,6 +22,7 @@ type Set []int
 
 func TestQuotes(t *testing.T) {
 	user := createUser()
+	godUser := getGODModeUser()
 	t.Run("Get Quotes", func(t *testing.T) {
 		t.Run("should return Quotes with id 1, 2 and 3...", func(t *testing.T) {
 
@@ -278,7 +279,7 @@ func TestQuotes(t *testing.T) {
 		t.Run("Should set / Overwrite Quote of the day", func(t *testing.T) {
 
 			quoteId := 1
-			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","qods": [{"id":%d, "date":""}]}`, user.ApiKey, quoteId))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","qods": [{"id":%d, "date":""}]}`, godUser.ApiKey, quoteId))
 			_, response := requestAndReturnArray(jsonStr, SetQuoteOfTheDay)
 			if response.StatusCode != 200 {
 				t.Fatalf("Expected a succesful insert but got %+v", response)
@@ -292,7 +293,7 @@ func TestQuotes(t *testing.T) {
 			date1 := "2020-12-22"
 			date2 := "2020-12-21"
 			quoteId2 := 3
-			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","qods": [{"id":%d, "date":"%s"},{"id":%d, "date":"%s"}]}`, user.ApiKey, quoteId1, date1, quoteId2, date2))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","qods": [{"id":%d, "date":"%s"},{"id":%d, "date":"%s"}]}`, godUser.ApiKey, quoteId1, date1, quoteId2, date2))
 			_, response := requestAndReturnArray(jsonStr, SetQuoteOfTheDay)
 			if response.StatusCode != 200 {
 				t.Fatalf("Expected a succesful insert but got %+v", response)
@@ -320,7 +321,7 @@ func TestQuotes(t *testing.T) {
 			//Input a quote in history for testing
 			quoteId := 1111
 			date := "1998-06-16"
-			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","qods": [{"id":%d, "date":"%s"}]}`, user.ApiKey, quoteId, date))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","qods": [{"id":%d, "date":"%s"}]}`, godUser.ApiKey, quoteId, date))
 			_, response := requestAndReturnArray(jsonStr, SetQuoteOfTheDay)
 			if response.StatusCode != 200 {
 				t.Fatalf("Expected a succesful insert but got %+v", response)
@@ -364,7 +365,7 @@ func TestQuotes(t *testing.T) {
 			//Input a quote in history for testing
 			quoteId := 666
 			date := "2021-06-04"
-			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","qods": [{"id":%d, "date":"%s"}]}`, user.ApiKey, quoteId, date))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","qods": [{"id":%d, "date":"%s"}]}`, godUser.ApiKey, quoteId, date))
 			_, response := requestAndReturnArray(jsonStr, SetQuoteOfTheDay)
 			if response.StatusCode != 200 {
 				t.Fatalf("Expected a succesful insert but got %+v", response)
@@ -697,7 +698,6 @@ func requestAndReturnArray(jsonStr []byte, fn httpRequest) ([]structs.QuoteView,
 	if errorResp.StatusCode == 0 {
 		errorResp.StatusCode = response.Result().StatusCode
 	}
-
 	return respObj, errorResp
 }
 

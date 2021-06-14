@@ -37,6 +37,8 @@ func getBody(rw http.ResponseWriter, r *http.Request, requestBody *structs.Reque
 	return nil, string(buf)
 }
 
+// ValidateRequestApiKey checks if the ApiKey supplied exists and wether the user has finished his allowed request in the past
+// hour. Also adds to the requestHistory... Maybe move that to the end of a request?
 func validateRequestApiKey(rw http.ResponseWriter, r *http.Request) error {
 	var requestBody structs.Request
 	err, bodyAsString := getBody(rw, r, &requestBody)
@@ -46,7 +48,7 @@ func validateRequestApiKey(rw http.ResponseWriter, r *http.Request) error {
 
 	if requestBody.ApiKey == "" {
 		log.Printf("no ApiKey given when accessing resource")
-		err := errors.New("you need an ApiKey to access this resource. Create a user and get a free-tier ApiKey here: https://www.example.com")
+		err := errors.New("you need to supply an apiKey to access this resource. Create a user and get a free-tier apiKey here: https://www.example.com")
 		rw.WriteHeader(http.StatusForbidden)
 		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: err.Error()})
 		return err
@@ -87,15 +89,14 @@ func validateRequestApiKey(rw http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	if count.Count >= REQUESTS_PER_HOUR[user.Tier] {
+	if float64(count.Count) >= REQUESTS_PER_HOUR[user.Tier] {
+		err := fmt.Errorf(
+			"you have used all the requests per hour that your tier %s allows for, i.e. %f request per hour. See https://www.example.com for more info and pricing plans to upgrade your tier if necessary", user.Tier, REQUESTS_PER_HOUR[user.Tier])
 		rw.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: fmt.Sprintf(
-			"You have used all the requests per hour that your tier %s allows for, i.e. %d request per hour. See https://www.example.com for more info and pricing plans to upgrade your tier if necessary.",
-			user.Tier, REQUESTS_PER_HOUR[user.Tier])})
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: err.Error()})
 		return err
 	}
 
-	log.Println("HERE:", "MOFO", count.Count)
 	//TODO: Put the following in its own golang function and run as a separate process!
 	requestEvent := structs.RequestEvent{
 		UserId:      user.Id,
@@ -280,5 +281,30 @@ func ValidateUserInformation(rw http.ResponseWriter, r *http.Request, requestBod
 		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: err.Error()})
 		return err
 	}
+	return nil
+}
+
+// Check whether user has GOD-tier permissions
+func AuthorizeGODApiKey(rw http.ResponseWriter, r *http.Request) error {
+	var requestBody structs.Request
+	if err, _ := getBody(rw, r, &requestBody); err != nil {
+		return err
+	}
+
+	var user structs.User
+	if err := Db.Table("users").Where("api_key = ?", requestBody.ApiKey).First(&user).Error; err != nil {
+		log.Printf("error when searching for user with the given api key in AuthorIzeGOD (api key validation): %s", err)
+		rw.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: "You need special privileges to access this route."})
+		return err
+	}
+
+	if user.Tier != TIERS[len(TIERS)-1] {
+		err := errors.New("you do not have the authorization to perform this action. Is your name Bassi Maraj? This is not meant for you... Sorry for the inconvenience")
+		rw.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: err.Error()})
+		return err
+	}
+
 	return nil
 }

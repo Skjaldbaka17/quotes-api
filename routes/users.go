@@ -61,7 +61,7 @@ func CreateUser(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(rw).Encode(structs.User{Id: user.Id, ApiKey: user.ApiKey})
+	json.NewEncoder(rw).Encode(structs.UserResponse{Id: user.Id, ApiKey: user.ApiKey})
 }
 
 // swagger:route POST /users/login USERS Login

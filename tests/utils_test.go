@@ -22,11 +22,9 @@ var functions map[string]httpRequest = map[string]httpRequest{
 	"GetRandomAuthor":       routes.GetRandomAuthor,
 	"GetAuthorOfTheDay":     routes.GetAuthorOfTheDay,
 	"GetAODHistory":         routes.GetAODHistory,
-	"SetAuthorOfTheDay":     routes.SetAuthorOfTheDay,
 	"GetQuotes":             routes.GetQuotes,
 	"GetQuotesList":         routes.GetQuotesList,
 	"GetRandomQuote":        routes.GetRandomQuote,
-	"SetQuoteOfTheDay":      routes.SetQuoteOfTheDay,
 	"GetQuoteOfTheDay":      routes.GetQuoteOfTheDay,
 	"GetQODHistory":         routes.GetQODHistory,
 	"SearchByString":        routes.SearchByString,
@@ -71,7 +69,7 @@ func TestUtils(t *testing.T) {
 
 			//Creating events to insert, use up all allowed requests for this apikey
 			requestEvents := []structs.RequestEvent{}
-			for i := 0; i < handlers.REQUESTS_PER_HOUR[handlers.TIERS[0]]; i++ {
+			for i := 0.0; i < handlers.REQUESTS_PER_HOUR[handlers.TIERS[0]]; i++ {
 				requestEvents = append(requestEvents, structs.RequestEvent{
 					UserId:      userStruct.Id,
 					ApiKey:      userResponse.ApiKey,
@@ -97,6 +95,27 @@ func TestUtils(t *testing.T) {
 
 		t.Run("Should save a requestEvent in requestHistory for all routes", func(t *testing.T) { t.Skip() })
 		t.Run("Should save a errorEvent in requestHistory for all routes, making errors happen", func(t *testing.T) { t.Skip() })
+
+		t.Run("Should not be able to setQOD nor setAOD", func(t *testing.T) {
+			user := getBasicUser()
+			var jsonStr = []byte(fmt.Sprintf(`{"name":"%s", "password":"%s", "passwordConfirmation":"%s", "email":"%s"}`, user.Name, user.Password, user.PasswordConfirmation, user.Email))
+			userResponse, _ := basicRequestReturnSingle(jsonStr, routes.CreateUser)
+
+			jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s", "aods": [{"id":%d, "date":""}]}`, userResponse.ApiKey, 1))
+
+			response := basicRequestReturnResponse(jsonStr, routes.SetAuthorOfTheDay)
+			if response.Result().StatusCode != http.StatusUnauthorized {
+				t.Fatalf("Expected to be declined, unauthorized user trying to setAOD, and receive status code %d, but got %d ", http.StatusUnauthorized, response.Result().StatusCode)
+			}
+
+			jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s", "qods": [{"id":%d, "date":""}]}`, userResponse.ApiKey, 1))
+
+			response = basicRequestReturnResponse(jsonStr, routes.SetQuoteOfTheDay)
+			if response.Result().StatusCode != http.StatusUnauthorized {
+				t.Fatalf("Expected to be declined, unauthorized user trying to setQOD, and receive status code %d, but got %d ", http.StatusUnauthorized, response.Result().StatusCode)
+			}
+
+		})
 	})
 }
 

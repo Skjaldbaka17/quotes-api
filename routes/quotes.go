@@ -187,15 +187,21 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 
 //SetQuoteOfTheyDay sets the quote of the day (is password protected)
 func SetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
+	if err := handlers.AuthorizeGODApiKey(rw, r); err != nil {
+		return
+	}
+
 	var requestBody structs.Request
 	if err := handlers.GetRequestBody(rw, r, &requestBody); err != nil {
 		return
 	}
+
 	if requestBody.Language == "" {
 		requestBody.Language = "English"
 	}
 
 	if len(requestBody.Qods) == 0 {
+		log.Println("HEREBruv2")
 		log.Println("Not QODS supplied when setting quote of the day")
 		rw.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: "Please supply some quotes", StatusCode: http.StatusBadRequest})
@@ -209,6 +215,7 @@ func SetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: "Some of the quotes (ids) you supplied are not in " + requestBody.Language, StatusCode: http.StatusBadRequest})
 			return
 		}
+
 	}
 
 	json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: "Successfully inserted quote of the day!", StatusCode: http.StatusOK})

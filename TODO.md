@@ -1,22 +1,19 @@
 # TODOS
 
-- [ ] Add password protection / protected routes capability (at least for SetQuoteOfTheyDay route )
-- [ ] Add authentication for access to the api + Creating apiKeys + Documenting usage + admin access vs normal access
-- [ ] Save History of requests
 - [ ] Save History of errors (i.e. error logs)?
-
 - [ ] CleanUp DB after tests
 
-- [ ] Optimize ApiKey Validation queries (index created_at dates-column?)
-
-- [ ] Created at for all tables automatically and updated?!
-- [ ] Coordinate naming conventino (apiKey vs api_key vs apikey etc)
-
+- [ ] Coordinate naming convention (apiKey vs api_key vs apikey etc)
 - [ ] only return keys, in the response-json, that are relevant to the request
-
-- [ ] create type handler around the *gorm.DB so that you can create specific methods for building the sql-queries
-
 - [ ] Add .env variables (i.e. for names of tables etc.)
+
+- [ ] Setup AWS server
+
+ -------------- Further Stuff  --------------
+
+- [ ] Draw up DB-Graph (i.e. how tables are connected to view etc)
+
+- [ ] Optimize ApiKey Validation queries (index created_at dates-column?)
 
 - [ ] Change to Use Gorm to the fullest, oooooooorrr just change returned json to : {"name":"authorName", "id":authorId, "hasIcelandicQuotes":true/false, "nrOfEnglishQuoes":int, "nrOfIcelandicQuotes":int, "quotes":[{"quote": "theQuote", "id":quoteId, "isIcelandic": true/false}]}
 
@@ -27,10 +24,6 @@
 - [ ] Create new Topic (private and public)
 - [ ] update created topic (priv and pub)
 
-- [ ] Setup AWS server
-
-- [ ] Draw up DB-Graph (i.e. how tables are connected to view etc)
-
 - [ ] is random truly random (i.e. does the "random" funcitonality truly return randomly or is it biased towards quotes in the "front" of the DB (i.e. in the front where postgres stores them))
 - [ ] Make Authors Search more efficient (create a similarity-based index ?)
 - [ ] Sort return list alphabetically Icelandic support
@@ -38,8 +31,13 @@
 - [ ] Look into and maybe Change rest into GraphQL (neeeeeee, frekar fyrir næsta project)
 - [ ] Look into payment for some privileges
 - [ ] New crawler for new quotes / authors
- --------------
 
+ -------------- Done  --------------
+
+- [x] add api key to swagger
+- [x] Add authentication for access to the api + Creating apiKeys + Documenting usage + admin access vs normal access
+- [x] Add password protection / protected routes capability (at least for SetQuoteOfTheyDay route )
+- [x] Save History of requests
 - [x] Add Users (GOD vs ...)
 - [x] Error handling
 - [x] Add error response to Swagger

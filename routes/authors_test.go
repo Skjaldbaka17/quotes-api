@@ -22,8 +22,15 @@ func createUser() structs.UserResponse {
 	return userResponse
 }
 
+func getGODModeUser() structs.UserResponse {
+	var user structs.UserResponse
+	handlers.Db.Table("users").Where("tier = 'GOD'").First(&user)
+	return user
+}
+
 func TestAuthors(t *testing.T) {
 	user := createUser()
+	godUser := getGODModeUser()
 
 	t.Run("Get authors", func(t *testing.T) {
 		t.Run("should return Author with id 1", func(t *testing.T) {
@@ -391,7 +398,7 @@ func TestAuthors(t *testing.T) {
 		t.Run("Should set / Overwrite Author of the day", func(t *testing.T) {
 
 			authorId := 1
-			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s", "aods": [{"id":%d, "date":""}]}`, user.ApiKey, authorId))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s", "aods": [{"id":%d, "date":""}]}`, godUser.ApiKey, authorId))
 			_, response := requestAndReturnArray(jsonStr, SetAuthorOfTheDay)
 			if response.StatusCode != 200 {
 				t.Fatalf("Expected a succesful insert but got %+v", response)
@@ -405,7 +412,7 @@ func TestAuthors(t *testing.T) {
 			date1 := "2020-12-22"
 			date2 := "2020-12-21"
 			authorId2 := 3
-			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s", "aods": [{"id":%d, "date":"%s"},{"id":%d, "date":"%s"}]}`, user.ApiKey, authorId1, date1, authorId2, date2))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s", "aods": [{"id":%d, "date":"%s"},{"id":%d, "date":"%s"}]}`, godUser.ApiKey, authorId1, date1, authorId2, date2))
 			_, response := requestAndReturnArray(jsonStr, SetAuthorOfTheDay)
 			if response.StatusCode != 200 {
 				t.Fatalf("Expected a succesful insert but got %+v", response)
@@ -439,7 +446,7 @@ func TestAuthors(t *testing.T) {
 			//Input a quote in history for testing
 			authorId := 1111
 			date := "1998-06-16"
-			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s", "aods": [{"id":%d, "date":"%s"}]}`, user.ApiKey, authorId, date))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s", "aods": [{"id":%d, "date":"%s"}]}`, godUser.ApiKey, authorId, date))
 			_, response := requestAndReturnArray(jsonStr, SetAuthorOfTheDay)
 			if response.StatusCode != 200 {
 				t.Fatalf("Expected a succesful insert but got %+v", response)
@@ -486,7 +493,7 @@ func TestAuthors(t *testing.T) {
 			//Input a quote in history for testing
 			authorId := 666
 			date := "2021-06-04"
-			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","aods": [{"id":%d, "date":"%s"}]}`, user.ApiKey, authorId, date))
+			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","aods": [{"id":%d, "date":"%s"}]}`, godUser.ApiKey, authorId, date))
 			_, response := requestAndReturnArray(jsonStr, SetAuthorOfTheDay)
 			if response.StatusCode != 200 {
 				t.Fatalf("Expected a succesful insert but got %+v", response)

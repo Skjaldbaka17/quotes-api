@@ -313,6 +313,9 @@ func GetAODHistory(rw http.ResponseWriter, r *http.Request) {
 
 //SetAuthorOfTheDay sets the author of the day.
 func SetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
+	if err := handlers.AuthorizeGODApiKey(rw, r); err != nil {
+		return
+	}
 	var requestBody structs.Request
 	if err := handlers.GetRequestBody(rw, r, &requestBody); err != nil {
 		return

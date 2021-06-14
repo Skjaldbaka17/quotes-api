@@ -11,6 +11,11 @@ type getAuthorsWrapper struct {
 		// Required: true
 		// Example: [24952,19161]
 		Ids []int `json:"ids"`
+		// The api-key you use to access the api
+		//
+		// Required: true
+		// Example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+		ApiKey string `json:"apiKey"`
 	}
 }
 
@@ -19,6 +24,11 @@ type authorsListWrapper struct {
 	// The structure of the request for getting a list of authors
 	// in: body
 	Body struct {
+		// The api-key you use to access the api
+		//
+		// Required: true
+		// Example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+		ApiKey string `json:"apiKey"`
 		// Response is paged. This parameter controls the number of Authors to be returned on each "page"
 		//
 		// Maximum: 200
@@ -46,6 +56,11 @@ type randomAuthorWrapper struct {
 	// The structure of the request for getting a random author
 	// in: body
 	Body struct {
+		// The api-key you use to access the api
+		//
+		// Required: true
+		// Example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+		ApiKey string `json:"apiKey"`
 		// The random author must have quotes in the given language ("english" or "icelandic") if left empty then no
 		// constraint on language is set
 		//
@@ -65,6 +80,11 @@ type ofTheDayWrapper struct {
 	// The structure of the request for getting the author / quote of the day
 	// in: body
 	Body struct {
+		// The api-key you use to access the api
+		//
+		// Required: true
+		// Example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+		ApiKey string `json:"apiKey"`
 		// Get the author / quote of the day for the given language ("icelandic" or "english")
 		//
 		// Default: English
@@ -78,6 +98,11 @@ type historyAODWrapper struct {
 	// The structure of the request for getting the history of AODs / QODs
 	// in: body
 	Body []struct {
+		// The api-key you use to access the api
+		//
+		// Required: true
+		// Example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+		ApiKey string `json:"apiKey"`
 		// Get the history of the AODS / QODs for the given language ("icelandic" or "english")
 		//
 		// Default: English
@@ -94,7 +119,12 @@ type setAODWrapper struct {
 	// The structure of the request for setting AODs
 	// in: body
 	Body []struct {
-		Aods []ofTheDayModel
+		// The api-key you use to access the api
+		//
+		// Required: true
+		// Example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+		ApiKey string `json:"apiKey"`
+		Aods   []ofTheDayModel
 	}
 }
 
@@ -103,7 +133,12 @@ type setQuoteOfTheDayWrapper struct {
 	// The structure of the request for setting the QOD
 	// in: body
 	Body struct {
-		Qods []ofTheDayModel
+		// The api-key you use to access the api
+		//
+		// Required: true
+		// Example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+		ApiKey string `json:"apiKey"`
+		Qods   []ofTheDayModel
 	}
 }
 
@@ -114,6 +149,11 @@ type getQuotesByWrapper struct {
 	// in: body
 	// required: true
 	Body struct {
+		// The api-key you use to access the api
+		//
+		// Required: true
+		// Example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+		ApiKey string `json:"apiKey"`
 		// The list of quotes's ids you want
 		//
 		// Example: [582676,443976]
@@ -141,6 +181,11 @@ type quotesListWrapper struct {
 	// The structure of the request for getting a list of quotes
 	// in: body
 	Body struct {
+		// The api-key you use to access the api
+		//
+		// Required: true
+		// Example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+		ApiKey string `json:"apiKey"`
 		// Response is paged. This parameter controls the number of Quotes to be returned on each "page"
 		//
 		// Maximum: 200
@@ -167,6 +212,11 @@ type getRandomQuoteResponseWrapper struct {
 	// The structure of the request for a random quote
 	// in: body
 	Body struct {
+		// The api-key you use to access the api
+		//
+		// Required: true
+		// Example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+		ApiKey string `json:"apiKey"`
 		// The random quote returned must be in the given language
 		//
 		// Example: English
@@ -192,6 +242,11 @@ type getSearchByStringWrapper struct {
 	// in: body
 	// required: true
 	Body struct {
+		// The api-key you use to access the api
+		//
+		// Required: true
+		// Example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+		ApiKey string `json:"apiKey"`
 		// The string to be used in the search
 		//
 		// Required: true
@@ -221,6 +276,11 @@ type getSearchAuthorsByStringWrapper struct {
 	// in: body
 	// required: true
 	Body struct {
+		// The api-key you use to access the api
+		//
+		// Required: true
+		// Example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+		ApiKey string `json:"apiKey"`
 		// The string to be used in the search
 		//
 		// Required: true
@@ -261,6 +321,11 @@ type quotesFromTopicWrapper struct {
 	// The structure of the request for listing topics
 	// in: body
 	Body struct {
+		// The api-key you use to access the api
+		//
+		// Required: true
+		// Example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+		ApiKey string `json:"apiKey"`
 		// Name of the topic, if left empty then the id is used
 		//
 		// required: false
@@ -290,6 +355,7 @@ type signUpParameterWrapper struct {
 	// The structure of the sign up request
 	// in: body
 	Body struct {
+
 		// The email for the created user (used for validation and password retrieval)
 		// example: example@gmail.com
 		Email string `json:"email"`
