@@ -4,15 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Skjaldbaka17/quotes-api/handlers"
 	"github.com/Skjaldbaka17/quotes-api/structs"
 )
 
 func TestSearch(t *testing.T) {
-	user := createUser()
+	user := createUser(t)
 	t.Run("Search Quotes By String", func(t *testing.T) {
 		t.Run("easy search should return list of quotes with Muhammad Ali as first author", func(t *testing.T) {
 
@@ -248,6 +250,16 @@ func TestSearch(t *testing.T) {
 			}
 		})
 
+	})
+
+	t.Cleanup(func() {
+		log.Println("CLEANUP TestSearch!")
+		// Set popularity of authors to 0
+		handlers.Db.Exec("Update authors set count = 0 where count > 0")
+		// Set popularity of quotes to 0
+		handlers.Db.Exec("Update quotes set count = 0 where count > 0")
+		// Set popularity of topics to 0
+		handlers.Db.Exec("Update topics set count = 0 where count > 0")
 	})
 
 }

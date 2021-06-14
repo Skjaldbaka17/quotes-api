@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -32,6 +33,10 @@ var functions map[string]httpRequest = map[string]httpRequest{
 	"SearchQuotesByString":  routes.SearchQuotesByString,
 	"GetTopics":             routes.GetTopics,
 	"GetTopic":              routes.GetTopic,
+}
+
+func deleteUser(id int) {
+	handlers.Db.Table("users").Delete(&structs.User{Id: id})
 }
 
 func TestUtils(t *testing.T) {
@@ -63,6 +68,12 @@ func TestUtils(t *testing.T) {
 			if userResponse.ApiKey == "" {
 				t.Fatalf("Expected an Api key but got %s", userResponse.ApiKey)
 			}
+
+			defer deleteUser(userResponse.Id)
+			defer func() {
+				// Delete from request History
+				handlers.Db.Exec("delete from requesthistory where user_id = ?", userResponse.Id)
+			}()
 
 			var userStruct structs.User
 			handlers.Db.Table("users").Where("api_key = ?", userResponse.ApiKey).First(&userStruct)
@@ -100,7 +111,7 @@ func TestUtils(t *testing.T) {
 			user := getBasicUser()
 			var jsonStr = []byte(fmt.Sprintf(`{"name":"%s", "password":"%s", "passwordConfirmation":"%s", "email":"%s"}`, user.Name, user.Password, user.PasswordConfirmation, user.Email))
 			userResponse, _ := basicRequestReturnSingle(jsonStr, routes.CreateUser)
-
+			defer deleteUser(userResponse.Id)
 			jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s", "aods": [{"id":%d, "date":""}]}`, userResponse.ApiKey, 1))
 
 			response := basicRequestReturnResponse(jsonStr, routes.SetAuthorOfTheDay)
@@ -116,6 +127,16 @@ func TestUtils(t *testing.T) {
 			}
 
 		})
+	})
+
+	t.Cleanup(func() {
+		log.Println("CLEANUP TestUtils!")
+		// Set popularity of authors to 0
+		handlers.Db.Exec("Update authors set count = 0 where count > 0")
+		// Set popularity of quotes to 0
+		handlers.Db.Exec("Update quotes set count = 0 where count > 0")
+		// Set popularity of topics to 0
+		handlers.Db.Exec("Update topics set count = 0 where count > 0")
 	})
 }
 

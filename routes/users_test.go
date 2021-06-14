@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Skjaldbaka17/quotes-api/handlers"
 	"github.com/Skjaldbaka17/quotes-api/structs"
 	"github.com/google/uuid"
 )
@@ -25,6 +26,10 @@ func getBasicUser() structs.UserRequest {
 		PasswordConfirmation: passwordConfirmation,
 	}
 }
+
+func deleteUser(id int) {
+	handlers.Db.Table("users").Delete(&structs.User{Id: id})
+}
 func TestUsers(t *testing.T) {
 	t.Run("Create User", func(t *testing.T) {
 		t.Run("Should create user with name: Þórður Ágústsson, password: 1234567890 and email: random@gmail.com", func(t *testing.T) {
@@ -39,20 +44,23 @@ func TestUsers(t *testing.T) {
 			if userResponse.ApiKey == "" {
 				t.Fatalf("Expected an Api key but got %s", userResponse.ApiKey)
 			}
+
+			deleteUser(userResponse.Id)
 		})
 
 		t.Run("Should try to create user with email already in use but get error", func(t *testing.T) {
 			user := getBasicUser()
 			var jsonStr = []byte(fmt.Sprintf(`{"name":"%s", "password":"%s", "passwordConfirmation":"%s", "email":"%s"}`, user.Name, user.Password, user.PasswordConfirmation, user.Email))
 
-			_, _ = basicRequestReturnSingle(jsonStr, CreateUser)
-
+			userResponse, _ := basicRequestReturnSingle(jsonStr, CreateUser)
+			defer deleteUser(userResponse.Id)
 			//Do it again with same info
 			_, response := basicRequestReturnSingle(jsonStr, CreateUser)
 
 			if response.Result().StatusCode != 400 {
 				t.Fatalf("Expected a status code of 400 but got %d", response.Result().StatusCode)
 			}
+
 		})
 
 		t.Run("Should try to create user with non-regex-email and get error", func(t *testing.T) {
@@ -63,10 +71,14 @@ func TestUsers(t *testing.T) {
 			user := getBasicUser()
 			user.PasswordConfirmation = "12345678901"
 			var jsonStr = []byte(fmt.Sprintf(`{"name":"%s", "password":"%s", "passwordConfirmation":"%s", "email":"%s"}`, user.Name, user.Password, user.PasswordConfirmation, user.Email))
-			_, response := basicRequestReturnSingle(jsonStr, CreateUser)
+			userResponse, response := basicRequestReturnSingle(jsonStr, CreateUser)
 
 			if response.Result().StatusCode != 400 {
 				t.Fatalf("Expected a status code of 200 but got %d", response.Result().StatusCode)
+			}
+
+			if userResponse.ApiKey != "" {
+				t.Fatalf("Expected not to create user but got user %+v", userResponse)
 			}
 		})
 
@@ -75,12 +87,16 @@ func TestUsers(t *testing.T) {
 			user.PasswordConfirmation = "123"
 			user.Password = "123"
 			var jsonStr = []byte(fmt.Sprintf(`{"name":"%s", "password":"%s", "passwordConfirmation":"%s", "email":"%s"}`, user.Name, user.Password, user.PasswordConfirmation, user.Email))
-			_, response := basicRequestReturnSingle(jsonStr, CreateUser)
+			userResponse, response := basicRequestReturnSingle(jsonStr, CreateUser)
 
 			if response.Result().StatusCode != 400 {
 				t.Fatalf("Expected a status code of 200 but got %d", response.Result().StatusCode)
 			}
+			if userResponse.ApiKey != "" {
+				t.Fatalf("Expected not to create user but got user %+v", userResponse)
+			}
 		})
+
 	})
 
 	t.Run("Login", func(t *testing.T) {
@@ -90,7 +106,7 @@ func TestUsers(t *testing.T) {
 			user := getBasicUser()
 			var jsonStr = []byte(fmt.Sprintf(`{"name":"%s", "password":"%s", "passwordConfirmation":"%s", "email":"%s"}`, user.Name, user.Password, user.PasswordConfirmation, user.Email))
 			firstUserResponse, _ := basicRequestReturnSingle(jsonStr, CreateUser)
-
+			defer deleteUser(firstUserResponse.Id)
 			apiKey := firstUserResponse.ApiKey
 
 			if apiKey == "" {
@@ -136,7 +152,7 @@ func TestUsers(t *testing.T) {
 			user := getBasicUser()
 			var jsonStr = []byte(fmt.Sprintf(`{"name":"%s", "password":"%s", "passwordConfirmation":"%s", "email":"%s"}`, user.Name, user.Password, user.PasswordConfirmation, user.Email))
 			firstUserResponse, _ := basicRequestReturnSingle(jsonStr, CreateUser)
-
+			defer deleteUser(firstUserResponse.Id)
 			apiKey := firstUserResponse.ApiKey
 
 			if apiKey == "" {
@@ -154,6 +170,8 @@ func TestUsers(t *testing.T) {
 			if response.Result().StatusCode != 401 {
 				t.Fatalf("Expected a status code of 401 but got %d", response.Result().StatusCode)
 			}
+
+			deleteUser(firstUserResponse.Id)
 		})
 	})
 }

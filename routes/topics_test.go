@@ -4,15 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Skjaldbaka17/quotes-api/handlers"
 	"github.com/Skjaldbaka17/quotes-api/structs"
 )
 
 func TestTopics(t *testing.T) {
-	user := createUser()
+	user := createUser(t)
 
 	t.Run("Should return the possible English topics as a list of objects", func(t *testing.T) {
 
@@ -132,5 +134,15 @@ func TestTopics(t *testing.T) {
 			t.Fatalf("got %+v but expected %+v", newRespObj[25], obj26)
 		}
 
+	})
+
+	t.Cleanup(func() {
+		log.Println("CLEANUP TestTopics!")
+		// Set popularity of authors to 0
+		handlers.Db.Exec("Update authors set count = 0 where count > 0")
+		// Set popularity of quotes to 0
+		handlers.Db.Exec("Update quotes set count = 0 where count > 0")
+		// Set popularity of topics to 0
+		handlers.Db.Exec("Update topics set count = 0 where count > 0")
 	})
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
@@ -21,8 +22,8 @@ type httpRequest func(http.ResponseWriter, *http.Request)
 type Set []int
 
 func TestQuotes(t *testing.T) {
-	user := createUser()
-	godUser := getGODModeUser()
+	user := createUser(t)
+	godUser := getGODModeUser(t)
 	t.Run("Get Quotes", func(t *testing.T) {
 		t.Run("should return Quotes with id 1, 2 and 3...", func(t *testing.T) {
 
@@ -589,6 +590,19 @@ func TestQuotes(t *testing.T) {
 			}
 		})
 
+	})
+
+	t.Cleanup(func() {
+		log.Println("CLEANUP TestQuotes!")
+		// Delete from qod
+		handlers.Db.Exec("DELETE FROM qod")
+		handlers.Db.Exec("DELETE FROM qodice")
+		// Set popularity of authors to 0
+		handlers.Db.Exec("Update authors set count = 0 where count > 0")
+		// Set popularity of quotes to 0
+		handlers.Db.Exec("Update quotes set count = 0 where count > 0")
+		// Set popularity of topics to 0
+		handlers.Db.Exec("Update topics set count = 0 where count > 0")
 	})
 }
 

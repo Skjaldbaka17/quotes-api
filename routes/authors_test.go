@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"testing"
 	"time"
@@ -11,26 +12,39 @@ import (
 	"github.com/google/uuid"
 )
 
-func createUser() structs.UserResponse {
+func createUser(t *testing.T) structs.UserResponse {
 	password := "1234567890"
 	passwordConfirmation := "1234567890"
 	random, _ := uuid.NewRandom()
 	name := "Þórður Ágústsson"
 	email := random.String() + "@gmail.com"
 	var jsonStr = []byte(fmt.Sprintf(`{"name":"%s", "password":"%s", "passwordConfirmation":"%s", "email":"%s"}`, name, password, passwordConfirmation, email))
-	userResponse, _ := basicRequestReturnSingle(jsonStr, CreateUser)
+	userResponse, response := basicRequestReturnSingle(jsonStr, CreateUser)
+	if response.Result().StatusCode != 200 {
+		t.Fatalf("Failed creating user, got statust code %d but expected %d", response.Result().StatusCode, 200)
+	}
+
+	t.Cleanup(func() {
+		log.Println("CLEANUP:", userResponse)
+		handlers.Db.Table("users").Delete(&structs.User{Id: userResponse.Id})
+		handlers.Db.Table("requesthistory").Where("user_id = ?", userResponse.Id).Delete(structs.RequestEvent{})
+	})
 	return userResponse
 }
 
-func getGODModeUser() structs.UserResponse {
+func getGODModeUser(t *testing.T) structs.UserResponse {
 	var user structs.UserResponse
 	handlers.Db.Table("users").Where("tier = 'GOD'").First(&user)
+	t.Cleanup(func() {
+		log.Println("CLEANUPGOD:", user)
+		handlers.Db.Table("requesthistory").Where("user_id = ?", user.Id).Delete(structs.RequestEvent{})
+	})
 	return user
 }
 
 func TestAuthors(t *testing.T) {
-	user := createUser()
-	godUser := getGODModeUser()
+	user := createUser(t)
+	godUser := getGODModeUser(t)
 
 	t.Run("Get authors", func(t *testing.T) {
 		t.Run("should return Author with id 1", func(t *testing.T) {
@@ -548,4 +562,16 @@ func TestAuthors(t *testing.T) {
 
 	})
 
+	t.Cleanup(func() {
+		log.Println("CLEANUP TestAuthors!")
+		// Delete from aod
+		handlers.Db.Exec("DELETE FROM aod")
+		handlers.Db.Exec("DELETE FROM aodice")
+		// Set popularity of authors to 0
+		handlers.Db.Exec("Update authors set count = 0 where count > 0")
+		// Set popularity of quotes to 0
+		handlers.Db.Exec("Update quotes set count = 0 where count > 0")
+		// Set popularity of topics to 0
+		handlers.Db.Exec("Update topics set count = 0 where count > 0")
+	})
 }
