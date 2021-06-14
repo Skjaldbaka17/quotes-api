@@ -567,11 +567,5 @@ func TestAuthors(t *testing.T) {
 		// Delete from aod
 		handlers.Db.Exec("DELETE FROM aod")
 		handlers.Db.Exec("DELETE FROM aodice")
-		// Set popularity of authors to 0
-		handlers.Db.Exec("Update authors set count = 0 where count > 0")
-		// Set popularity of quotes to 0
-		handlers.Db.Exec("Update quotes set count = 0 where count > 0")
-		// Set popularity of topics to 0
-		handlers.Db.Exec("Update topics set count = 0 where count > 0")
 	})
 }

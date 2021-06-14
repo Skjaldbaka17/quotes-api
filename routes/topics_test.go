@@ -9,7 +9,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Skjaldbaka17/quotes-api/handlers"
 	"github.com/Skjaldbaka17/quotes-api/structs"
 )
 
@@ -138,11 +137,5 @@ func TestTopics(t *testing.T) {
 
 	t.Cleanup(func() {
 		log.Println("CLEANUP TestTopics!")
-		// Set popularity of authors to 0
-		handlers.Db.Exec("Update authors set count = 0 where count > 0")
-		// Set popularity of quotes to 0
-		handlers.Db.Exec("Update quotes set count = 0 where count > 0")
-		// Set popularity of topics to 0
-		handlers.Db.Exec("Update topics set count = 0 where count > 0")
 	})
 }

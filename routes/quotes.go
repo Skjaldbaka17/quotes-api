@@ -130,7 +130,7 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 	}
 	var dbPointer *gorm.DB
 	var result structs.QuoteView
-	shouldOrderBy := false //Used when there are few rows to choose from and therefore higher probability that random() < 0.005 returns no rows
+	// shouldOrderBy := false //Used when there are few rows to choose from and therefore higher probability that random() < 0.005 returns no rows
 
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	m1 := regexp.MustCompile(` `)
@@ -139,7 +139,7 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 	//Random quote from a particular topic
 	if requestBody.TopicId > 0 {
 		dbPointer = handlers.Db.Table("topicsview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq", requestBody.SearchString, phrasesearch).Where("topicid = ?", requestBody.TopicId)
-		shouldOrderBy = true
+		// shouldOrderBy = true
 	} else {
 		dbPointer = handlers.Db.Table("searchview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq", requestBody.SearchString, phrasesearch)
 	}
@@ -147,7 +147,7 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 	//Random quote from a particular author
 	if requestBody.AuthorId > 0 {
 		dbPointer = dbPointer.Where("authorid = ?", requestBody.AuthorId)
-		shouldOrderBy = true
+		// shouldOrderBy = true
 	}
 
 	//Random quote from a particular language
@@ -155,14 +155,14 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 
 	if requestBody.SearchString != "" {
 		dbPointer = dbPointer.Where("( quotetsv @@ plainq OR quotetsv @@ phraseq)")
-		shouldOrderBy = true
+		// shouldOrderBy = true
 	}
 
 	//Order by used to get random quote if there are "few" rows returned
-	if !shouldOrderBy {
-		dbPointer = dbPointer.
-			Where("random() < 0.005")
-	}
+	// if !shouldOrderBy {
+	// 	dbPointer = dbPointer.
+	// 		Where("random() < 0.005")
+	// }
 
 	dbPointer = dbPointer.Order("random()") //Randomized, O( n*log(n) )
 	//** ---------- Paramater configuratino for DB query ends ---------- **//

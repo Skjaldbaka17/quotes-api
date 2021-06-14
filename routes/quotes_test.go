@@ -597,12 +597,6 @@ func TestQuotes(t *testing.T) {
 		// Delete from qod
 		handlers.Db.Exec("DELETE FROM qod")
 		handlers.Db.Exec("DELETE FROM qodice")
-		// Set popularity of authors to 0
-		handlers.Db.Exec("Update authors set count = 0 where count > 0")
-		// Set popularity of quotes to 0
-		handlers.Db.Exec("Update quotes set count = 0 where count > 0")
-		// Set popularity of topics to 0
-		handlers.Db.Exec("Update topics set count = 0 where count > 0")
 	})
 }
 
