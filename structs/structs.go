@@ -1,93 +1,51 @@
 package structs
 
-import "gorm.io/gorm"
-
-type Quotes struct {
-	gorm.Model
-	Id          int    `json:"id"`
-	Authorid    int    `json:"authorid"`
-	Quote       string `json:"quote"`
-	Count       int    `json:"count"`
-	IsIcelandic bool   `json:"isicelandic"`
-}
-
-type Authors struct {
-	gorm.Model
-	Id     int      `json:"id"`
-	Name   string   `json:"name"`
-	Count  int      `json:"count"`
-	Quotes []Quotes `json:"quotes" gorm:"foreignKey:authorid"`
-}
-
-type AuthorsView struct {
-	// The author's id
-	//Unique: true
-	//example: 24952
-	Id int `json:"id"`
-	// Name of the author
-	//example: Muhammad Ali
-	Name string `json:"name"`
-	// Whether or not this author has some icelandic quotes
-	//example: true
-	Hasicelandicquotes bool `json:"hasicelandicquotes"`
-	// How many quotes in icelandic this author has
-	//example: 6
-	Nroficelandicquotes int `json:"nroficelandicquotes"`
-	// How many quotes in icelandic this author has
-	//example: 78
-	Nrofenglishquotes int `json:"nrofenglishquotes"`
-	//swagger:ignore
-	Count int `json:"count"`
-	//swagger:ignore
-	Date string `json:"date"`
-}
-
 type QuoteView struct {
 	// The author's id
 	//Unique: true
 	//example: 24952
-	Authorid int `json:"authorid"`
+	Authorid int `json:"author_id"`
 	// Name of author
 	//example: Muhammad Ali
 	Name string `json:"name"`
 	// The quote's id
 	//Unique: true
 	//example: 582676
-	Quoteid int `json:"quoteid" `
+	Quoteid int `json:"quote_id" `
 	// The topic's id
 	//Unique: true
 	//example: 10
-	Topicid int `json:"topicid" `
+	Topicid int `json:"topic_id" `
 	// The topic's name
 	//Unique: true
 	//example: inspirational
-	Topicname string `json:"topicname" `
+	Topicname string `json:"topic_name" `
 	// The quote
 	//example: Float like a butterfly, sting like a bee.
 	Quote string `json:"quote"`
 	// Whether or not this quote is in Icelandic or not
 	// example: false
-	Isicelandic bool `json:"isicelandic"`
+	Isicelandic bool `json:"is_icelandic"`
 	//swagger:ignore
 	Id int `json:"id"`
 	//swagger:ignore
-	Hasicelandicquotes bool `json:"hasicelandicquotes"`
+	Hasicelandicquotes bool `json:"has_icelandic_quotes"`
 	//swagger:ignore
-	Nroficelandicquotes int `json:"nroficelandicquotes"`
+	Nroficelandicquotes int `json:"nr_of_icelandic_quotes"`
 	//swagger:ignore
-	Nrofenglishquotes int `json:"nrofenglishquotes"`
+	Nrofenglishquotes int `json:"nr_of_english_quotes"`
 	//swagger:ignore Date
 	Date string `json:"date"`
 	//swagger:ignore
-	Quotecount int `json:"quotecount"`
+	Quotecount int `json:"quote_count"`
 	//swagger:ignore
-	Authorcount int `json:"authorcount"`
+	Authorcount int `json:"author_count"`
 }
 
 type ListItem struct {
 	Id          int    `json:"id"`
 	Name        string `json:"name"`
-	Isicelandic string `json:"isicelandic"`
+	Isicelandic string `json:"is_icelandic"`
 }
 
 type Request struct {
@@ -109,26 +67,6 @@ type Request struct {
 	Qods         []Qod       `json:"qods"`
 	Aods         []Qod       `json:"aods"`
 	ApiKey       string      `json:"apiKey"`
-}
-
-type UserRequest struct {
-	ApiKey               string `json:"apiKey"`
-	Id                   int    `json:"id"`
-	Email                string `json:"email"`
-	Name                 string `json:"name"`
-	Password             string `json:"password"`
-	PasswordConfirmation string `json:"passwordConfirmation"`
-	Tier                 string `json:"tier"`
-}
-
-type User struct {
-	Id           int    `json:"id"`
-	ApiKey       string `json:"api_key"`
-	Message      string `json:"message"`
-	PasswordHash string `json:"password_hash"`
-	Tier         string `json:"tier"`
-	Name         string `json:"name"`
-	Email        string `json:"email"`
 }
 
 type RequestEvent struct {
@@ -188,5 +126,5 @@ type OrderConfig struct {
 
 type ErrorResponse struct {
 	Message    string `json:"message"`
-	StatusCode int    `json:"statusCode"`
+	StatusCode int    `json:"status_code"`
 }

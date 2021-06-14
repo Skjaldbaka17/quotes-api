@@ -30,7 +30,7 @@ func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var authors []structs.AuthorsView
+	var authors []structs.AuthorDBModel
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	err := handlers.Db.Table("authors").
 		Where("id in (?)", requestBody.Ids).
@@ -48,7 +48,8 @@ func GetAuthorsById(rw http.ResponseWriter, r *http.Request) {
 	//Update popularity in background!
 	go handlers.DirectFetchAuthorsCountIncrement(requestBody.Ids)
 
-	json.NewEncoder(rw).Encode(&authors)
+	authorsAPI := structs.ConvertToAuthorsAPIModel(authors)
+	json.NewEncoder(rw).Encode(&authorsAPI)
 }
 
 // swagger:route POST /authors/list AUTHORS ListAuthors
@@ -67,7 +68,7 @@ func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var authors []structs.AuthorsView
+	var authors []structs.AuthorDBModel
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	dbPointer := handlers.Db.Table("authors")
 
@@ -88,11 +89,11 @@ func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
 	case "nrofquotes":
 		switch strings.ToLower(requestBody.Language) {
 		case "english":
-			dbPointer = setMaxMinNumber(requestBody.OrderConfig, "nrofenglishquotes", orderDirection, dbPointer)
+			dbPointer = setMaxMinNumber(requestBody.OrderConfig, "nr_of_english_quotes", orderDirection, dbPointer)
 		case "icelandic":
-			dbPointer = setMaxMinNumber(requestBody.OrderConfig, "nroficelandicquotes", orderDirection, dbPointer)
+			dbPointer = setMaxMinNumber(requestBody.OrderConfig, "nr_of_icelandic_quotes", orderDirection, dbPointer)
 		default:
-			dbPointer = setMaxMinNumber(requestBody.OrderConfig, "nroficelandicquotes + nrofenglishquotes", orderDirection, dbPointer)
+			dbPointer = setMaxMinNumber(requestBody.OrderConfig, "nr_of_icelandic_quotes + nr_of_english_quotes", orderDirection, dbPointer)
 		}
 
 	default:
@@ -122,7 +123,8 @@ func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
 	//Update popularity in background!
 	go handlers.AuthorsAppearInSearchCountIncrement(authors)
 
-	json.NewEncoder(rw).Encode(&authors)
+	authorsAPI := structs.ConvertToAuthorsAPIModel(authors)
+	json.NewEncoder(rw).Encode(&authorsAPI)
 }
 
 // swagger:route POST /authors/random AUTHORS GetRandomAuthor
@@ -139,8 +141,8 @@ func GetRandomAuthor(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var result []structs.QuoteView
-	var author structs.AuthorsView
+	var result []structs.SearchViewDBModel
+	var author structs.AuthorDBModel
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 
 	//Get Random author
@@ -159,7 +161,7 @@ func GetRandomAuthor(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbPointer = handlers.Db.Table("searchview").Where("authorid = ?", author.Id)
+	dbPointer = handlers.Db.Table("searchview").Where("author_id = ?", author.Id)
 
 	//An icelandic quote from the particular/random author
 	dbPointer = quoteLanguageSQL(requestBody.Language, dbPointer)
@@ -173,7 +175,8 @@ func GetRandomAuthor(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(rw).Encode(result)
+	searchViewAPI := structs.ConvertToSearchViewsAPIModel(result)
+	json.NewEncoder(rw).Encode(searchViewAPI)
 }
 
 // swagger:route POST /authors/aod AUTHORS GetAuthorOfTheDay
@@ -193,7 +196,7 @@ func GetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
 		requestBody.Language = "English"
 	}
 
-	var author structs.AuthorsView
+	var author structs.AodDBModel
 	var err error
 
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
@@ -212,7 +215,7 @@ func GetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if (structs.AuthorsView{}) == author {
+	if (structs.AodDBModel{}) == author {
 		err = setNewRandomAOD(requestBody.Language)
 		if err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
@@ -244,7 +247,7 @@ func GetAODHistory(rw http.ResponseWriter, r *http.Request) {
 	if requestBody.Language == "" {
 		requestBody.Language = "English"
 	}
-	var authors []structs.AuthorsView
+	var authors []structs.AodDBModel
 	var err error
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	dbPointer := aodLanguageSQL(requestBody.Language)
@@ -345,9 +348,9 @@ func SetAuthorOfTheDay(rw http.ResponseWriter, r *http.Request) {
 func setAOD(language string, date string, authorId int) error {
 	switch strings.ToLower(language) {
 	case "icelandic":
-		return handlers.Db.Exec("insert into aodice (authorid, date) values((select id from authors where id = ? and hasicelandicquotes), ?) on conflict (date) do update set authorid = ?", authorId, date, authorId).Error
+		return handlers.Db.Exec("insert into aodice (author_id, date) values((select id from authors where id = ? and has_icelandic_quotes), ?) on conflict (date) do update set author_id = ?", authorId, date, authorId).Error
 	default:
-		return handlers.Db.Exec("insert into aod (authorid, date) values((select id from authors where id = ? and not hasicelandicquotes), ?) on conflict (date) do update set authorid = ?", authorId, date, authorId).Error
+		return handlers.Db.Exec("insert into aod (author_id, date) values((select id from authors where id = ? and not has_icelandic_quotes), ?) on conflict (date) do update set author_id = ?", authorId, date, authorId).Error
 	}
 }
 
@@ -361,13 +364,10 @@ func setNewRandomAOD(language string) error {
 	dbPointer := handlers.Db.Table("authors")
 	dbPointer = authorLanguageSQL(language, dbPointer)
 
-	log.Println("HEREMatur")
 	err := dbPointer.Order("random()").Limit(1).Scan(&authorItem).Error
 	if err != nil {
 		return err
 	}
-
-	log.Println("MASSI:", authorItem)
 
 	return setAOD(language, time.Now().Format("2006-01-02"), authorItem.Id)
 }
@@ -397,9 +397,9 @@ func authorLanguageSQL(language string, dbPointer *gorm.DB) *gorm.DB {
 	if language != "" {
 		switch strings.ToLower(language) {
 		case "english":
-			dbPointer = dbPointer.Not("hasicelandicquotes")
+			dbPointer = dbPointer.Not("has_icelandic_quotes")
 		case "icelandic":
-			dbPointer = dbPointer.Where("hasicelandicquotes")
+			dbPointer = dbPointer.Where("has_icelandic_quotes")
 		}
 	}
 	return dbPointer
@@ -410,9 +410,9 @@ func quoteLanguageSQL(language string, dbPointer *gorm.DB) *gorm.DB {
 	if language != "" {
 		switch strings.ToLower(language) {
 		case "english":
-			dbPointer = dbPointer.Not("isicelandic")
+			dbPointer = dbPointer.Not("is_icelandic")
 		case "icelandic":
-			dbPointer = dbPointer.Where("isicelandic")
+			dbPointer = dbPointer.Where("is_icelandic")
 		}
 	}
 	return dbPointer

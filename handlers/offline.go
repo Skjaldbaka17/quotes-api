@@ -31,7 +31,7 @@ func DirectFetchTopicCountIncrement(topicId int, topicName string) error {
 }
 
 //AuthorsAppearInSearchCountIncrement increments the popularity count of the Authors from a listing in a search
-func AuthorsAppearInSearchCountIncrement(authors []structs.AuthorsView) error {
+func AuthorsAppearInSearchCountIncrement(authors []structs.AuthorDBModel) error {
 	if len(authors) == 0 {
 		return nil
 	}

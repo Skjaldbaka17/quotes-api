@@ -64,8 +64,8 @@ func TestSearch(t *testing.T) {
 				t.Fatalf("got %q, want %q", firstAuthorQuote, want_quote)
 			}
 
-			if respObj[0].Topicid != topicId {
-				t.Fatalf("got quote with topicId %d, but expected with topicID %d. Quote got: %+v", respObj[0].Topicid, topicId, respObj[0])
+			if respObj[0].TopicId != topicId {
+				t.Fatalf("got quote with topicId %d, but expected with topicID %d. Quote got: %+v", respObj[0].TopicId, topicId, respObj[0])
 			}
 		})
 	})
@@ -158,8 +158,8 @@ func TestSearch(t *testing.T) {
 				t.Fatalf("got %q, want %q", firstAuthorName, want_author)
 			}
 
-			if respObj[0].Topicid != topicId {
-				t.Fatalf("got quote with topicId %d, but expected with topicID %d. Quote got: %+v", respObj[0].Topicid, topicId, respObj[0])
+			if respObj[0].TopicId != topicId {
+				t.Fatalf("got quote with topicId %d, but expected with topicID %d. Quote got: %+v", respObj[0].TopicId, topicId, respObj[0])
 			}
 		})
 	})

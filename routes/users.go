@@ -23,7 +23,7 @@ import (
 
 // CreateUsers handles post requests to create a user and an accompanying ApiKey
 func CreateUser(rw http.ResponseWriter, r *http.Request) {
-	var requestBody structs.UserRequest
+	var requestBody structs.UserApiModel
 	if err := handlers.GetUserRequestBody(rw, r, &requestBody); err != nil {
 		return
 	}
@@ -37,7 +37,7 @@ func CreateUser(rw http.ResponseWriter, r *http.Request) {
 	passHash, _ := bcrypt.GenerateFromPassword([]byte(requestBody.Password), bcrypt.DefaultCost)
 	requestBody.Tier = handlers.TIERS[0]
 	log.Println("The created apikey:", apiKey)
-	user := structs.User{Name: requestBody.Name, ApiKey: apiKey, Tier: requestBody.Tier, Email: requestBody.Email, PasswordHash: string(passHash)}
+	user := structs.UserDBModel{Name: requestBody.Name, ApiKey: apiKey, Tier: requestBody.Tier, Email: requestBody.Email, PasswordHash: string(passHash)}
 
 	result := handlers.Db.Table("users").Select("name", "api_key", "tier", "email", "password_hash").Create(&user)
 
@@ -74,12 +74,12 @@ func CreateUser(rw http.ResponseWriter, r *http.Request) {
 
 // Login handles post requests to login to a user and receive his ApiKey
 func Login(rw http.ResponseWriter, r *http.Request) {
-	var requestBody structs.UserRequest
+	var requestBody structs.UserApiModel
 	if err := handlers.GetUserRequestBody(rw, r, &requestBody); err != nil {
 		return
 	}
 
-	var user structs.User
+	var user structs.UserDBModel
 	if err := handlers.Db.Table("users").Where("email = ?", requestBody.Email).First(&user).Error; err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		log.Printf("Got error when login/fetching user: %s", err)

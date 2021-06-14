@@ -1,12 +1,12 @@
 CREATE TABLE quotes(
    id SERIAL PRIMARY KEY,
-   authorid integer not null,
+   author_id integer not null,
    quote text NOT NULL unique,
    count integer default 0,
-   isIcelandic boolean default false,
+   is_icelandic boolean default false,
    created_at timestamptz default current_timestamp,
-   updatedat timestamptz,
-   deletedat timestamptz,
+   updated_at timestamptz,
+   deleted_at timestamptz,
    tsv tsvector,
-   FOREIGN KEY (authorid) REFERENCES authors(id) ON DELETE CASCADE
+   FOREIGN KEY (author_id) REFERENCES authors(id) ON DELETE CASCADE
 );

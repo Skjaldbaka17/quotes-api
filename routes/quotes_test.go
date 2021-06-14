@@ -36,8 +36,8 @@ func TestQuotes(t *testing.T) {
 			}
 
 			for idx, quote := range respObj {
-				if quote.Quoteid != quoteIds[idx] {
-					t.Fatalf("got %d, expected %d", quote.Quoteid, quoteIds[idx])
+				if quote.QuoteId != quoteIds[idx] {
+					t.Fatalf("got %d, expected %d", quote.QuoteId, quoteIds[idx])
 				}
 			}
 		})
@@ -51,8 +51,8 @@ func TestQuotes(t *testing.T) {
 				t.Fatalf("got list of length 0 but expected some quotes, response : %+v", respObj)
 			}
 
-			if respObj[0].Authorid != authorId {
-				t.Fatalf("got quotes for author with id %d but expected quotes for the author with id %d, respObj: %+v", respObj[0].Authorid, authorId, respObj)
+			if respObj[0].AuthorId != authorId {
+				t.Fatalf("got quotes for author with id %d but expected quotes for the author with id %d, respObj: %+v", respObj[0].AuthorId, authorId, respObj)
 			}
 		})
 	})
@@ -71,8 +71,8 @@ func TestQuotes(t *testing.T) {
 			}
 
 			firstQuote := respObj[0]
-			if firstQuote.Quoteid != 1 {
-				t.Fatalf("got %d, want quote with id 1. Resp: %+v", firstQuote.Quoteid, firstQuote)
+			if firstQuote.QuoteId != 1 {
+				t.Fatalf("got %d, want quote with id 1. Resp: %+v", firstQuote.QuoteId, firstQuote)
 			}
 
 		})
@@ -90,7 +90,7 @@ func TestQuotes(t *testing.T) {
 
 			firstQuote := respObj[0]
 
-			if !firstQuote.Isicelandic {
+			if !firstQuote.IsIcelandic {
 				t.Fatalf("got %+v, but expected a quote in Icelandic.", firstQuote)
 			}
 
@@ -108,7 +108,7 @@ func TestQuotes(t *testing.T) {
 
 			firstQuote := respObj[0]
 
-			if firstQuote.Quoteid < 639028 {
+			if firstQuote.QuoteId < 639028 {
 				t.Fatalf("got %+v, but want quote with larger quoteid i.e. want last quote in db", firstQuote)
 			}
 
@@ -127,7 +127,7 @@ func TestQuotes(t *testing.T) {
 
 			firstQuote := respObj[0]
 
-			if firstQuote.Quoteid < minimum {
+			if firstQuote.QuoteId < minimum {
 				t.Fatalf("got %+v, want quote that has id larger or equal to 300.000", firstQuote)
 			}
 
@@ -204,7 +204,7 @@ func TestQuotes(t *testing.T) {
 
 			firstQuote := respObj[0]
 
-			if firstQuote.Quotecount == 0 {
+			if firstQuote.QuoteCount == 0 {
 				t.Fatalf("got %+v, but expected a quote that has more than 0 popularity count", firstQuote)
 			}
 
@@ -222,7 +222,7 @@ func TestQuotes(t *testing.T) {
 
 			firstQuote := respObj[0]
 
-			if firstQuote.Quotecount != 0 {
+			if firstQuote.QuoteCount != 0 {
 				t.Fatalf("got %+v, but expected an author that has 0 popularity count", firstQuote)
 			}
 
@@ -257,7 +257,7 @@ func TestQuotes(t *testing.T) {
 				t.Fatalf("got error %s, but expected an empty errormessage", errResponse.Message)
 			}
 
-			if respObj[0].Quoteid < minimum {
+			if respObj[0].QuoteId < minimum {
 				t.Fatalf("got %+v, but expected quote with a higher quoteid than %d", len(respObj), minimum)
 			}
 
@@ -267,7 +267,7 @@ func TestQuotes(t *testing.T) {
 
 			respObj, errResponse = requestAndReturnArray(jsonStr, GetQuotesList)
 
-			if objToFetch.Quoteid != respObj[0].Quoteid {
+			if objToFetch.QuoteId != respObj[0].QuoteId {
 				t.Fatalf("got %+v, but expected %+v", respObj[0], objToFetch)
 			}
 
@@ -430,7 +430,7 @@ func TestQuotes(t *testing.T) {
 
 			secondRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 
-			if secondRespObj.Quoteid == firstRespObj.Quoteid {
+			if secondRespObj.QuoteId == firstRespObj.QuoteId {
 				t.Fatalf("Expected two different quotes but got the same quote twice which is higly improbable")
 			}
 		})
@@ -448,11 +448,11 @@ func TestQuotes(t *testing.T) {
 
 			secondRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 
-			if secondRespObj.Authorid != firstRespObj.Authorid {
-				t.Fatalf("got author with id %d, expected author with id %d", secondRespObj.Authorid, firstRespObj.Authorid)
+			if secondRespObj.AuthorId != firstRespObj.AuthorId {
+				t.Fatalf("got author with id %d, expected author with id %d", secondRespObj.AuthorId, firstRespObj.AuthorId)
 			}
 
-			if secondRespObj.Quoteid == firstRespObj.Quoteid {
+			if secondRespObj.QuoteId == firstRespObj.QuoteId {
 				t.Fatalf("got quote %s, expected a random different quote", secondRespObj.Quote)
 			}
 
@@ -464,15 +464,15 @@ func TestQuotes(t *testing.T) {
 			topicId := getTopicId(topicName, user.ApiKey)
 			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","topicId": %d}`, user.ApiKey, topicId))
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
-			if firstRespObj.Topicname != topicName {
-				t.Fatalf("got %s, expected %s", firstRespObj.Topicname, topicName)
+			if firstRespObj.TopicName != topicName {
+				t.Fatalf("got %s, expected %s", firstRespObj.TopicName, topicName)
 			}
 			secondRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
-			if secondRespObj.Topicid != firstRespObj.Topicid {
-				t.Fatalf("got topic with id %d, expected topic with id %d", secondRespObj.Topicid, firstRespObj.Topicid)
+			if secondRespObj.TopicId != firstRespObj.TopicId {
+				t.Fatalf("got topic with id %d, expected topic with id %d", secondRespObj.TopicId, firstRespObj.TopicId)
 			}
 
-			if secondRespObj.Quoteid == firstRespObj.Quoteid {
+			if secondRespObj.QuoteId == firstRespObj.QuoteId {
 				t.Fatalf("got quote %s, expected a random different quote", secondRespObj.Quote)
 			}
 		})
@@ -482,15 +482,15 @@ func TestQuotes(t *testing.T) {
 			language := "english"
 			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","language": "%s"}`, user.ApiKey, language))
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
-			if firstRespObj.Isicelandic {
+			if firstRespObj.IsIcelandic {
 				t.Fatalf("first response, got an IcelandicQuote but expected an English quote")
 			}
 			secondRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
-			if secondRespObj.Isicelandic {
+			if secondRespObj.IsIcelandic {
 				t.Fatalf("second response, got an IcelandicQuote but expected an English quote")
 			}
 
-			if secondRespObj.Quoteid == firstRespObj.Quoteid {
+			if secondRespObj.QuoteId == firstRespObj.QuoteId {
 				t.Fatalf("got quote %s, expected a random different quote", secondRespObj.Quote)
 			}
 		})
@@ -500,15 +500,15 @@ func TestQuotes(t *testing.T) {
 			language := "Icelandic"
 			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","language": "%s"}`, user.ApiKey, language))
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
-			if !firstRespObj.Isicelandic {
+			if !firstRespObj.IsIcelandic {
 				t.Fatalf("first response, got an EnglishQuote but expected an Icelandic quote")
 			}
 			secondRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
-			if !secondRespObj.Isicelandic {
+			if !secondRespObj.IsIcelandic {
 				t.Fatalf("second response, got an EnglishQuote, %+v, but expected an Icelandic quote", secondRespObj)
 			}
 
-			if secondRespObj.Quoteid == firstRespObj.Quoteid {
+			if secondRespObj.QuoteId == firstRespObj.QuoteId {
 				t.Fatalf("got quote %s, expected a random different quote", secondRespObj.Quote)
 			}
 		})
@@ -529,7 +529,7 @@ func TestQuotes(t *testing.T) {
 				t.Fatalf("second response, got the quote %+v that does not contain the searchString %s", secondRespObj, regexStub)
 			}
 
-			if secondRespObj.Quoteid == firstRespObj.Quoteid {
+			if secondRespObj.QuoteId == firstRespObj.QuoteId {
 				t.Fatalf("got quote %s, expected a random different quote", secondRespObj.Quote)
 			}
 
@@ -545,7 +545,7 @@ func TestQuotes(t *testing.T) {
 				t.Fatalf("first response, got the quote %+v that does not contain the searchString %s", firstRespObj, searchString)
 			}
 
-			if !firstRespObj.Isicelandic {
+			if !firstRespObj.IsIcelandic {
 				t.Fatalf("first response, got the quote %+v which is in English but expected it to be in icelandic", firstRespObj)
 			}
 
@@ -554,7 +554,7 @@ func TestQuotes(t *testing.T) {
 				t.Fatalf("second response, got the quote %+v that does not contain the searchString %s", secondRespObj, searchString)
 			}
 
-			if secondRespObj.Quoteid == firstRespObj.Quoteid {
+			if secondRespObj.QuoteId == firstRespObj.QuoteId {
 				t.Fatalf("got quote %s, expected a random different quote", secondRespObj.Quote)
 			}
 		})
@@ -567,8 +567,8 @@ func TestQuotes(t *testing.T) {
 			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","searchString":"%s","topicId": %d}`, user.ApiKey, searchString, topicId))
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 
-			if firstRespObj.Topicname != topicName {
-				t.Fatalf("got %s, expected %s", firstRespObj.Topicname, topicName)
+			if firstRespObj.TopicName != topicName {
+				t.Fatalf("got %s, expected %s", firstRespObj.TopicName, topicName)
 			}
 
 			m1 := regexp.MustCompile(searchString)
@@ -581,11 +581,11 @@ func TestQuotes(t *testing.T) {
 				t.Fatalf("second response, got the quote %+v that does not contain the searchString %s", secondRespObj, searchString)
 			}
 
-			if secondRespObj.Topicid != firstRespObj.Topicid {
-				t.Fatalf("got topic with id %d, expected topic with id %d", secondRespObj.Topicid, firstRespObj.Topicid)
+			if secondRespObj.TopicId != firstRespObj.TopicId {
+				t.Fatalf("got topic with id %d, expected topic with id %d", secondRespObj.TopicId, firstRespObj.TopicId)
 			}
 
-			if secondRespObj.Quoteid == firstRespObj.Quoteid {
+			if secondRespObj.QuoteId == firstRespObj.QuoteId {
 				t.Fatalf("got quote %s, expected a random different quote... Remember that this is a random function and therefore there is a chance the same quote is fetched twice.", secondRespObj.Quote)
 			}
 		})
@@ -686,20 +686,20 @@ func getObjNr26(searchString string, fn httpRequest, apiKey string) (structs.Quo
 	return respObj[25], nil
 }
 
-func requestAndReturnSingle(jsonStr []byte, fn httpRequest) structs.QuoteView {
+func requestAndReturnSingle(jsonStr []byte, fn httpRequest) structs.TestApiResponse {
 	response, request := getRequestAndResponseForTest(jsonStr)
 	fn(response, request)
 
-	var respObj structs.QuoteView
+	var respObj structs.TestApiResponse
 
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	return respObj
 }
 
-func requestAndReturnArray(jsonStr []byte, fn httpRequest) ([]structs.QuoteView, structs.ErrorResponse) {
+func requestAndReturnArray(jsonStr []byte, fn httpRequest) ([]structs.TestApiResponse, structs.ErrorResponse) {
 	response, request := getRequestAndResponseForTest(jsonStr)
 	fn(response, request)
-	var respObj []structs.QuoteView
+	var respObj []structs.TestApiResponse
 	var errorResp structs.ErrorResponse
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	_ = json.Unmarshal(response.Body.Bytes(), &errorResp)

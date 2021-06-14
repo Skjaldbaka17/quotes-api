@@ -1,10 +1,10 @@
 CREATE TABLE topics(
    id SERIAL PRIMARY KEY,
    name VARCHAR NOT NULL UNIQUE,
-   isIcelandic boolean default false,
+   is_icelandic boolean default false,
    count integer default 0,
    created_at timestamptz default current_timestamp,
-   updatedat timestamptz,
-   deletedat timestamptz,
+   updated_at timestamptz,
+   deleted_at timestamptz,
    tsv tsvector
 );

@@ -72,7 +72,7 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var results []structs.AuthorsView
+	var results []structs.AuthorDBModel
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	//Order by authorid to have definitive order (when for examplke some names rank the same for similarity), same for why quoteid
 	//% is same as SIMILARITY but with default threshold 0.3
@@ -98,7 +98,8 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 	//Update popularity in background!
 	go handlers.AuthorsAppearInSearchCountIncrement(results)
 
-	json.NewEncoder(rw).Encode(&results)
+	authorsAPI := structs.ConvertToAuthorsAPIModel(results)
+	json.NewEncoder(rw).Encode(authorsAPI)
 }
 
 // swagger:route POST /search/quotes SEARCH SearchQuotesByString

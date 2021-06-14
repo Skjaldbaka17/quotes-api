@@ -4,4 +4,4 @@ select a.id as id,
        aodice.date as date
 from authors a
    inner join aodice
-      on aodice.authorid = a.id;
+      on aodice.author_id = a.id;

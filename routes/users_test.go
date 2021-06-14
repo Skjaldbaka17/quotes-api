@@ -13,13 +13,13 @@ import (
 	"github.com/google/uuid"
 )
 
-func getBasicUser() structs.UserRequest {
+func getBasicUser() structs.UserApiModel {
 	password := "1234567890"
 	passwordConfirmation := "1234567890"
 	random, _ := uuid.NewRandom()
 	name := "Þórður Ágústsson"
 	email := random.String() + "@gmail.com"
-	return structs.UserRequest{
+	return structs.UserApiModel{
 		Name:                 name,
 		Email:                email,
 		Password:             password,
@@ -28,7 +28,7 @@ func getBasicUser() structs.UserRequest {
 }
 
 func deleteUser(id int) {
-	handlers.Db.Table("users").Delete(&structs.User{Id: id})
+	handlers.Db.Table("users").Delete(&structs.UserDBModel{Id: id})
 }
 func TestUsers(t *testing.T) {
 	t.Run("Create User", func(t *testing.T) {

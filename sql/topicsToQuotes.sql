@@ -1,8 +1,8 @@
 CREATE TABLE topicstoquotes(
    id SERIAL PRIMARY KEY,
-   topicid int,
-   quoteid int,
+   topic_id int,
+   quote_id int,
    created_at timestamptz default current_timestamp,
-   updatedat timestamptz,
-   deletedat timestamptz
+   updated_at timestamptz,
+   deleted_at timestamptz
 );

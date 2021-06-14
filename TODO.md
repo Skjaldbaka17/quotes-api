@@ -1,13 +1,12 @@
 # TODOS
 
-- [ ] Save History of errors (i.e. error logs)?
-- [ ] CleanUp DB after tests
-
 - [ ] Coordinate naming convention (apiKey vs api_key vs apikey etc)
 - [ ] only return keys, in the response-json, that are relevant to the request
 - [ ] Add .env variables (i.e. for names of tables etc.)
 
 - [ ] Setup AWS server
+
+- [ ] Save History of errors (i.e. error logs)?
 
  -------------- Further Stuff  --------------
 
@@ -34,6 +33,7 @@
 
  -------------- Done  --------------
 
+- [x] CleanUp DB after tests
 - [x] add api key to swagger
 - [x] Add authentication for access to the api + Creating apiKeys + Documenting usage + admin access vs normal access
 - [x] Add password protection / protected routes capability (at least for SetQuoteOfTheyDay route )

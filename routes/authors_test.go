@@ -26,7 +26,7 @@ func createUser(t *testing.T) structs.UserResponse {
 
 	t.Cleanup(func() {
 		log.Println("CLEANUP:", userResponse)
-		handlers.Db.Table("users").Delete(&structs.User{Id: userResponse.Id})
+		handlers.Db.Table("users").Delete(&structs.UserDBModel{Id: userResponse.Id})
 		handlers.Db.Table("requesthistory").Where("user_id = ?", userResponse.Id).Delete(structs.RequestEvent{})
 	})
 	return userResponse
@@ -55,7 +55,7 @@ func TestAuthors(t *testing.T) {
 			respObj, _ := requestAndReturnArray(jsonStr, GetAuthorsById)
 			firstAuthor := respObj[0]
 			if firstAuthor.Id != authorId[0] {
-				t.Fatalf("got %d, want %d", firstAuthor.Authorid, authorId[0])
+				t.Fatalf("got %d, want %d", firstAuthor.AuthorId, authorId[0])
 			}
 		})
 
@@ -104,7 +104,7 @@ func TestAuthors(t *testing.T) {
 
 			firstAuthor := respObj[0]
 
-			if firstAuthor.Hasicelandicquotes {
+			if firstAuthor.HasIcelandicQuotes {
 				t.Fatalf("got %+v, but expected an author that has no icelandic quotes", firstAuthor)
 			}
 
@@ -127,7 +127,7 @@ func TestAuthors(t *testing.T) {
 
 			firstAuthor := respObj[0]
 
-			if firstAuthor.Hasicelandicquotes {
+			if firstAuthor.HasIcelandicQuotes {
 				t.Fatalf("got %+v, but expected an author that has no icelandic quotes", firstAuthor)
 			}
 
@@ -150,7 +150,7 @@ func TestAuthors(t *testing.T) {
 
 			firstAuthor := respObj[0]
 
-			if firstAuthor.Hasicelandicquotes {
+			if firstAuthor.HasIcelandicQuotes {
 				t.Fatalf("got %+v, but expected an author that has no icelandic quotes", firstAuthor)
 			}
 
@@ -177,7 +177,7 @@ func TestAuthors(t *testing.T) {
 
 			firstAuthor := respObj[0]
 
-			if firstAuthor.Nroficelandicquotes+firstAuthor.Nrofenglishquotes > 1 {
+			if firstAuthor.NrOfIcelandicQuotes+firstAuthor.NrOfEnglishQuotes > 1 {
 				t.Fatalf("got %+v, but expected an author that has no more than 1 quotes", firstAuthor)
 			}
 
@@ -197,7 +197,8 @@ func TestAuthors(t *testing.T) {
 
 			firstAuthor := respObj[0]
 
-			if firstAuthor.Nroficelandicquotes+firstAuthor.Nrofenglishquotes != 10 {
+			log.Println(firstAuthor)
+			if firstAuthor.NrOfIcelandicQuotes+firstAuthor.NrOfEnglishQuotes != 10 {
 				t.Fatalf("got %+v, but expected an author that has no fewer than 10 quotes", firstAuthor)
 			}
 
@@ -216,7 +217,7 @@ func TestAuthors(t *testing.T) {
 
 			firstAuthor := respObj[0]
 
-			if firstAuthor.Nroficelandicquotes+firstAuthor.Nrofenglishquotes != 10 {
+			if firstAuthor.NrOfIcelandicQuotes+firstAuthor.NrOfEnglishQuotes != 10 {
 				t.Fatalf("got %+v, but expected an author that has 10 quotes", firstAuthor)
 			}
 
@@ -234,7 +235,7 @@ func TestAuthors(t *testing.T) {
 
 			firstAuthor := respObj[0]
 
-			if firstAuthor.Nroficelandicquotes != 160 {
+			if firstAuthor.NrOfIcelandicQuotes != 160 {
 				t.Fatalf("got %+v, but expected an author that has 10 quotes", firstAuthor)
 			}
 		})
@@ -315,7 +316,7 @@ func TestAuthors(t *testing.T) {
 
 			respObj, errResponse = requestAndReturnArray(jsonStr, GetAuthorsList)
 
-			if objToFetch != respObj[0] {
+			if objToFetch.AuthorId != respObj[0].AuthorId {
 				t.Fatalf("got %+v, but expected %+v", respObj[0], objToFetch)
 			}
 
@@ -340,8 +341,8 @@ func TestAuthors(t *testing.T) {
 
 			secondRespObj, _ := requestAndReturnArray(jsonStr, GetRandomAuthor)
 			secondAuthor := secondRespObj[0]
-			if firstAuthor.Authorid == secondAuthor.Authorid {
-				t.Fatalf("Expected two different authors but got the same author twice which is higly improbable, got author with id %d and name %s", firstAuthor.Authorid, firstAuthor.Name)
+			if firstAuthor.AuthorId == secondAuthor.AuthorId {
+				t.Fatalf("Expected two different authors but got the same author twice which is higly improbable, got author with id %d and name %s", firstAuthor.AuthorId, firstAuthor.Name)
 			}
 
 		})
@@ -356,14 +357,14 @@ func TestAuthors(t *testing.T) {
 				t.Fatalf("Expected a random author but got an empty name for author")
 			}
 
-			if !firstAuthor.Isicelandic {
+			if !firstAuthor.IsIcelandic {
 				t.Fatalf("Expected the quotes returned to be in icelandic")
 			}
 
 			secondRespObj, _ := requestAndReturnArray(jsonStr, GetRandomAuthor)
 			secondAuthor := secondRespObj[0]
-			if firstAuthor.Authorid == secondAuthor.Authorid {
-				t.Fatalf("Expected two different authors but got the same author twice which is higly improbable, got author with id %d and name %s", firstAuthor.Authorid, firstAuthor.Name)
+			if firstAuthor.AuthorId == secondAuthor.AuthorId {
+				t.Fatalf("Expected two different authors but got the same author twice which is higly improbable, got author with id %d and name %s", firstAuthor.AuthorId, firstAuthor.Name)
 			}
 		})
 
@@ -378,14 +379,14 @@ func TestAuthors(t *testing.T) {
 				t.Fatalf("Expected a random author but got an empty name for author")
 			}
 
-			if firstAuthor.Isicelandic {
+			if firstAuthor.IsIcelandic {
 				t.Fatalf("Expected the quotes returned to be in English")
 			}
 
 			secondRespObj, _ := requestAndReturnArray(jsonStr, GetRandomAuthor)
 			secondAuthor := secondRespObj[0]
-			if firstAuthor.Authorid == secondAuthor.Authorid {
-				t.Fatalf("Expected two different authors but got the same author twice which is higly improbable, got author with id %d and name %s", firstAuthor.Authorid, firstAuthor.Name)
+			if firstAuthor.AuthorId == secondAuthor.AuthorId {
+				t.Fatalf("Expected two different authors but got the same author twice which is higly improbable, got author with id %d and name %s", firstAuthor.AuthorId, firstAuthor.Name)
 			}
 
 		})

@@ -54,7 +54,7 @@ func validateRequestApiKey(rw http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	var user structs.User
+	var user structs.UserDBModel
 
 	err = Db.Table("users").Where("api_key = ?", requestBody.ApiKey).First(&user).Error
 	// Err==nil if user with given api_key does not exist or internal server error
@@ -217,7 +217,7 @@ func GetRequestBody(rw http.ResponseWriter, r *http.Request, requestBody *struct
 //ValidateUserRequestBody takes in the request and validates all the input fields, returns an error with reason for validation-failure
 //if validation fails.
 //TODO: Make validation better! i.e. make it "real"
-func GetUserRequestBody(rw http.ResponseWriter, r *http.Request, requestBody *structs.UserRequest) error {
+func GetUserRequestBody(rw http.ResponseWriter, r *http.Request, requestBody *structs.UserApiModel) error {
 	//Save the state back into the body for later use (Especially useful for getting the AOD/QOD because if the AOD has not been set a random AOD is set and the function called again)
 	buf, _ := ioutil.ReadAll(r.Body)
 	rdr1 := ioutil.NopCloser(bytes.NewBuffer(buf))
@@ -238,7 +238,7 @@ func GetUserRequestBody(rw http.ResponseWriter, r *http.Request, requestBody *st
 	return nil
 }
 
-func ValidateUserInformation(rw http.ResponseWriter, r *http.Request, requestBody *structs.UserRequest) error {
+func ValidateUserInformation(rw http.ResponseWriter, r *http.Request, requestBody *structs.UserApiModel) error {
 	//TODO: Add email validation
 	if requestBody.Email == "" {
 		err := errors.New("email should not be empty")
@@ -291,7 +291,7 @@ func AuthorizeGODApiKey(rw http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	var user structs.User
+	var user structs.UserDBModel
 	if err := Db.Table("users").Where("api_key = ?", requestBody.ApiKey).First(&user).Error; err != nil {
 		log.Printf("error when searching for user with the given api key in AuthorIzeGOD (api key validation): %s", err)
 		rw.WriteHeader(http.StatusUnauthorized)

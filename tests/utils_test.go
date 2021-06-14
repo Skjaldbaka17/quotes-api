@@ -36,7 +36,7 @@ var functions map[string]httpRequest = map[string]httpRequest{
 }
 
 func deleteUser(id int) {
-	handlers.Db.Table("users").Delete(&structs.User{Id: id})
+	handlers.Db.Table("users").Delete(&structs.UserDBModel{Id: id})
 }
 
 func TestUtils(t *testing.T) {
@@ -75,7 +75,7 @@ func TestUtils(t *testing.T) {
 				handlers.Db.Exec("delete from requesthistory where user_id = ?", userResponse.Id)
 			}()
 
-			var userStruct structs.User
+			var userStruct structs.UserDBModel
 			handlers.Db.Table("users").Where("api_key = ?", userResponse.ApiKey).First(&userStruct)
 
 			//Creating events to insert, use up all allowed requests for this apikey
@@ -152,13 +152,13 @@ func basicRequestReturnSingle(jsonStr []byte, fn httpRequest) (structs.UserRespo
 	return userResponse, response
 }
 
-func getBasicUser() structs.UserRequest {
+func getBasicUser() structs.UserApiModel {
 	password := "1234567890"
 	passwordConfirmation := "1234567890"
 	random, _ := uuid.NewRandom()
 	name := "Þórður Ágústsson"
 	email := random.String() + "@gmail.com"
-	return structs.UserRequest{
+	return structs.UserApiModel{
 		Name:                 name,
 		Email:                email,
 		Password:             password,

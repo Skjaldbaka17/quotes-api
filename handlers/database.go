@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"github.com/Skjaldbaka17/quotes-api/structs"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -23,8 +22,4 @@ func init() {
 	}
 
 	// defer db.Close()
-
-	Db.AutoMigrate(&structs.Authors{})
-
-	Db.AutoMigrate(&structs.Quotes{})
 }
