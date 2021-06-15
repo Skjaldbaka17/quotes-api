@@ -14,7 +14,7 @@ func TestIncrementCount(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Expected no error but got %s", err.Error())
 		}
-		var authors []structs.AuthorsView
+		var authors []structs.TestApiResponse
 		err = Db.Table("authors").Where("id in ?", authorIds).Find(&authors).Error
 
 		if err != nil {
@@ -28,20 +28,20 @@ func TestIncrementCount(t *testing.T) {
 
 	t.Run("Should Increment Authors count from appearing in a search", func(t *testing.T) {
 
-		quotes := []structs.QuoteView{
+		quotes := []structs.TopicViewDBModel{
 			{
-				Authorid: 100,
-				Quoteid:  100,
+				AuthorId: 100,
+				QuoteId:  100,
 			},
 		}
-		err := AppearInSearchCountIncrement(quotes)
+		err := TopicViewAppearInSearchCountIncrement(quotes)
 
 		if err != nil {
 			t.Fatalf("Expected no error but got %s", err.Error())
 		}
 
-		var authors []structs.AuthorsView
-		err = Db.Table("authors").Where("id = ?", quotes[0].Authorid).Find(&authors).Error
+		var authors []structs.AuthorDBModel
+		err = Db.Table("authors").Where("id = ?", quotes[0].AuthorId).Find(&authors).Error
 		if err != nil {
 			t.Fatalf("Expected no error but got %s", err.Error())
 		}

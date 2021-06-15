@@ -47,26 +47,3 @@ type AodDBModel struct {
 	Name string `json:"name"`
 	Date string `json:"date"`
 }
-
-type AuthorsView struct {
-	// The author's id
-	//Unique: true
-	//example: 24952
-	Id int `json:"id"`
-	// Name of the author
-	//example: Muhammad Ali
-	Name string `json:"name"`
-	// Whether or not this author has some icelandic quotes
-	//example: true
-	Hasicelandicquotes bool `json:"has_icelandic_quotes"`
-	// How many quotes in icelandic this author has
-	//example: 6
-	Nroficelandicquotes int `json:"nr_of_icelandic_quotes"`
-	// How many quotes in icelandic this author has
-	//example: 78
-	Nrofenglishquotes int `json:"nr_of_english_quotes"`
-	//swagger:ignore
-	Count int `json:"count"`
-	//swagger:ignore
-	Date string `json:"date"`
-}

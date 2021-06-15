@@ -23,7 +23,7 @@ func GetTopics(rw http.ResponseWriter, r *http.Request) {
 	if err := handlers.GetRequestBody(rw, r, &requestBody); err != nil {
 		return
 	}
-	var results []structs.ListItem
+	var results []structs.TopicDBModel
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	dbPointer := handlers.Db.Table("topics")
 
@@ -37,7 +37,8 @@ func GetTopics(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(rw).Encode(&results)
+	apiResults := structs.ConvertToTopicsAPIModel(results)
+	json.NewEncoder(rw).Encode(apiResults)
 }
 
 // swagger:route POST /topic TOPICS GetTopic
@@ -53,17 +54,17 @@ func GetTopic(rw http.ResponseWriter, r *http.Request) {
 	if err := handlers.GetRequestBody(rw, r, &requestBody); err != nil {
 		return
 	}
-	var results []structs.QuoteView
+	var results []structs.TopicViewDBModel
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	//Order by quoteid to have definitive order (when for examplke some quotes rank the same for plain, phrase and general)
 	dbPoint := handlers.Db.Table("topicsview").Clauses(clause.OrderBy{
-		Expression: clause.Expr{SQL: "quoteid DESC", Vars: []interface{}{}, WithoutParentheses: true},
+		Expression: clause.Expr{SQL: "quote_id DESC", Vars: []interface{}{}, WithoutParentheses: true},
 	})
 
 	if requestBody.Topic != "" {
-		dbPoint = dbPoint.Where("lower(topicname) = lower(?)", requestBody.Topic)
+		dbPoint = dbPoint.Where("lower(topic_name) = lower(?)", requestBody.Topic)
 	} else {
-		dbPoint = dbPoint.Where("topicid = ?", requestBody.Id)
+		dbPoint = dbPoint.Where("topic_id = ?", requestBody.Id)
 	}
 
 	//** ---------- Paramatere configuratino for DB query ends ---------- **//
@@ -78,6 +79,7 @@ func GetTopic(rw http.ResponseWriter, r *http.Request) {
 
 	//Update popularity in background!
 	go handlers.DirectFetchTopicCountIncrement(requestBody.Id, requestBody.Topic)
+	topicViewsAPI := structs.ConvertToTopicViewsAPIModel(results)
 
-	json.NewEncoder(rw).Encode(&results)
+	json.NewEncoder(rw).Encode(topicViewsAPI)
 }

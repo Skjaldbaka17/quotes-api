@@ -45,29 +45,49 @@ func AuthorsAppearInSearchCountIncrement(authors []structs.AuthorDBModel) error 
 }
 
 //QuotesAppearInSearchCountIncrement increments the popularity count of the Quotes from a listing in a search
-func QuotesAppearInSearchCountIncrement(quotes []structs.QuoteView) error {
+func QuotesAppearInSearchCountIncrement(quotes []structs.SearchViewDBModel) error {
 	if len(quotes) == 0 {
 		return nil
 	}
 	quoteIds := []int{}
 
 	for _, quote := range quotes {
-		quoteIds = append(quoteIds, quote.Quoteid)
+		quoteIds = append(quoteIds, quote.QuoteId)
 	}
 
 	return Db.Exec("UPDATE quotes SET count = count + ? where id in (?) returning *", incrementAppearInSearchList, quoteIds).Error
 }
 
 //AppearInSearchCountIncrement increments the popularity count of the Authors and quotes from a listing in a search
-func AppearInSearchCountIncrement(quotes []structs.QuoteView) error {
+func TopicViewAppearInSearchCountIncrement(quotes []structs.TopicViewDBModel) error {
 	if len(quotes) == 0 {
 		return nil
 	}
 	authorIds := []int{}
 	quoteIds := []int{}
 	for _, quote := range quotes {
-		authorIds = append(authorIds, quote.Authorid)
-		quoteIds = append(quoteIds, quote.Quoteid)
+		authorIds = append(authorIds, quote.AuthorId)
+		quoteIds = append(quoteIds, quote.QuoteId)
+	}
+
+	err := Db.Exec("UPDATE authors SET count = count + ? where id in (?) returning *", incrementAppearInSearchList, authorIds).Error
+	if err != nil {
+		return err
+	}
+	err = Db.Exec("UPDATE quotes SET count = count + ? where id in (?) returning *", incrementAppearInSearchList, quoteIds).Error
+	return err
+}
+
+//AppearInSearchCountIncrement increments the popularity count of the Authors and quotes from a listing in a search
+func SearchViewAppearInSearchCountIncrement(quotes []structs.SearchViewDBModel) error {
+	if len(quotes) == 0 {
+		return nil
+	}
+	authorIds := []int{}
+	quoteIds := []int{}
+	for _, quote := range quotes {
+		authorIds = append(authorIds, quote.AuthorId)
+		quoteIds = append(quoteIds, quote.QuoteId)
 	}
 
 	err := Db.Exec("UPDATE authors SET count = count + ? where id in (?) returning *", incrementAppearInSearchList, authorIds).Error

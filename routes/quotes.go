@@ -28,16 +28,16 @@ func GetQuotes(rw http.ResponseWriter, r *http.Request) {
 	if err := handlers.GetRequestBody(rw, r, &requestBody); err != nil {
 		return
 	}
-	var quotes []structs.QuoteView
+	var quotes []structs.SearchViewDBModel
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 
-	dbPointer := handlers.Db.Table("searchview").Order("quoteid ASC")
+	dbPointer := handlers.Db.Table("searchview").Order("quote_id ASC")
 	if requestBody.AuthorId > 0 {
 		dbPointer = dbPointer.
-			Where("authorid = ?", requestBody.AuthorId)
+			Where("author_id = ?", requestBody.AuthorId)
 		dbPointer = pagination(requestBody, dbPointer)
 	} else {
-		dbPointer = dbPointer.Where("quoteid in ?", requestBody.Ids)
+		dbPointer = dbPointer.Where("quote_id in ?", requestBody.Ids)
 	}
 	//** ---------- Paramatere configuratino for DB query ends ---------- **//
 
@@ -53,7 +53,8 @@ func GetQuotes(rw http.ResponseWriter, r *http.Request) {
 	//Update popularity in background!
 	go handlers.DirectFetchQuotesCountIncrement(requestBody.Ids)
 
-	json.NewEncoder(rw).Encode(&quotes)
+	searchViewsAPI := structs.ConvertToSearchViewsAPIModel(quotes)
+	json.NewEncoder(rw).Encode(searchViewsAPI)
 }
 
 // swagger:route POST /quotes/list QUOTES GetQuotesList
@@ -73,7 +74,7 @@ func GetQuotesList(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var quotes []structs.QuoteView
+	var quotes []structs.SearchViewDBModel
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	dbPointer := handlers.Db.Table("searchview")
 	dbPointer = quoteLanguageSQL(requestBody.Language, dbPointer)
@@ -89,16 +90,16 @@ func GetQuotesList(rw http.ResponseWriter, r *http.Request) {
 		if requestBody.OrderConfig.Reverse {
 			orderDirection = "ASC"
 		}
-		dbPointer = dbPointer.Order("quotecount " + orderDirection)
+		dbPointer = dbPointer.Order("quote_count " + orderDirection)
 	case "length":
 		dbPointer = setMaxMinNumber(requestBody.OrderConfig, "length(quote)", orderDirection, dbPointer)
 	default:
-		dbPointer = setMaxMinNumber(requestBody.OrderConfig, "quoteid", orderDirection, dbPointer)
+		dbPointer = setMaxMinNumber(requestBody.OrderConfig, "quote_id", orderDirection, dbPointer)
 	}
 
 	//** ---------- Paramatere configuratino for DB query ends ---------- **//
 
-	err := pagination(requestBody, dbPointer).Order("quoteid").
+	err := pagination(requestBody, dbPointer).Order("quote_id").
 		Find(&quotes).
 		Error
 
@@ -111,8 +112,8 @@ func GetQuotesList(rw http.ResponseWriter, r *http.Request) {
 
 	//Update popularity in background!
 	go handlers.QuotesAppearInSearchCountIncrement(quotes)
-
-	json.NewEncoder(rw).Encode(&quotes)
+	searchViewsAPI := structs.ConvertToSearchViewsAPIModel(quotes)
+	json.NewEncoder(rw).Encode(searchViewsAPI)
 }
 
 // swagger:route POST /quotes/random QUOTES GetRandomQuote
@@ -129,7 +130,8 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var dbPointer *gorm.DB
-	var result structs.QuoteView
+	var topicResult structs.TopicViewDBModel
+	var searchViewResult structs.SearchViewDBModel
 	// shouldOrderBy := false //Used when there are few rows to choose from and therefore higher probability that random() < 0.005 returns no rows
 
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
@@ -138,7 +140,7 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 
 	//Random quote from a particular topic
 	if requestBody.TopicId > 0 {
-		dbPointer = handlers.Db.Table("topicsview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq", requestBody.SearchString, phrasesearch).Where("topicid = ?", requestBody.TopicId)
+		dbPointer = handlers.Db.Table("topicsview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq", requestBody.SearchString, phrasesearch).Where("topic_id = ?", requestBody.TopicId)
 		// shouldOrderBy = true
 	} else {
 		dbPointer = handlers.Db.Table("searchview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq", requestBody.SearchString, phrasesearch)
@@ -146,7 +148,7 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 
 	//Random quote from a particular author
 	if requestBody.AuthorId > 0 {
-		dbPointer = dbPointer.Where("authorid = ?", requestBody.AuthorId)
+		dbPointer = dbPointer.Where("author_id = ?", requestBody.AuthorId)
 		// shouldOrderBy = true
 	}
 
@@ -154,7 +156,7 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 	dbPointer = quoteLanguageSQL(requestBody.Language, dbPointer)
 
 	if requestBody.SearchString != "" {
-		dbPointer = dbPointer.Where("( quotetsv @@ plainq OR quotetsv @@ phraseq)")
+		dbPointer = dbPointer.Where("( quote_tsv @@ plainq OR quote_tsv @@ phraseq)")
 		// shouldOrderBy = true
 	}
 
@@ -166,16 +168,26 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 
 	dbPointer = dbPointer.Order("random()") //Randomized, O( n*log(n) )
 	//** ---------- Paramater configuratino for DB query ends ---------- **//
-
-	err := dbPointer.Limit(1).Find(&result).Error
-	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
-		log.Printf("Got error when querying DB in GetRandomQuote: %s", err)
-		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
-		return
+	if requestBody.TopicId > 0 {
+		err := dbPointer.Limit(1).Find(&topicResult).Error
+		if err != nil {
+			rw.WriteHeader(http.StatusInternalServerError)
+			log.Printf("Got error when querying DB in GetRandomQuote: %s", err)
+			json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
+			return
+		}
+		json.NewEncoder(rw).Encode(topicResult.ConvertToAPIModel())
+	} else {
+		err := dbPointer.Limit(1).Find(&searchViewResult).Error
+		if err != nil {
+			rw.WriteHeader(http.StatusInternalServerError)
+			log.Printf("Got error when querying DB in GetRandomQuote: %s", err)
+			json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
+			return
+		}
+		json.NewEncoder(rw).Encode(searchViewResult.ConvertToAPIModel())
 	}
 
-	json.NewEncoder(rw).Encode(result)
 }
 
 // swagger:route POST /quotes/qod/new QUOTES SetQuoteOfTheDay
@@ -201,7 +213,6 @@ func SetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(requestBody.Qods) == 0 {
-		log.Println("HEREBruv2")
 		log.Println("Not QODS supplied when setting quote of the day")
 		rw.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: "Please supply some quotes", StatusCode: http.StatusBadRequest})
@@ -238,7 +249,7 @@ func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 		requestBody.Language = "English"
 	}
 
-	var quote structs.QuoteView
+	var quote structs.QodViewDBModel
 	var err error
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	dbPointer := qodLanguageSQL(requestBody.Language).Where("date = current_date")
@@ -252,7 +263,7 @@ func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if (structs.QuoteView{}) == quote {
+	if (structs.QodViewDBModel{}) == quote {
 		fmt.Println("Setting a brand new QOD for today")
 		err = setNewRandomQOD(requestBody.Language)
 		if err != nil {
@@ -266,7 +277,7 @@ func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(rw).Encode(quote)
+	json.NewEncoder(rw).Encode(quote.ConvertToAPIModel())
 }
 
 // swagger:route POST /quotes/qod QUOTES GetQODHistory
@@ -286,7 +297,7 @@ func GetQODHistory(rw http.ResponseWriter, r *http.Request) {
 		requestBody.Language = "English"
 	}
 
-	var quotes []structs.QuoteView
+	var quotes []structs.QodViewDBModel
 	var err error
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	dbPointer := qodLanguageSQL(requestBody.Language)
@@ -318,22 +329,23 @@ func GetQODHistory(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(rw).Encode(quotes)
+	qodHistoryAPI := structs.ConvertToQodViewsAPIModel(quotes)
+	json.NewEncoder(rw).Encode(qodHistoryAPI)
 }
 
 //setQOD inserts a new row into qod/qodice table
 func setQOD(language string, date string, quoteId int) error {
 	switch strings.ToLower(language) {
 	case "icelandic":
-		return handlers.Db.Exec("insert into qodice (quoteid, date) values((select id from quotes where id = ? and isicelandic), ?) on conflict (date) do update set quoteid = ?", quoteId, date, quoteId).Error
+		return handlers.Db.Exec("insert into qodice (quote_id, date) values((select id from quotes where id = ? and is_icelandic), ?) on conflict (date) do update set quote_id = ?", quoteId, date, quoteId).Error
 	default:
-		return handlers.Db.Exec("insert into qod (quoteid, date) values((select id from quotes where id = ? and not isicelandic), ?) on conflict (date) do update set quoteid = ?", quoteId, date, quoteId).Error
+		return handlers.Db.Exec("insert into qod (quote_id, date) values((select id from quotes where id = ? and not is_icelandic), ?) on conflict (date) do update set quote_id = ?", quoteId, date, quoteId).Error
 	}
 }
 
 //SetNewRandomQOD sets a random quote as the qod for today (if language=icelandic is supplied then it adds the random qod to the icelandic qod table)
 func setNewRandomQOD(language string) error {
-	var quoteItem structs.ListItem
+	var quoteItem structs.QuoteDBModel
 	var dbPointer *gorm.DB
 	dbPointer = handlers.Db.Table("quotes")
 	dbPointer = quoteLanguageSQL(language, dbPointer)

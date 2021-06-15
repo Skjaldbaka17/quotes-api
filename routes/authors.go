@@ -356,7 +356,7 @@ func setAOD(language string, date string, authorId int) error {
 
 //SetNewRandomQOD sets a random quote as the qod for today (if language=icelandic is supplied then it adds the random qod to the icelandic qod table)
 func setNewRandomAOD(language string) error {
-	var authorItem structs.ListItem
+	var authorItem structs.AuthorDBModel
 
 	if language == "" {
 		language = "english"

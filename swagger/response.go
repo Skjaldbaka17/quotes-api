@@ -7,7 +7,7 @@ import "github.com/Skjaldbaka17/quotes-api/structs"
 type authorsResponseWrapper struct {
 	// A usual authors response
 	// in: body
-	Body []structs.AuthorsView
+	Body []structs.AuthorAPIModel
 }
 
 // Data structure representing the response for a random author
@@ -31,7 +31,7 @@ type quotesResponseWrapper struct {
 type quoteResponseWrapper struct {
 	// A quote struct
 	// in: body
-	Body structs.QuoteView
+	Body structs.QuoteAPIModel
 }
 
 // Data structure representing the response for the quote of the day

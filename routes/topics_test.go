@@ -25,7 +25,7 @@ func TestTopics(t *testing.T) {
 
 		GetTopics(response, request)
 
-		var respObj []structs.ListItem
+		var respObj []structs.TestApiResponse
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		if len(respObj) != nrOfEnglishTopics {
@@ -41,7 +41,7 @@ func TestTopics(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodPost, "/api", bytes.NewBuffer(jsonStr))
 		response := httptest.NewRecorder()
 		GetTopics(response, request)
-		var respObj []structs.ListItem
+		var respObj []structs.TestApiResponse
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		if len(respObj) != nrOfIcelandicTopics {
@@ -58,7 +58,7 @@ func TestTopics(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodPost, "/api", bytes.NewBuffer(jsonStr))
 		response := httptest.NewRecorder()
 		GetTopic(response, request)
-		var respObj []structs.QuoteView
+		var respObj []structs.TestApiResponse
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		if len(respObj) != pageSize {
@@ -66,7 +66,7 @@ func TestTopics(t *testing.T) {
 		}
 
 		for _, obj := range respObj {
-			if respObj[0].Topicname != nameOfTopic {
+			if respObj[0].TopicName != nameOfTopic {
 				t.Fatalf("got %+v but expected a quote with topic %s", obj, nameOfTopic)
 			}
 		}
@@ -82,7 +82,7 @@ func TestTopics(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodPost, "/api", bytes.NewBuffer(jsonStr))
 		response := httptest.NewRecorder()
 		GetTopic(response, request)
-		var respObj []structs.QuoteView
+		var respObj []structs.TestApiResponse
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		if len(respObj) != pageSize {
@@ -90,7 +90,7 @@ func TestTopics(t *testing.T) {
 		}
 
 		for _, obj := range respObj {
-			if respObj[0].Topicid != topicId {
+			if respObj[0].TopicId != topicId {
 				t.Fatalf("got %+v but expected a quote with topicId %d", obj, topicId)
 			}
 		}
@@ -108,7 +108,7 @@ func TestTopics(t *testing.T) {
 		response := httptest.NewRecorder()
 		GetTopic(response, request)
 
-		var respObj []structs.QuoteView
+		var respObj []structs.TestApiResponse
 		_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 		obj26 := respObj[0]
@@ -121,7 +121,7 @@ func TestTopics(t *testing.T) {
 		response = httptest.NewRecorder()
 		GetTopic(response, request)
 
-		var newRespObj []structs.QuoteView
+		var newRespObj []structs.TestApiResponse
 		_ = json.Unmarshal(response.Body.Bytes(), &newRespObj)
 
 		if len(newRespObj) != pageSize {

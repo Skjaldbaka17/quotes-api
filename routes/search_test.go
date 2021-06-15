@@ -181,14 +181,14 @@ func TestSearch(t *testing.T) {
 			response := httptest.NewRecorder()
 
 			SearchByString(response, request)
-			var respObj []structs.QuoteView
+			var respObj []structs.TestApiResponse
 			_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 			if pageSize != len(respObj) {
 				t.Fatalf("got list of length %d but expected %d", len(respObj), pageSize)
 			}
 
-			if respObj[0].Quoteid != obj26.Quoteid {
+			if respObj[0].QuoteId != obj26.QuoteId {
 				t.Fatalf("got %+v, want %+v", respObj[0], obj26)
 			}
 		})
@@ -209,14 +209,14 @@ func TestSearch(t *testing.T) {
 
 			SearchAuthorsByString(response, request)
 
-			var respObj []structs.QuoteView
+			var respObj []structs.TestApiResponse
 			_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 			if pageSize != len(respObj) {
 				t.Fatalf("got list of length %d but expected %d", len(respObj), pageSize)
 			}
 
-			if respObj[0] != obj26 {
+			if respObj[0].QuoteId != obj26.QuoteId {
 				t.Fatalf("got %+v, want %+v", respObj[0], obj26)
 			}
 		})
@@ -237,14 +237,14 @@ func TestSearch(t *testing.T) {
 
 			SearchQuotesByString(response, request)
 
-			var respObj []structs.QuoteView
+			var respObj []structs.TestApiResponse
 			_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 			if pageSize != len(respObj) {
 				t.Fatalf("got list of length %d but expected %d", len(respObj), pageSize)
 			}
 
-			if respObj[0].Quoteid != obj26.Quoteid {
+			if respObj[0].QuoteId != obj26.QuoteId {
 				t.Fatalf("got %+v, want %+v", respObj[0], obj26)
 			}
 		})

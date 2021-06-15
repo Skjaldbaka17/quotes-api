@@ -465,7 +465,7 @@ func TestQuotes(t *testing.T) {
 			var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","topicId": %d}`, user.ApiKey, topicId))
 			firstRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 			if firstRespObj.TopicName != topicName {
-				t.Fatalf("got %s, expected %s", firstRespObj.TopicName, topicName)
+				t.Fatalf("got topicname: %s, expected %s", firstRespObj.TopicName, topicName)
 			}
 			secondRespObj := requestAndReturnSingle(jsonStr, GetRandomQuote)
 			if secondRespObj.TopicId != firstRespObj.TopicId {
@@ -608,9 +608,9 @@ func getTopicId(topicName string, apiKey string) int {
 
 	GetTopic(response, request)
 
-	var respObj []structs.QuoteView
+	var respObj []structs.TestApiResponse
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
-	return respObj[0].Topicid
+	return respObj[0].TopicId
 }
 
 func (set *Set) toString() string {
@@ -622,7 +622,7 @@ func (set *Set) toString() string {
 	return strings.Join(IDs, ", ")
 }
 
-func getAuthor(searchString string, apiKey string) structs.AuthorsView {
+func getAuthor(searchString string, apiKey string) structs.TestApiResponse {
 
 	var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","searchString": "%s"}`, apiKey, searchString))
 	request, _ := http.NewRequest(http.MethodGet, "/api/search/authors", bytes.NewBuffer(jsonStr))
@@ -630,12 +630,12 @@ func getAuthor(searchString string, apiKey string) structs.AuthorsView {
 
 	SearchAuthorsByString(response, request)
 
-	var respObj []structs.AuthorsView
+	var respObj []structs.TestApiResponse
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	return respObj[0]
 }
 
-func getAuthorsById(authorIds Set, apiKey string) []structs.AuthorsView {
+func getAuthorsById(authorIds Set, apiKey string) []structs.TestApiResponse {
 
 	var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","ids": [%s]}`, apiKey, authorIds.toString()))
 	request, _ := http.NewRequest(http.MethodGet, "/api/search/authors", bytes.NewBuffer(jsonStr))
@@ -643,12 +643,12 @@ func getAuthorsById(authorIds Set, apiKey string) []structs.AuthorsView {
 
 	GetAuthorsById(response, request)
 
-	var respObj []structs.AuthorsView
+	var respObj []structs.TestApiResponse
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	return respObj
 }
 
-func getQuotes(searchString string, apiKey string) []structs.QuoteView {
+func getQuotes(searchString string, apiKey string) []structs.TestApiResponse {
 
 	var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","searchString": "%s"}`, apiKey, searchString))
 	request, _ := http.NewRequest(http.MethodGet, "/api/search/quotes", bytes.NewBuffer(jsonStr))
@@ -656,7 +656,7 @@ func getQuotes(searchString string, apiKey string) []structs.QuoteView {
 
 	SearchQuotesByString(response, request)
 
-	var respObj []structs.QuoteView
+	var respObj []structs.TestApiResponse
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	return respObj
 }
@@ -668,7 +668,7 @@ func getRequestAndResponseForTest(jsonStr []byte) (*httptest.ResponseRecorder, *
 }
 
 //TODO: Give a better name,more intuitive
-func getObjNr26(searchString string, fn httpRequest, apiKey string) (structs.QuoteView, error) {
+func getObjNr26(searchString string, fn httpRequest, apiKey string) (structs.TestApiResponse, error) {
 	pageSize := 100
 	var jsonStr = []byte(fmt.Sprintf(`{"apiKey":"%s","searchString": "%s", "pageSize":%d}`, apiKey, searchString, pageSize))
 	request, _ := http.NewRequest(http.MethodPost, "/api/search", bytes.NewBuffer(jsonStr))
@@ -676,11 +676,11 @@ func getObjNr26(searchString string, fn httpRequest, apiKey string) (structs.Quo
 
 	fn(response, request)
 
-	var respObj []structs.QuoteView
+	var respObj []structs.TestApiResponse
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 
 	if pageSize != len(respObj) {
-		return structs.QuoteView{}, fmt.Errorf("got list of length %d but expected %d", len(respObj), pageSize)
+		return structs.TestApiResponse{}, fmt.Errorf("got list of length %d but expected %d", len(respObj), pageSize)
 	}
 
 	return respObj[25], nil
@@ -709,10 +709,10 @@ func requestAndReturnArray(jsonStr []byte, fn httpRequest) ([]structs.TestApiRes
 	return respObj, errorResp
 }
 
-func requestAndReturnArrayAuthors(jsonStr []byte, fn httpRequest) ([]structs.AuthorsView, structs.ErrorResponse) {
+func requestAndReturnArrayAuthors(jsonStr []byte, fn httpRequest) ([]structs.TestApiResponse, structs.ErrorResponse) {
 	response, request := getRequestAndResponseForTest(jsonStr)
 	fn(response, request)
-	var respObj []structs.AuthorsView
+	var respObj []structs.TestApiResponse
 	var errorResp structs.ErrorResponse
 	_ = json.Unmarshal(response.Body.Bytes(), &respObj)
 	_ = json.Unmarshal(response.Body.Bytes(), &errorResp)
