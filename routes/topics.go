@@ -13,7 +13,7 @@ import (
 // swagger:route POST /topics TOPICS GetTopics
 // List the available topics, english / icelandic or both
 // responses:
-//	200: listTopicsResponse
+//	200: topicsResponse
 //  400: incorrectBodyStructureResponse
 //  500: internalServerErrorResponse
 
@@ -44,7 +44,7 @@ func GetTopics(rw http.ResponseWriter, r *http.Request) {
 // swagger:route POST /topic TOPICS GetTopic
 // Get quotes from a particular topic
 // responses:
-//	200: multipleQuotesTopicResponse
+//	200: topicViewsResponse
 //  400: incorrectBodyStructureResponse
 //  500: internalServerErrorResponse
 

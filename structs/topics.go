@@ -9,7 +9,7 @@ type TopicDBModel struct {
 type TopicAPIModel struct {
 	Id          int    `json:"id"`
 	Name        string `json:"name"`
-	Isicelandic string `json:"is_icelandic"`
+	Isicelandic string `json:"isIcelandic"`
 }
 
 func (dbModel *TopicDBModel) ConvertToAPIModel() TopicAPIModel {
@@ -37,27 +37,13 @@ func ConvertToTopicsDBModel(authors []TopicAPIModel) []TopicDBModel {
 }
 
 type TopicViewDBModel struct {
-	// The author's id
-	//Unique: true
-	//example: 24952
-	AuthorId int `json:"author_id"`
-	// Name of author
-	//example: Muhammad Ali
-	Name string `json:"name"`
-	// The quote's id
-	//Unique: true
-	//example: 582676
-	QuoteId int `json:"quote_id" `
-	// The quote
-	//example: Float like a butterfly, sting like a bee.
-	Quote string `json:"quote"`
-	// Whether or not this quote is in Icelandic or not
-	// example: false
-	IsIcelandic bool `json:"is_icelandic"`
-	//swagger:ignore
-	TopicName string `json:"topic_name"`
-	//swagger:ignore
-	TopicId int `json:"topic_id"`
+	AuthorId    int    `json:"author_id"`
+	Name        string `json:"name"`
+	QuoteId     int    `json:"quote_id" `
+	Quote       string `json:"quote"`
+	IsIcelandic bool   `json:"is_icelandic"`
+	TopicName   string `json:"topic_name"`
+	TopicId     int    `json:"topic_id"`
 }
 
 type TopicViewAPIModel struct {
@@ -78,9 +64,11 @@ type TopicViewAPIModel struct {
 	// Whether or not this quote is in Icelandic or not
 	// example: false
 	IsIcelandic bool `json:"isIcelandic"`
-	//swagger:ignore
+	// The topic's name (if topic id / name not supplied this will return empty string "")
+	// example: inspirational
 	TopicName string `json:"topicName"`
-	//swagger:ignore
+	// The topic's id (if topic id / name not supplied this will return a zero id)
+	// example: 10
 	TopicId int `json:"topicId"`
 }
 

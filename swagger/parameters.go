@@ -47,7 +47,7 @@ type authorsListWrapper struct {
 		// Example: English
 		Language string `json:"language"`
 		//Model
-		OrderConfig orderConfigListAuthorsModel
+		OrderConfig orderConfigListAuthorsModel `json:"orderConfig"`
 	}
 }
 
@@ -123,8 +123,8 @@ type setAODWrapper struct {
 		//
 		// Required: true
 		// Example: 91fd6d19-2c32-4081-8729-4d9786d43b95
-		ApiKey string `json:"apiKey"`
-		Aods   []ofTheDayModel
+		ApiKey string          `json:"apiKey"`
+		Aods   []ofTheDayModel `json:"aods"`
 	}
 }
 
@@ -137,8 +137,8 @@ type setQuoteOfTheDayWrapper struct {
 		//
 		// Required: true
 		// Example: 91fd6d19-2c32-4081-8729-4d9786d43b95
-		ApiKey string `json:"apiKey"`
-		Qods   []ofTheDayModel
+		ApiKey string          `json:"apiKey"`
+		Qods   []ofTheDayModel `json:"qods"`
 	}
 }
 
@@ -203,7 +203,7 @@ type quotesListWrapper struct {
 		// Example: English
 		Language string `json:"language"`
 		//Model
-		OrderConfig orderConfigListQuotesModel
+		OrderConfig orderConfigListQuotesModel `json:"orderConfig"`
 	}
 }
 

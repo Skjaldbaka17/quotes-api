@@ -10,12 +10,25 @@ type AuthorDBModel struct {
 }
 
 type AuthorAPIModel struct {
-	Id                  int    `json:"id"`
-	Name                string `json:"name"`
-	HasIcelandicQuotes  bool   `json:"hasIcelandicQuotes"`
-	NrOfIcelandicQuotes int    `json:"nrOfIcelandicQuotes"`
-	NrOfEnglishQuotes   int    `json:"nrOfEnglishQuotes"`
-	Count               int    `json:"count"`
+	// The author's id
+	// unique: true
+	// example: 24952
+	Id int `json:"id"`
+	// Name of the author
+	// example: Muhammad Ali
+	Name string `json:"name"`
+	// Whether or not this author has some icelandic quotes
+	// example: true
+	HasIcelandicQuotes bool `json:"hasIcelandicQuotes"`
+	// How many quotes in Icelandic this author has
+	// example: 6
+	NrOfIcelandicQuotes int `json:"nrOfIcelandicQuotes"`
+	// How many quotes in English this author has
+	// example: 78
+	NrOfEnglishQuotes int `json:"nrOfEnglishQuotes"`
+	// The popularity index of the author
+	// example: 1111
+	Count int `json:"count"`
 }
 
 func (dbModel *AuthorDBModel) ConvertToAPIModel() AuthorAPIModel {
@@ -45,5 +58,17 @@ func ConvertToAuthorsDBModel(authors []AuthorAPIModel) []AuthorDBModel {
 type AodDBModel struct {
 	Id   int    `json:"id"`
 	Name string `json:"name"`
+	Date string `json:"date"`
+}
+
+type AodAPIModel struct {
+	// The author's id
+	// example: 24952
+	Id int `json:"id"`
+	// The name of the author
+	// example: Muhammad Ali
+	Name string `json:"name"`
+	// The date when this author was the author of the day
+	// example: 2021-06-12T00:00:00Z
 	Date string `json:"date"`
 }

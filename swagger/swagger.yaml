@@ -2,13 +2,39 @@ basePath: /api/
 consumes:
 - application/json
 definitions:
-  AuthorsView:
+  AodAPIModel:
     properties:
-      hasicelandicquotes:
+      date:
+        description: The date when this author was the author of the day
+        example: "2021-06-12T00:00:00Z"
+        type: string
+        x-go-name: Date
+      id:
+        description: The author's id
+        example: 24952
+        format: int64
+        type: integer
+        x-go-name: Id
+      name:
+        description: The name of the author
+        example: Muhammad Ali
+        type: string
+        x-go-name: Name
+    type: object
+    x-go-package: github.com/Skjaldbaka17/quotes-api/structs
+  AuthorAPIModel:
+    properties:
+      count:
+        description: The popularity index of the author
+        example: 1111
+        format: int64
+        type: integer
+        x-go-name: Count
+      hasIcelandicQuotes:
         description: Whether or not this author has some icelandic quotes
         example: true
         type: boolean
-        x-go-name: Hasicelandicquotes
+        x-go-name: HasIcelandicQuotes
       id:
         description: The author's id
         example: 24952
@@ -21,18 +47,18 @@ definitions:
         example: Muhammad Ali
         type: string
         x-go-name: Name
-      nrofenglishquotes:
-        description: How many quotes in icelandic this author has
+      nrOfEnglishQuotes:
+        description: How many quotes in English this author has
         example: 78
         format: int64
         type: integer
-        x-go-name: Nrofenglishquotes
-      nroficelandicquotes:
-        description: How many quotes in icelandic this author has
+        x-go-name: NrOfEnglishQuotes
+      nrOfIcelandicQuotes:
+        description: How many quotes in Icelandic this author has
         example: 6
         format: int64
         type: integer
-        x-go-name: Nroficelandicquotes
+        x-go-name: NrOfIcelandicQuotes
     type: object
     x-go-package: github.com/Skjaldbaka17/quotes-api/structs
   OfTheDayModel:
@@ -87,20 +113,56 @@ definitions:
     type: object
     x-go-name: orderConfigListQuotesModel
     x-go-package: github.com/Skjaldbaka17/quotes-api/swagger
-  QuoteView:
+  QodViewAPIModel:
     properties:
-      authorid:
+      authorId:
+        description: The author's id
+        format: int64
+        type: integer
+        x-go-name: AuthorId
+      date:
+        description: The date when this quote was the quote of the day
+        example: "2021-06-12T00:00:00Z"
+        type: string
+        x-go-name: Date
+      isIcelandic:
+        description: |-
+          Whether the quote is in icelandic
+          false
+        type: boolean
+        x-go-name: IsIcelandic
+      name:
+        description: Name of the author
+        example: Muhammad Ali
+        type: string
+        x-go-name: Name
+      quote:
+        description: The quote for the day
+        example: Float like a butterfly, sting like a bee
+        type: string
+        x-go-name: Quote
+      quoteId:
+        description: The quote's id
+        example: 582676
+        format: int64
+        type: integer
+        x-go-name: QuoteId
+    type: object
+    x-go-package: github.com/Skjaldbaka17/quotes-api/structs
+  SearchViewAPIModel:
+    properties:
+      authorId:
         description: The author's id
         example: 24952
         format: int64
         type: integer
         uniqueItems: true
-        x-go-name: Authorid
-      isicelandic:
+        x-go-name: AuthorId
+      isIcelandic:
         description: Whether or not this quote is in Icelandic or not
         example: false
         type: boolean
-        x-go-name: Isicelandic
+        x-go-name: IsIcelandic
       name:
         description: Name of author
         example: Muhammad Ali
@@ -111,31 +173,78 @@ definitions:
         example: Float like a butterfly, sting like a bee.
         type: string
         x-go-name: Quote
-      quoteid:
+      quoteId:
         description: The quote's id
         example: 582676
         format: int64
         type: integer
         uniqueItems: true
-        x-go-name: Quoteid
-      topicid:
-        description: The topic's id
-        example: 10
+        x-go-name: QuoteId
+    type: object
+    x-go-package: github.com/Skjaldbaka17/quotes-api/structs
+  TopicAPIModel:
+    properties:
+      id:
+        format: int64
+        type: integer
+        x-go-name: Id
+      isIcelandic:
+        type: string
+        x-go-name: Isicelandic
+      name:
+        type: string
+        x-go-name: Name
+    type: object
+    x-go-package: github.com/Skjaldbaka17/quotes-api/structs
+  TopicViewAPIModel:
+    properties:
+      authorId:
+        description: The author's id
+        example: 24952
         format: int64
         type: integer
         uniqueItems: true
-        x-go-name: Topicid
-      topicname:
-        description: The topic's name
+        x-go-name: AuthorId
+      isIcelandic:
+        description: Whether or not this quote is in Icelandic or not
+        example: false
+        type: boolean
+        x-go-name: IsIcelandic
+      name:
+        description: Name of author
+        example: Muhammad Ali
+        type: string
+        x-go-name: Name
+      quote:
+        description: The quote
+        example: Float like a butterfly, sting like a bee.
+        type: string
+        x-go-name: Quote
+      quoteId:
+        description: The quote's id
+        example: 582676
+        format: int64
+        type: integer
+        uniqueItems: true
+        x-go-name: QuoteId
+      topicId:
+        description: The topic's id (if topic id / name not supplied this will return
+          a zero id)
+        example: 10
+        format: int64
+        type: integer
+        x-go-name: TopicId
+      topicName:
+        description: The topic's name (if topic id / name not supplied this will return
+          empty string "")
         example: inspirational
         type: string
-        uniqueItems: true
-        x-go-name: Topicname
+        x-go-name: TopicName
     type: object
     x-go-package: github.com/Skjaldbaka17/quotes-api/structs
   UserResponse:
     properties:
-      api_key:
+      apiKey:
         description: The api-key that the user should send to get access to the api
         example: 1d8db1d2-6f5b-4254-8b74-44f5e5229add
         type: string
@@ -298,7 +407,7 @@ paths:
           type: object
       responses:
         "200":
-          $ref: '#/responses/authorOfTheDayResponse'
+          $ref: '#/responses/aodResponse'
         "400":
           $ref: '#/responses/incorrectBodyStructureResponse'
         "500":
@@ -359,10 +468,11 @@ paths:
         schema:
           items:
             properties:
-              Aods:
+              aods:
                 items:
                   $ref: '#/definitions/OfTheDayModel'
                 type: array
+                x-go-name: Aods
               apiKey:
                 description: The api-key you use to access the api
                 example: 91fd6d19-2c32-4081-8729-4d9786d43b95
@@ -391,8 +501,6 @@ paths:
         name: Body
         schema:
           properties:
-            OrderConfig:
-              $ref: '#/definitions/OrderConfiguration'
             apiKey:
               description: The api-key you use to access the api
               example: 91fd6d19-2c32-4081-8729-4d9786d43b95
@@ -406,6 +514,8 @@ paths:
               example: English
               type: string
               x-go-name: Language
+            orderConfig:
+              $ref: '#/definitions/OrderConfiguration'
             page:
               description: Response is paged. This parameter controls the page you
                 are asking for, starts with 0.
@@ -472,7 +582,7 @@ paths:
           type: object
       responses:
         "200":
-          $ref: '#/responses/randomAuthorResponse'
+          $ref: '#/responses/searchViewsResponse'
         "400":
           $ref: '#/responses/incorrectBodyStructureResponse'
         "500":
@@ -545,7 +655,7 @@ paths:
           type: object
       responses:
         "200":
-          $ref: '#/responses/quotesResponse'
+          $ref: '#/responses/searchViewsResponse'
         "400":
           $ref: '#/responses/incorrectBodyStructureResponse'
         "500":
@@ -562,8 +672,6 @@ paths:
         name: Body
         schema:
           properties:
-            OrderConfig:
-              $ref: '#/definitions/OrderConfiguration'
             apiKey:
               description: The api-key you use to access the api
               example: 91fd6d19-2c32-4081-8729-4d9786d43b95
@@ -576,6 +684,8 @@ paths:
               example: English
               type: string
               x-go-name: Language
+            orderConfig:
+              $ref: '#/definitions/OrderConfiguration'
             page:
               description: Response is paged. This parameter controls the page you
                 are asking for, starts with 0.
@@ -599,7 +709,7 @@ paths:
           type: object
       responses:
         "200":
-          $ref: '#/responses/quotesResponse'
+          $ref: '#/responses/searchViewsResponse'
         "400":
           $ref: '#/responses/incorrectBodyStructureResponse'
         "500":
@@ -607,6 +717,41 @@ paths:
       tags:
       - QUOTES
   /quotes/qod:
+    post:
+      description: gets the quote of the day
+      operationId: GetQuoteOfTheDay
+      parameters:
+      - description: The structure of the request for getting the author / quote of
+          the day
+        in: body
+        name: Body
+        schema:
+          properties:
+            apiKey:
+              description: The api-key you use to access the api
+              example: 91fd6d19-2c32-4081-8729-4d9786d43b95
+              type: string
+              x-go-name: ApiKey
+            language:
+              default: English
+              description: Get the author / quote of the day for the given language
+                ("icelandic" or "english")
+              example: English
+              type: string
+              x-go-name: Language
+          required:
+          - apiKey
+          type: object
+      responses:
+        "200":
+          $ref: '#/responses/qodResponse'
+        "400":
+          $ref: '#/responses/incorrectBodyStructureResponse'
+        "500":
+          $ref: '#/responses/internalServerErrorResponse'
+      tags:
+      - QUOTES
+  /quotes/qod/history:
     post:
       description: Gets the history for the quotes of the day
       operationId: GetQODHistory
@@ -659,15 +804,16 @@ paths:
         name: Body
         schema:
           properties:
-            Qods:
-              items:
-                $ref: '#/definitions/OfTheDayModel'
-              type: array
             apiKey:
               description: The api-key you use to access the api
               example: 91fd6d19-2c32-4081-8729-4d9786d43b95
               type: string
               x-go-name: ApiKey
+            qods:
+              items:
+                $ref: '#/definitions/OfTheDayModel'
+              type: array
+              x-go-name: Qods
           required:
           - apiKey
           type: object
@@ -725,7 +871,7 @@ paths:
           type: object
       responses:
         "200":
-          $ref: '#/responses/randomQuoteResponse'
+          $ref: '#/responses/topicViewResponse'
         "400":
           $ref: '#/responses/incorrectBodyStructureResponse'
         "500":
@@ -781,7 +927,7 @@ paths:
           type: object
       responses:
         "200":
-          $ref: '#/responses/quotesResponse'
+          $ref: '#/responses/topicViewsResponse'
         "400":
           $ref: '#/responses/incorrectBodyStructureResponse'
         "500":
@@ -891,7 +1037,7 @@ paths:
           type: object
       responses:
         "200":
-          $ref: '#/responses/quotesResponse'
+          $ref: '#/responses/topicViewsResponse'
         "400":
           $ref: '#/responses/incorrectBodyStructureResponse'
         "500":
@@ -945,7 +1091,7 @@ paths:
           type: object
       responses:
         "200":
-          $ref: '#/responses/multipleQuotesTopicResponse'
+          $ref: '#/responses/topicViewsResponse'
         "400":
           $ref: '#/responses/incorrectBodyStructureResponse'
         "500":
@@ -971,7 +1117,7 @@ paths:
           type: object
       responses:
         "200":
-          $ref: '#/responses/listTopicsResponse'
+          $ref: '#/responses/topicsResponse'
         "400":
           $ref: '#/responses/incorrectBodyStructureResponse'
         "500":
@@ -980,7 +1126,7 @@ paths:
       - TOPICS
   /users/login:
     post:
-      description: Login to get the api_key for the user
+      description: Login to get the apiKey for the user
       operationId: Login
       parameters:
       - description: The structure of the Login request
@@ -1059,53 +1205,17 @@ responses:
     description: Data structure representing the response for the history of AODs
     schema:
       items:
-        properties:
-          date:
-            description: The date when this author was the author of the day
-            example: "2021-06-12T00:00:00Z"
-            type: string
-            x-go-name: Date
-          id:
-            description: The author's id
-            example: 24952
-            format: int64
-            type: integer
-            uniqueItems: true
-            x-go-name: Id
-          name:
-            description: Name of the author
-            example: Muhammad Ali
-            type: string
-            x-go-name: Name
-        type: object
+        $ref: '#/definitions/AodAPIModel'
       type: array
-  authorOfTheDayResponse:
+  aodResponse:
     description: Data structure representing the response for the author of the day
     schema:
-      properties:
-        date:
-          description: The date when this author was the author of the day
-          example: "2021-06-12T00:00:00Z"
-          type: string
-          x-go-name: Date
-        id:
-          description: The author's id
-          example: 24952
-          format: int64
-          type: integer
-          uniqueItems: true
-          x-go-name: Id
-        name:
-          description: Name of the author
-          example: Muhammad Ali
-          type: string
-          x-go-name: Name
-      type: object
+      $ref: '#/definitions/AodAPIModel'
   authorsResponse:
-    description: Data structure representing the response for a authors
+    description: Data structure representing the response for authors
     schema:
       items:
-        $ref: '#/definitions/AuthorsView'
+        $ref: '#/definitions/AuthorAPIModel'
       type: array
   incorrectBodyStructureResponse:
     description: Data structure representing the error response to a wrongly structured
@@ -1156,100 +1266,26 @@ responses:
             x-go-name: Languages
         type: object
       type: array
-  listTopicsResponse:
-    description: Data structure representing a list response for topics
-    schema:
-      items:
-        properties:
-          id:
-            description: The id of the topic
-            example: 10
-            format: int64
-            type: integer
-            x-go-name: Id
-          isicelandic:
-            description: Boolean whether or not this quote is in icelandic
-            example: true
-            type: boolean
-            x-go-name: Isicelandic
-          name:
-            description: Name of the topics
-            example: inspirational
-            type: string
-            x-go-name: Name
-        type: object
-      type: array
-  multipleQuotesTopicResponse:
-    description: Data structure representing topic quotes response
-    schema:
-      items:
-        properties:
-          authorid:
-            description: The author's id
-            example: 26214
-            format: int64
-            type: integer
-            uniqueItems: true
-            x-go-name: Authorid
-          name:
-            description: Name of author
-            example: John D. Rockefeller
-            type: string
-            x-go-name: Name
-          quote:
-            description: The quote
-            example: If you want to succeed you should strike out on new paths, rather
-              than travel the worn paths of accepted success.
-            type: string
-            x-go-name: Quote
-          quoteid:
-            description: The quote's id
-            example: 625402
-            format: int64
-            type: integer
-            uniqueItems: true
-            x-go-name: Quoteid
-          topicid:
-            description: The topic's id
-            example: 6
-            format: int64
-            type: integer
-            uniqueItems: true
-            x-go-name: Topicid
-          topicname:
-            description: The topic's name
-            example: motivational
-            type: string
-            uniqueItems: true
-            x-go-name: Topicname
-        type: object
-      type: array
   qodHistoryResponse:
     description: Data structure representing the response for the history of QODS
     schema:
       items:
-        $ref: '#/definitions/qodResponseModel'
+        $ref: '#/definitions/QodViewAPIModel'
       type: array
-  quoteOfTheDayResponse:
+  qodResponse:
     description: Data structure representing the response for the quote of the day
     schema:
-      $ref: '#/definitions/qodResponseModel'
-  quotesResponse:
-    description: Data structure representing the response for the quotes
-    schema:
-      items:
-        $ref: '#/definitions/quotesResponse'
-      type: array
-  randomAuthorResponse:
-    description: Data structure representing the response for a random author
-    schema:
-      items:
-        $ref: '#/definitions/quotesResponse'
-      type: array
-  randomQuoteResponse:
+      $ref: '#/definitions/QodViewAPIModel'
+  searchViewResponse:
     description: Data structure representing the response for a quote
     schema:
-      $ref: '#/definitions/QuoteView'
+      $ref: '#/definitions/SearchViewAPIModel'
+  searchViewsResponse:
+    description: Data structure representing the response for quotes
+    schema:
+      items:
+        $ref: '#/definitions/SearchViewAPIModel'
+      type: array
   successResponse:
     description: ""
     schema:
@@ -1265,6 +1301,24 @@ responses:
           type: integer
           x-go-name: StatusCode
       type: object
+  topicViewResponse:
+    description: Data structure representing the response for a quote based on a particular
+      topic
+    schema:
+      $ref: '#/definitions/TopicViewAPIModel'
+  topicViewsResponse:
+    description: Data structure representing the response for a quote based on a particular
+      topic
+    schema:
+      items:
+        $ref: '#/definitions/TopicViewAPIModel'
+      type: array
+  topicsResponse:
+    description: Data structure representing a list response for topics
+    schema:
+      items:
+        $ref: '#/definitions/TopicAPIModel'
+      type: array
   userResponse:
     description: Data structure representing a user response
     schema:
@@ -1273,10 +1327,10 @@ schemes:
 - http
 securityDefinitions:
   apikey:
-    description: To use the api you need an access key. The basic access key lets
-      you make up to 100 requests an hour.
+    description: To use the api you need an API key. The basic API key lets you make
+      up to 100 requests an hour.
     in: body
-    name: accessKey
+    name: apiKey
     type: apiKey
 swagger: "2.0"
 tags:

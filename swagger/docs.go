@@ -22,8 +22,8 @@
 //    apikey:
 //      type: apiKey
 //      in: body
-//      name: accessKey
-//      description: To use the api you need an access key. The basic access key lets you make up to 100 requests an hour.
+//      name: apiKey
+//      description: To use the api you need an API key. The basic API key lets you make up to 100 requests an hour.
 //
 //
 // swagger:meta

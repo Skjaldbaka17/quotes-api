@@ -50,12 +50,23 @@ type QodViewDBModel struct {
 }
 
 type QodViewAPIModel struct {
-	QuoteId     int    `json:"quote_id"`
-	Name        string `json:"name"`
-	Quote       string `json:"quote"`
-	AuthorId    int    `json:"author_id"`
-	IsIcelandic bool   `json:"is_icelandic"`
-	Date        string `json:"date"`
+	// The quote's id
+	// example: 582676
+	QuoteId int `json:"quoteId"`
+	// Name of the author
+	// example: Muhammad Ali
+	Name string `json:"name"`
+	// The quote for the day
+	// example: Float like a butterfly, sting like a bee
+	Quote string `json:"quote"`
+	// The author's id
+	AuthorId int `json:"authorId"`
+	// Whether the quote is in icelandic
+	// false
+	IsIcelandic bool `json:"isIcelandic"`
+	// The date when this quote was the quote of the day
+	// example: 2021-06-12T00:00:00Z
+	Date string `json:"date"`
 }
 
 func (dbModel *QodViewDBModel) ConvertToAPIModel() QodViewAPIModel {

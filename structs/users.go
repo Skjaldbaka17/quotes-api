@@ -43,5 +43,5 @@ type UserResponse struct {
 	Id int `json:"id"`
 	// The api-key that the user should send to get access to the api
 	// example: 1d8db1d2-6f5b-4254-8b74-44f5e5229add
-	ApiKey string `json:"api_key"`
+	ApiKey string `json:"apiKey"`
 }

@@ -130,7 +130,7 @@ func GetAuthorsList(rw http.ResponseWriter, r *http.Request) {
 // swagger:route POST /authors/random AUTHORS GetRandomAuthor
 // Get a random Author, and some of his quotes, according to the given parameters
 // responses:
-//	200: randomAuthorResponse
+//	200: searchViewsResponse
 //  400: incorrectBodyStructureResponse
 //  500: internalServerErrorResponse
 
@@ -182,7 +182,7 @@ func GetRandomAuthor(rw http.ResponseWriter, r *http.Request) {
 // swagger:route POST /authors/aod AUTHORS GetAuthorOfTheDay
 // Gets the author of the day
 // responses:
-//	200: authorOfTheDayResponse
+//	200: aodResponse
 //  400: incorrectBodyStructureResponse
 //  500: internalServerErrorResponse
 

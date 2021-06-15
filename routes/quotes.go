@@ -18,7 +18,7 @@ import (
 // Get quotes by their ids
 //
 // responses:
-//	200: quotesResponse
+//	200: searchViewsResponse
 //  400: incorrectBodyStructureResponse
 //  500: internalServerErrorResponse
 
@@ -62,7 +62,7 @@ func GetQuotes(rw http.ResponseWriter, r *http.Request) {
 // Get list of quotes according to some ordering / parameters
 //
 // responses:
-//	200: quotesResponse
+//	200: searchViewsResponse
 //  400: incorrectBodyStructureResponse
 //  500: internalServerErrorResponse
 
@@ -119,7 +119,7 @@ func GetQuotesList(rw http.ResponseWriter, r *http.Request) {
 // swagger:route POST /quotes/random QUOTES GetRandomQuote
 // Get a random quote according to the given parameters
 // responses:
-//	200: randomQuoteResponse
+//  200: topicViewResponse
 //  400: incorrectBodyStructureResponse
 //  500: internalServerErrorResponse
 
@@ -131,7 +131,6 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 	}
 	var dbPointer *gorm.DB
 	var topicResult structs.TopicViewDBModel
-	var searchViewResult structs.SearchViewDBModel
 	// shouldOrderBy := false //Used when there are few rows to choose from and therefore higher probability that random() < 0.005 returns no rows
 
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
@@ -168,25 +167,14 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 
 	dbPointer = dbPointer.Order("random()") //Randomized, O( n*log(n) )
 	//** ---------- Paramater configuratino for DB query ends ---------- **//
-	if requestBody.TopicId > 0 {
-		err := dbPointer.Limit(1).Find(&topicResult).Error
-		if err != nil {
-			rw.WriteHeader(http.StatusInternalServerError)
-			log.Printf("Got error when querying DB in GetRandomQuote: %s", err)
-			json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
-			return
-		}
-		json.NewEncoder(rw).Encode(topicResult.ConvertToAPIModel())
-	} else {
-		err := dbPointer.Limit(1).Find(&searchViewResult).Error
-		if err != nil {
-			rw.WriteHeader(http.StatusInternalServerError)
-			log.Printf("Got error when querying DB in GetRandomQuote: %s", err)
-			json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
-			return
-		}
-		json.NewEncoder(rw).Encode(searchViewResult.ConvertToAPIModel())
+	err := dbPointer.Limit(1).Find(&topicResult).Error
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Got error when querying DB in GetRandomQuote: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
+		return
 	}
+	json.NewEncoder(rw).Encode(topicResult.ConvertToAPIModel())
 
 }
 
@@ -233,9 +221,9 @@ func SetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 }
 
 // swagger:route POST /quotes/qod QUOTES GetQuoteOfTheDay
-// Gets the quote of the day
+// gets the quote of the day
 // responses:
-//	200: quoteOfTheDayResponse
+//	200: qodResponse
 //  400: incorrectBodyStructureResponse
 //  500: internalServerErrorResponse
 
@@ -280,7 +268,7 @@ func GetQuoteOfTheDay(rw http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(rw).Encode(quote.ConvertToAPIModel())
 }
 
-// swagger:route POST /quotes/qod QUOTES GetQODHistory
+// swagger:route POST /quotes/qod/history QUOTES GetQODHistory
 // Gets the history for the quotes of the day
 // responses:
 //	200: qodHistoryResponse

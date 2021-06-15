@@ -16,7 +16,7 @@ import (
 // Search for quotes / authors by a general string-search that searches both in the names of the authors and the quotes themselves
 //
 // responses:
-//	200: quotesResponse
+//  200: topicViewsResponse
 //  400: incorrectBodyStructureResponse
 //  500: internalServerErrorResponse
 
@@ -28,7 +28,6 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	var topicResults []structs.TopicViewDBModel
-	var searchViewResults []structs.SearchViewDBModel
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	dbPointer := getBasePointer(requestBody)
 	//Order by authorid to have definitive order (when for examplke some quotes rank the same for plain, phrase, general and similarity)
@@ -41,37 +40,20 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 	//Particular language search
 	dbPointer = quoteLanguageSQL(requestBody.Language, dbPointer)
 	//** ---------- Paramatere configuratino for DB query ends ---------- **//
-	if requestBody.TopicId > 0 {
-		err := pagination(requestBody, dbPointer).
-			Find(&topicResults).Error
+	err := pagination(requestBody, dbPointer).
+		Find(&topicResults).Error
 
-		if err != nil {
-			rw.WriteHeader(http.StatusInternalServerError)
-			log.Printf("Got error when querying DB in SearchByString: %s", err)
-			json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
-			return
-		}
-
-		//Update popularity in background!
-		go handlers.TopicViewAppearInSearchCountIncrement(topicResults)
-		apiResults := structs.ConvertToTopicViewsAPIModel(topicResults)
-		json.NewEncoder(rw).Encode(apiResults)
-	} else {
-		err := pagination(requestBody, dbPointer).
-			Find(&searchViewResults).Error
-
-		if err != nil {
-			rw.WriteHeader(http.StatusInternalServerError)
-			log.Printf("Got error when querying DB in SearchByString: %s", err)
-			json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
-			return
-		}
-
-		//Update popularity in background!
-		go handlers.SearchViewAppearInSearchCountIncrement(searchViewResults)
-		apiResults := structs.ConvertToSearchViewsAPIModel(searchViewResults)
-		json.NewEncoder(rw).Encode(apiResults)
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Got error when querying DB in SearchByString: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
+		return
 	}
+
+	//Update popularity in background!
+	go handlers.TopicViewAppearInSearchCountIncrement(topicResults)
+	apiResults := structs.ConvertToTopicViewsAPIModel(topicResults)
+	json.NewEncoder(rw).Encode(apiResults)
 
 }
 
@@ -124,7 +106,7 @@ func SearchAuthorsByString(rw http.ResponseWriter, r *http.Request) {
 // swagger:route POST /search/quotes SEARCH SearchQuotesByString
 // Quotes search. Searching quotes by a given search string
 // responses:
-//	200: quotesResponse
+//  200: topicViewsResponse
 //  400: incorrectBodyStructureResponse
 //  500: internalServerErrorResponse
 
@@ -136,7 +118,6 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	var topicResults []structs.TopicViewDBModel
-	var searchViewResults []structs.SearchViewDBModel
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	dbPointer := getBasePointer(requestBody)
 	dbPointer = dbPointer.Where("( quote_tsv @@ plainq OR quote_tsv @@ phraseq OR quote_tsv @@ generalq)")
@@ -154,37 +135,21 @@ func SearchQuotesByString(rw http.ResponseWriter, r *http.Request) {
 	//Particular language search
 	dbPointer = quoteLanguageSQL(requestBody.Language, dbPointer)
 	//** ---------- Paramatere configuratino for DB query ends ---------- **//
-	if requestBody.TopicId > 0 {
-		err := pagination(requestBody, dbPointer).
-			Find(&topicResults).Error
+	err := pagination(requestBody, dbPointer).
+		Find(&topicResults).Error
 
-		if err != nil {
-			rw.WriteHeader(http.StatusInternalServerError)
-			log.Printf("Got error when querying DB in SearchQuotesByString: %s", err)
-			json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
-			return
-		}
-
-		//Update popularity in background!
-		go handlers.TopicViewAppearInSearchCountIncrement(topicResults)
-		apiResults := structs.ConvertToTopicViewsAPIModel(topicResults)
-		json.NewEncoder(rw).Encode(apiResults)
-	} else {
-		err := pagination(requestBody, dbPointer).
-			Find(&searchViewResults).Error
-
-		if err != nil {
-			rw.WriteHeader(http.StatusInternalServerError)
-			log.Printf("Got error when querying DB in SearchQuotesByString: %s", err)
-			json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
-			return
-		}
-
-		//Update popularity in background!
-		go handlers.SearchViewAppearInSearchCountIncrement(searchViewResults)
-		apiResults := structs.ConvertToSearchViewsAPIModel(searchViewResults)
-		json.NewEncoder(rw).Encode(apiResults)
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Got error when querying DB in SearchQuotesByString: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
+		return
 	}
+
+	//Update popularity in background!
+	go handlers.TopicViewAppearInSearchCountIncrement(topicResults)
+	apiResults := structs.ConvertToTopicViewsAPIModel(topicResults)
+	json.NewEncoder(rw).Encode(apiResults)
+
 }
 
 //getBasePointer returns a base DB pointer for a table for a thorough full text search

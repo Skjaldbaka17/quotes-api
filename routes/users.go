@@ -65,7 +65,7 @@ func CreateUser(rw http.ResponseWriter, r *http.Request) {
 }
 
 // swagger:route POST /users/login USERS Login
-// Login to get the api_key for the user
+// Login to get the apiKey for the user
 // responses:
 //	200: userResponse
 //  400: incorrectBodyStructureResponse
