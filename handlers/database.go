@@ -11,7 +11,8 @@ var Db *gorm.DB
 func init() {
 
 	var err error
-	dsn := "host=localhost port=5432 user=thorduragustsson dbname=all_quotes sslmode=disable password="
+
+	dsn := GetEnvVariable(DATABASE_URL)
 	Db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent),
 	})

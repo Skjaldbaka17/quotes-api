@@ -1,7 +1,5 @@
 # TODOS
 
-- [ ] Coordinate naming convention (apiKey vs api_key vs apikey etc)
-- [ ] only return keys, in the response-json, that are relevant to the request
 - [ ] Add .env variables (i.e. for names of tables etc.)
 
 - [ ] Setup AWS server
@@ -33,6 +31,8 @@
 
  -------------- Done  --------------
 
+- [x] Coordinate naming convention (apiKey vs api_key vs apikey etc)
+- [x] only return keys, in the response-json, that are relevant to the request
 - [x] CleanUp DB after tests
 - [x] add api key to swagger
 - [x] Add authentication for access to the api + Creating apiKeys + Documenting usage + admin access vs normal access
