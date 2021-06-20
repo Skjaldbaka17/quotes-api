@@ -46,5 +46,5 @@ func main() {
 	gets.Handle("/docs", sh)
 	gets.Handle("/swagger/swagger.yaml", http.FileServer(http.Dir("./")))
 
-	http.ListenAndServe(":80", r)
+	http.ListenAndServe(":8080", r)
 }
