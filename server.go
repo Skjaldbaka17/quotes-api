@@ -4,6 +4,7 @@ package main
 import (
 	"net/http"
 
+	"github.com/Skjaldbaka17/quotes-api/handlers"
 	"github.com/Skjaldbaka17/quotes-api/routes"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/gorilla/mux"
@@ -46,5 +47,9 @@ func main() {
 	gets.Handle("/docs", sh)
 	gets.Handle("/swagger/swagger.yaml", http.FileServer(http.Dir("./")))
 
-	http.ListenAndServe(":8080", r)
+	err := http.ListenAndServe(":"+handlers.GetEnvVariable("PORT"), r)
+
+	if err != nil {
+		panic(err)
+	}
 }
