@@ -1,20 +1,23 @@
+body{
+  background-color: black;
+}
+
 .contentWrapper{
   margin: 5%;
 }
 
 .quoteWrapper {
   display: flex;
-margin-bottom: 40px;
+margin-bottom: 20px;
 }
 
 .quote {
-  color: #000000;
-  font-size: 50px;
-  font-weight: 600;
+  color: #fff;
+  font-size: 40px;
+  font-weight: 500;
   line-height: 60px;
+  font-family: 'Vollkorn', serif;
   /* text-transform: uppercase; */
-  -webkit-transition: opacity 0.5s linear;
-  -moz-transition: opacity 0.5s linear;
 }
 
 .authorWrapper{
@@ -25,19 +28,24 @@ margin-bottom: 40px;
 }
 
 .author{
-  color: #000000;
-  font-size: 50px;
+  color: #fff;
+  font-size: 40px;
   font-weight: 500;
   line-height: 60px;
+  font-family: 'Vollkorn', serif;
   text-align: center;
   /* text-transform: uppercase; */
 }
 
 #footnote {
   bottom: 10px;
-  color: #777777;
+  color: #aaa;
   font-size: 12px;
   position: fixed;
   margin-left: 10px;
   right: 10px;
+}
+
+.alink{
+  color: #ccc;
 }
