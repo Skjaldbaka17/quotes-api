@@ -30,7 +30,7 @@ echo "PORT=$port" >> .env
 nohup make server &
 cd ..
 
-#Need to create new nginx.conf in /etc/nginx looking like the nginx.conf in this root!
+#Need to create new nginx.conf in /etc/nginx looking like the nginx.conf in this root! and then "sudo services nginx reload"
 echo "Need to create new nginx.conf in /etc/nginx looking like the nginx.conf in this root!"
 
 #Cloning db-setup from rep, do the setup from local comuter (if using free-tier or something with less than 4GB storage)

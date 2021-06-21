@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"regexp"
 	"strings"
@@ -142,8 +143,12 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 }
 
 func getRandomQuoteFromDb(requestBody *structs.Request) (structs.TopicViewAPIModel, error) {
+	const NR_OF_QUOTES = 639028
+	const NR_OF_ENGLISH_QUOTES = 634841
 	var dbPointer *gorm.DB
 	var topicResult structs.TopicViewDBModel
+
+	var shouldDoQuick = true
 
 	//** ---------- Paramatere configuratino for DB query begins ---------- **//
 	m1 := regexp.MustCompile(` `)
@@ -152,7 +157,7 @@ func getRandomQuoteFromDb(requestBody *structs.Request) (structs.TopicViewAPIMod
 	//Random quote from a particular topic
 	if requestBody.TopicId > 0 {
 		dbPointer = handlers.Db.Table("topicsview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq", requestBody.SearchString, phrasesearch).Where("topic_id = ?", requestBody.TopicId)
-		// shouldOrderBy = true
+		shouldDoQuick = false
 	} else {
 		dbPointer = handlers.Db.Table("searchview, plainto_tsquery(?) as plainq, to_tsquery(?) as phraseq", requestBody.SearchString, phrasesearch)
 	}
@@ -160,24 +165,34 @@ func getRandomQuoteFromDb(requestBody *structs.Request) (structs.TopicViewAPIMod
 	//Random quote from a particular author
 	if requestBody.AuthorId > 0 {
 		dbPointer = dbPointer.Where("author_id = ?", requestBody.AuthorId)
-		// shouldOrderBy = true
+		shouldDoQuick = false
 	}
 
 	//Random quote from a particular language
 	dbPointer = quoteLanguageSQL(requestBody.Language, dbPointer)
 
+	if strings.ToLower(requestBody.Language) == "icelandic" {
+		shouldDoQuick = false
+	}
+
 	if requestBody.SearchString != "" {
 		dbPointer = dbPointer.Where("( quote_tsv @@ plainq OR quote_tsv @@ phraseq)")
-		// shouldOrderBy = true
+		shouldDoQuick = false
 	}
 
 	//Order by used to get random quote if there are "few" rows returned
-	// if !shouldOrderBy {
-	// 	dbPointer = dbPointer.
-	// 		Where("random() < 0.005")
-	// }
+	if !shouldDoQuick {
+		dbPointer = dbPointer.Order("random()") //Randomized, O( n*log(n) )
+	} else {
+		r := rand.New(rand.NewSource(time.Now().UnixNano()))
+		if strings.ToLower(requestBody.Language) == "english" {
+			dbPointer = dbPointer.Offset(r.Intn(NR_OF_ENGLISH_QUOTES))
+		} else {
+			dbPointer = dbPointer.Offset(r.Intn(NR_OF_QUOTES))
+		}
 
-	dbPointer = dbPointer.Order("random()") //Randomized, O( n*log(n) )
+	}
+
 	//** ---------- Paramater configuratino for DB query ends ---------- **//
 	err := dbPointer.Limit(1).Find(&topicResult).Error
 	if err != nil {
