@@ -13,6 +13,7 @@ import (
 func main() {
 
 	r := mux.NewRouter()
+
 	posts := r.Methods(http.MethodPost).Subrouter()
 	posts.HandleFunc("/api/quotes", routes.GetQuotes)
 	posts.HandleFunc("/api/quotes/list", routes.GetQuotesList)
@@ -46,6 +47,10 @@ func main() {
 	gets.HandleFunc("/api/languages", routes.ListLanguagesSupported)
 	gets.Handle("/docs", sh)
 	gets.Handle("/swagger/swagger.yaml", http.FileServer(http.Dir("./")))
+
+	r.HandleFunc("/", routes.Home)
+	s := http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets/")))
+	r.PathPrefix("/assets/").Handler(s)
 
 	err := http.ListenAndServe(":"+handlers.GetEnvVariable("PORT"), r)
 
