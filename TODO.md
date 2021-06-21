@@ -1,6 +1,16 @@
 # TODOS
 
 - [ ] Save History of errors (i.e. error logs)?
+- [ ] automate setting up the EC2 and fetching the code and running server
+- [ ] Google Analytics for the site (set it up on google)
+- [ ] Frontend Look fixes according to Roberto
+- [ ] More info about author (Wikipedia link + birth-death i.e. for example 1901-2000)
+- [ ] Front end for API ()
+
+- [ ] Test/Use ElasticBeans (Cheaper?)
+- [ ] Test/Use Container Service (Cheaper?)
+- [ ] Test/Use AWS lambda (Cheaper?)
+- [ ] User Heroku (if Cheaper)
 
  -------------- Further Stuff  --------------
 
