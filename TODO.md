@@ -3,6 +3,7 @@
 - [ ] automate setting up the EC2 and fetching the code and running server
 - [ ] Google Analytics for the site (set it up on google)
 - [ ] https certificate
+- [ ] Logo
 
 - [ ] Front end for API (Create it in its own repo!) (Find template?)
 - [ ] LandingPage (with minor info i.e. used by www.whothefucksaidthat.com + some quotes + tiers/pricing info)
@@ -12,7 +13,9 @@
 - [ ] Pay with Crypto
 
 - [ ] Separate WhoTheFuckSaidThat.com from the API (i.e. have as its own APP that queries the API!)
+- [ ] find / buy an url for the API (quotel.com?)
 
+- [ ] Test/Use Amazon's API Gateway (Cheaper?) //https://www.quora.com/What-is-the-best-and-cheapest-way-of-hosting-REST-API-as-a-startup-I-am-using-AWS-EC2-but-I-am-not-sure-whether-that-is-the-best-option-or-not-for-the-startup-who-has-limited-budget
 - [ ] Test/Use ElasticBeans (Cheaper?)
 - [ ] Test/Use Container Service (Cheaper?)
 - [ ] Test/Use AWS lambda (Cheaper?)
