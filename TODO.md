@@ -1,10 +1,25 @@
 # TODOS
 
+- [ ] Test/Use Amazon's API Gateway + Lambda (Cheaper?) //https://www.quora.com/What-is-the-best-and-cheapest-way-of-hosting-REST-API-as-a-startup-I-am-using-AWS-EC2-but-I-am-not-sure-whether-that-is-the-best-option-or-not-for-the-startup-who-has-limited-budget
+- [ ] Test/Use ElasticBeans (Cheaper?)
+- [ ] Test/Use Container Service (Cheaper?)
+- [ ] Test/Use AWS lambda (Cheaper?)
+- [ ] Use Heroku (if Cheaper)?
+- [ ] Find cheapest option to run the API and the API/USER front end and use that!
+
+- [ ] Clean Up DB (only have GOD user and quotes / authors in) and save in S3 bucket for safe keeping
+
+- [ ] Separate WhoTheFuckSaidThat.com from the API (i.e. have as its own APP that queries the API! + its own Repo)
+- [ ] find / buy an url for the API (quotel.com?)
+
 - [ ] automate setting up the EC2 and fetching the code and running server
+
+--- WhoTheFuckSaidThat.com ---
 - [ ] Google Analytics for the site (set it up on google)
 - [ ] https certificate
-- [ ] Logo
+- [ ] WebsiteLogo
 
+--- Front End for API Users ---
 - [ ] Front end for API (Create it in its own repo!) (Find template?)
 - [ ] LandingPage (with minor info i.e. used by www.whothefucksaidthat.com + some quotes + tiers/pricing info)
 - [ ] SignUp / Login (Add googleLogin?)
@@ -12,18 +27,9 @@
 - [ ] HomePage for users (History of requests + Tier + upgrade / downgrade tier)
 - [ ] Pay with Crypto
 
-- [ ] Separate WhoTheFuckSaidThat.com from the API (i.e. have as its own APP that queries the API!)
-- [ ] find / buy an url for the API (quotel.com?)
-
-- [ ] Test/Use Amazon's API Gateway (Cheaper?) //https://www.quora.com/What-is-the-best-and-cheapest-way-of-hosting-REST-API-as-a-startup-I-am-using-AWS-EC2-but-I-am-not-sure-whether-that-is-the-best-option-or-not-for-the-startup-who-has-limited-budget
-- [ ] Test/Use ElasticBeans (Cheaper?)
-- [ ] Test/Use Container Service (Cheaper?)
-- [ ] Test/Use AWS lambda (Cheaper?)
-- [ ] User Heroku (if Cheaper)
+ -------------- Further Stuff  --------------
 
 - [ ] Save History of errors (i.e. error logs)?
-
- -------------- Further Stuff  --------------
 
 - [ ] Draw up DB-Graph (i.e. how tables are connected to view etc)
 
