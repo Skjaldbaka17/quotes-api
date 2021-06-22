@@ -1,40 +1,47 @@
-body{
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
   background-color: black;
+  overflow-y: hidden;
 }
 
 .contentWrapper{
-  margin: 5%;
-}
-
-.quoteWrapper {
+  height: 100%;
   display: flex;
-margin-bottom: 20px;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .quote {
   color: #fff;
-  font-size: 40px;
-  font-weight: 500;
-  line-height: 60px;
-  font-family: 'Vollkorn', serif;
-  /* text-transform: uppercase; */
-}
 
-.authorWrapper{
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  margin-bottom: 20px;
+  margin-top: 15px;
+  padding: 0 5%;
+  padding-top: 10px;
+  
+  font-size: 40px;
+  font-weight: 400;
+  line-height: 60px;
+  text-align: center;
+
+  max-height: 125vh;
+  overflow-y: scroll;
+  
+  cursor:default;
 }
 
 .author{
   color: #fff;
-  font-size: 40px;
-  font-weight: 500;
+
+  margin-bottom: 30px;
+  margin-top: 15px;
+
+  font-size: 28px;
+  font-weight: 400;
   line-height: 60px;
-  font-family: 'Vollkorn', serif;
   text-align: center;
-  /* text-transform: uppercase; */
+  text-decoration: none;
 }
 
 #footnote {

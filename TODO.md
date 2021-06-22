@@ -7,6 +7,8 @@
 - [ ] More info about author (Wikipedia link + birth-death i.e. for example 1901-2000)
 - [ ] Front end for API ()
 
+- [ ] Separate WhoTheFuckSaidThat.com from the API (i.e. have as its own APP that queries the API!)
+
 - [ ] Test/Use ElasticBeans (Cheaper?)
 - [ ] Test/Use Container Service (Cheaper?)
 - [ ] Test/Use AWS lambda (Cheaper?)

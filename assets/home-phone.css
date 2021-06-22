@@ -1,0 +1,17 @@
+/* Portrait and Landscape */
+@media only screen 
+and (max-device-width: 736px)   { 
+      
+      .quote {
+        font-size: 20px !important;
+        font-weight:100 !important;
+        line-height: 30px !important;
+      }
+      
+      .author{
+        font-size: 15px !important;
+        font-weight: 100 !important;
+        line-height: 30px !important;
+        font-weight: 200 !important;
+      }
+}
