@@ -1,11 +1,15 @@
 # TODOS
 
-- [ ] Save History of errors (i.e. error logs)?
 - [ ] automate setting up the EC2 and fetching the code and running server
 - [ ] Google Analytics for the site (set it up on google)
-- [ ] Frontend Look fixes according to Roberto
-- [ ] More info about author (Wikipedia link + birth-death i.e. for example 1901-2000)
-- [ ] Front end for API ()
+- [ ] https certificate
+
+- [ ] Front end for API (Create it in its own repo!) (Find template?)
+- [ ] LandingPage (with minor info i.e. used by www.whothefucksaidthat.com + some quotes + tiers/pricing info)
+- [ ] SignUp / Login (Add googleLogin?)
+- [ ] Move Users Backend to Front End Repo?
+- [ ] HomePage for users (History of requests + Tier + upgrade / downgrade tier)
+- [ ] Pay with Crypto
 
 - [ ] Separate WhoTheFuckSaidThat.com from the API (i.e. have as its own APP that queries the API!)
 
@@ -13,6 +17,8 @@
 - [ ] Test/Use Container Service (Cheaper?)
 - [ ] Test/Use AWS lambda (Cheaper?)
 - [ ] User Heroku (if Cheaper)
+
+- [ ] Save History of errors (i.e. error logs)?
 
  -------------- Further Stuff  --------------
 
@@ -39,6 +45,8 @@
 
  -------------- Done  --------------
 
+- [x] Frontend Look fixes according to Roberto
+- [x] More info about author (Wikipedia link + birth-death i.e. for example 1901-2000)
 - [x] Buy and setup Domain name
 - [x] Make Random query faster
 - [x] Setup frontend on / route for displaying a random quote.
