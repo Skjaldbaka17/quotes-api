@@ -232,7 +232,7 @@ type getRandomQuoteResponseWrapper struct {
 		// The random quote returned must be from the author with the given authorId
 		//
 		//example: 24952
-		Authorid int `json:"authorid"`
+		Authorid int `json:"authorId"`
 	}
 }
 
