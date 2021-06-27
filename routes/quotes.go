@@ -122,6 +122,7 @@ func GetQuotesList(rw http.ResponseWriter, r *http.Request) {
 // responses:
 //  200: topicViewResponse
 //  400: incorrectBodyStructureResponse
+//  404: internalServerErrorResponse
 //  500: internalServerErrorResponse
 
 // GetRandomQuote handles POST requests for getting a random quote
@@ -136,6 +137,13 @@ func GetRandomQuote(rw http.ResponseWriter, r *http.Request) {
 		rw.WriteHeader(http.StatusInternalServerError)
 		log.Printf("Got error when querying DB in GetRandomQuote: %s", err)
 		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: handlers.InternalServerError})
+		return
+	}
+
+	if result == (structs.TopicViewAPIModel{}) {
+		rw.WriteHeader(http.StatusNotFound)
+		log.Printf("Got error when querying DB in GetRandomQuote: %s", err)
+		json.NewEncoder(rw).Encode(structs.ErrorResponse{Message: "No quote exists that matches the given parameters"})
 		return
 	}
 	json.NewEncoder(rw).Encode(result)

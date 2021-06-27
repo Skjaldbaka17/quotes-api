@@ -87,20 +87,22 @@ definitions:
     properties:
       maximum:
         description: |-
-          Where to end the ordering (if empty it ends at the logical end, for example end at the highest quoteid for quoteid ascending order).
-          Note this key is always a string.
+          Where to end the ordering (if empty it ends at the logical end, for example end at 'Z' for alphabetical ascending order).
+          Note this key is always a string, for example if ordering by nrOfQuotes (or popularity) of maximum 11 quotes you need to
+          set "maximum":"11" in the request body
         example: "11"
         type: string
         x-go-name: Maximum
       minimum:
         description: |-
-          Where to start the ordering (if empty it starts from beginning, for example start at 1 for quoteid ascending order).
-          Note this key is always a string.
+          Where to start the ordering (if empty it starts from beginning, for example start at 'A' for alphabetical ascending order).
+          Note this key is always a string, for example if ordering by nrOfQuotes (or popularity) of minimum 10 quotes you need to
+          set "minimum":"10" in the request body
         example: "10"
         type: string
         x-go-name: Minimum
       orderBy:
-        description: What to order by, 'quoteId', 'popularity' or 'length'
+        description: What to order by, 'alphabetical', 'popularity' or 'nrOfQuotes'
         example: popularity
         type: string
         x-go-name: OrderBy
@@ -111,7 +113,7 @@ definitions:
         type: boolean
         x-go-name: Reverse
     type: object
-    x-go-name: orderConfigListQuotesModel
+    x-go-name: orderConfigListAuthorsModel
     x-go-package: github.com/Skjaldbaka17/quotes-api/swagger
   QodViewAPIModel:
     properties:
@@ -189,8 +191,8 @@ definitions:
         type: integer
         x-go-name: Id
       isIcelandic:
-        type: string
-        x-go-name: Isicelandic
+        type: boolean
+        x-go-name: IsIcelandic
       name:
         type: string
         x-go-name: Name
@@ -841,7 +843,7 @@ paths:
               example: 91fd6d19-2c32-4081-8729-4d9786d43b95
               type: string
               x-go-name: ApiKey
-            authorid:
+            authorId:
               description: The random quote returned must be from the author with
                 the given authorId
               example: 24952
@@ -874,6 +876,8 @@ paths:
           $ref: '#/responses/topicViewResponse'
         "400":
           $ref: '#/responses/incorrectBodyStructureResponse'
+        "404":
+          $ref: '#/responses/internalServerErrorResponse'
         "500":
           $ref: '#/responses/internalServerErrorResponse'
       tags:
