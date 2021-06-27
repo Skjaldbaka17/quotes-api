@@ -1,5 +1,6 @@
 # TODOS
 
+- [ ] QOD/AOD history called -> if QOD/AOD not set for some day in the history then create that row for that date!
 - [ ] Copy The PostgresDB (as it is just after setup) into an S3 bucket for safekeeping
 - [ ] Test/Use Amazon's API Gateway + Lambda (Cheaper?) //https://www.quora.com/What-is-the-best-and-cheapest-way-of-hosting-REST-API-as-a-startup-I-am-using-AWS-EC2-but-I-am-not-sure-whether-that-is-the-best-option-or-not-for-the-startup-who-has-limited-budget
 - [ ] Test/Use ElasticBeans (Cheaper?)
