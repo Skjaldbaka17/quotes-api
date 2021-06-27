@@ -1,0 +1,1 @@
+select * from searchview, plainto_tsquery('sting like a butterfly') as plainq, to_tsquery('sting like a butterfly') as phraseq,to_tsquery(?) as generalq 
