@@ -44,7 +44,7 @@ func main() {
 	sh := middleware.Redoc(opts, nil)
 
 	gets := r.Methods(http.MethodGet).Subrouter()
-	gets.HandleFunc("/api/languages", routes.ListLanguagesSupported)
+	gets.HandleFunc("/api/meta/languages", routes.ListLanguagesSupported)
 	gets.Handle("/docs", sh)
 	gets.Handle("/swagger/swagger.yaml", http.FileServer(http.Dir("./")))
 

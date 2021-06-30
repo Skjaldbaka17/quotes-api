@@ -267,6 +267,10 @@ type getSearchByStringWrapper struct {
 		// The particular language that the quote should be in
 		// example: English
 		Language string `json:"language"`
+		// Should search in the specified topic for the searchString
+		//
+		// Example: 10
+		TopicId int `json:"topicId"`
 	}
 }
 

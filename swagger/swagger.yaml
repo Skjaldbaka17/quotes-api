@@ -87,22 +87,20 @@ definitions:
     properties:
       maximum:
         description: |-
-          Where to end the ordering (if empty it ends at the logical end, for example end at 'Z' for alphabetical ascending order).
-          Note this key is always a string, for example if ordering by nrOfQuotes (or popularity) of maximum 11 quotes you need to
-          set "maximum":"11" in the request body
+          Where to end the ordering (if empty it ends at the logical end, for example end at the highest quoteid for quoteid ascending order).
+          Note this key is always a string.
         example: "11"
         type: string
         x-go-name: Maximum
       minimum:
         description: |-
-          Where to start the ordering (if empty it starts from beginning, for example start at 'A' for alphabetical ascending order).
-          Note this key is always a string, for example if ordering by nrOfQuotes (or popularity) of minimum 10 quotes you need to
-          set "minimum":"10" in the request body
+          Where to start the ordering (if empty it starts from beginning, for example start at 1 for quoteid ascending order).
+          Note this key is always a string.
         example: "10"
         type: string
         x-go-name: Minimum
       orderBy:
-        description: What to order by, 'alphabetical', 'popularity' or 'nrOfQuotes'
+        description: What to order by, 'quoteId', 'popularity' or 'length'
         example: popularity
         type: string
         x-go-name: OrderBy
@@ -113,7 +111,7 @@ definitions:
         type: boolean
         x-go-name: Reverse
     type: object
-    x-go-name: orderConfigListAuthorsModel
+    x-go-name: orderConfigListQuotesModel
     x-go-package: github.com/Skjaldbaka17/quotes-api/swagger
   QodViewAPIModel:
     properties:
@@ -877,7 +875,7 @@ paths:
         "400":
           $ref: '#/responses/incorrectBodyStructureResponse'
         "404":
-          $ref: '#/responses/internalServerErrorResponse'
+          $ref: '#/responses/notFoundResponse'
         "500":
           $ref: '#/responses/internalServerErrorResponse'
       tags:
@@ -1270,6 +1268,16 @@ responses:
             x-go-name: Languages
         type: object
       type: array
+  notFoundResponse:
+    description: Data structure representing the error response to a not found error
+    schema:
+      properties:
+        message:
+          description: The error message
+          example: No quote exists that matches the given parameters.
+          type: string
+          x-go-name: Message
+      type: object
   qodHistoryResponse:
     description: Data structure representing the response for the history of QODS
     schema:

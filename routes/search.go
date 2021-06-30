@@ -54,7 +54,6 @@ func SearchByString(rw http.ResponseWriter, r *http.Request) {
 	go handlers.TopicViewAppearInSearchCountIncrement(topicResults)
 	apiResults := structs.ConvertToTopicViewsAPIModel(topicResults)
 	json.NewEncoder(rw).Encode(apiResults)
-
 }
 
 // swagger:route POST /search/authors SEARCH SearchAuthorsByString

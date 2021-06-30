@@ -1,5 +1,8 @@
 # TODOS
 
+- [ ] ELASTIC SEARCH! And clean up tables i.e. delete searchview ? or move it back into normal view (i.e. not materialized)
+
+- [ ] refresh view regularly: refresh materialized view mv_account_balances; ---- or input popularity count there?
 
 - [ ] Copy The PostgresDB (as it is just after setup) into an S3 bucket for safekeeping
 - [ ] Test/Use Amazon's API Gateway + Lambda (Cheaper?) //https://www.quora.com/What-is-the-best-and-cheapest-way-of-hosting-REST-API-as-a-startup-I-am-using-AWS-EC2-but-I-am-not-sure-whether-that-is-the-best-option-or-not-for-the-startup-who-has-limited-budget

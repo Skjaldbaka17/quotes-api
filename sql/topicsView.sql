@@ -1,4 +1,4 @@
-create or replace view topicsView as 
+CREATE MATERIALIZED VIEW topicsView as 
 select authors.id as author_id,
        authors.name,
        q.id as quote_id,

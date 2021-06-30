@@ -122,7 +122,7 @@ func GetQuotesList(rw http.ResponseWriter, r *http.Request) {
 // responses:
 //  200: topicViewResponse
 //  400: incorrectBodyStructureResponse
-//  404: internalServerErrorResponse
+//  404: notFoundResponse
 //  500: internalServerErrorResponse
 
 // GetRandomQuote handles POST requests for getting a random quote

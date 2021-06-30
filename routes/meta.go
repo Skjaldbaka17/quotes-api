@@ -7,7 +7,7 @@ import (
 
 var languages = []string{"English", "Icelandic"}
 
-// swagger:route GET /languages META GetLanguages
+// swagger:route GET /meta/languages META GetLanguages
 // Get languages supported by the api
 // responses:
 //	200: listOfStrings

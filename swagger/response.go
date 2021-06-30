@@ -112,6 +112,18 @@ type internalServerErrorResponseWrapper struct {
 	}
 }
 
+// Data structure representing the error response to a not found error
+// swagger:response notFoundResponse
+type notFoundResponseWrapper struct {
+	// The error response to a not found error
+	// in: body
+	Body struct {
+		// The error message
+		// Example: No quote exists that matches the given parameters.
+		Message string `json:"message"`
+	}
+}
+
 // Data structure representing a list response for topics
 // swagger:response topicsResponse
 type topicsResponseWrapper struct {
