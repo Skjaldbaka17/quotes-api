@@ -4,9 +4,8 @@
 // To use it you first need to sign up here https://somethingsomethingdarkside.com to get an authentication api key.
 //
 //     Schemes: http
-//     BasePath: /api/
 //     Version: 1.0.0
-//     Host: quotel-api.com
+//     Host: https://api.whothefucksaidthat.com
 //	   Contact: Þórður Ágústsson<skjaldbaka17@gmail.com>
 //
 //     Consumes:
@@ -15,15 +14,6 @@
 //     Produces:
 //     - application/json
 //
-//     Security:
-//     - apikey
-//
-//    SecurityDefinitions:
-//    apikey:
-//      type: apiKey
-//      in: body
-//      name: apiKey
-//      description: To use the api you need an API key. The basic API key lets you make up to 100 requests an hour.
 //
 //
 // swagger:meta

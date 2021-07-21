@@ -55,6 +55,7 @@ func TestQuotes(t *testing.T) {
 				t.Fatalf("got quotes for author with id %d but expected quotes for the author with id %d, respObj: %+v", respObj[0].AuthorId, authorId, respObj)
 			}
 		})
+
 	})
 
 	t.Run("Quoteslist Test", func(t *testing.T) {
