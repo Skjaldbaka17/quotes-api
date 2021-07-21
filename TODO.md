@@ -1,50 +1,22 @@
 # TODOS
 
-- [ ] ELASTIC SEARCH! And clean up tables i.e. delete searchview ? or move it back into normal view (i.e. not materialized)
-
-- [ ] refresh view regularly: refresh materialized view mv_account_balances; ---- or input popularity count there?
-
-- [ ] Copy The PostgresDB (as it is just after setup) into an S3 bucket for safekeeping
-- [ ] Test/Use Amazon's API Gateway + Lambda (Cheaper?) //https://www.quora.com/What-is-the-best-and-cheapest-way-of-hosting-REST-API-as-a-startup-I-am-using-AWS-EC2-but-I-am-not-sure-whether-that-is-the-best-option-or-not-for-the-startup-who-has-limited-budget
-- [ ] Test/Use ElasticBeans (Cheaper?)
-- [ ] Test/Use Container Service (Cheaper?)
-- [ ] Test/Use AWS lambda (Cheaper?)
-- [ ] Use Heroku (if Cheaper)?
-- [ ] Find cheapest option to run the API and the API/USER front end and use that!
-
-- [ ] Clean Up DB (only have GOD user and quotes / authors in) and save in S3 bucket for safe keeping
-
-- [ ] Separate WhoTheFuckSaidThat.com from the API (i.e. have as its own APP that queries the API! + its own Repo)
-- [ ] find / buy an url for the API (quotel.com?)
-
-- [ ] automate setting up the EC2 and fetching the code and running server
-
---- WhoTheFuckSaidThat.com ---
+ ---------------------------- WHOTHEFUCKSAIDTHAT.COM ---------------------------- 
 - [ ] Google Analytics for the site (set it up on google)
-- [ ] https certificate
-- [ ] WebsiteLogo
+- [x] https certificate
 
---- Front End for API Users ---
+ ---------------------------- FRONT END FOR API USERS ---------------------------- 
+
 - [ ] Front end for API (Create it in its own repo!) (Find template?)
 - [ ] LandingPage (with minor info i.e. used by www.whothefucksaidthat.com + some quotes + tiers/pricing info)
-- [ ] SignUp / Login (Add googleLogin?)
+- [ ] SignUp / Login Using aws Cognito
 - [ ] Move Users Backend to Front End Repo?
 - [ ] HomePage for users (History of requests + Tier + upgrade / downgrade tier)
 - [ ] Pay with Crypto
 
---- Tips from Roberto ---
-- [ ] SEARCHSPEED VERY SLOW ON SERVER (10-15sec!) => indexes + move to DynamoDB/NOSql!
-- [ ] QOD/AOD history called -> if QOD/AOD not set for some day in the history then create that row for that date!
 
- -------------- Further Stuff  --------------
-
-- [ ] Save History of errors (i.e. error logs)?
+ ---------------------------- FURTHER STUFF ---------------------------- 
 
 - [ ] Draw up DB-Graph (i.e. how tables are connected to view etc)
-
-- [ ] Optimize ApiKey Validation queries (index created_at dates-column?)
-
-- [ ] Change to Use Gorm to the fullest, oooooooorrr just change returned json to : {"name":"authorName", "id":authorId, "hasIcelandicQuotes":true/false, "nrOfEnglishQuoes":int, "nrOfIcelandicQuotes":int, "quotes":[{"quote": "theQuote", "id":quoteId, "isIcelandic": true/false}]}
 
 - [ ] Insert Quote for created author or for a 'real' author (private and public)
 - [ ] update inserted quote (priv and pub)
@@ -52,17 +24,25 @@
 - [ ] Update created author (priv and pub)
 - [ ] Create new Topic (private and public)
 - [ ] update created topic (priv and pub)
-
-- [ ] is random truly random (i.e. does the "random" funcitonality truly return randomly or is it biased towards quotes in the "front" of the DB (i.e. in the front where postgres stores them))
-- [ ] Make Authors Search more efficient (create a similarity-based index ?)
 - [ ] Sort return list alphabetically Icelandic support
 
-- [ ] Look into and maybe Change rest into GraphQL (neeeeeee, frekar fyrir næsta project)
 - [ ] Look into payment for some privileges
-- [ ] New crawler for new quotes / authors
 
- -------------- Done  --------------
+ ---------------------------- DONE ---------------------------- 
 
+- [x] New crawler for new quotes / authors
+- [x] Make Authors Search more efficient (create a similarity-based index ?)
+- [x] is random truly random (i.e. does the "random" funcitonality truly return randomly or is it biased towards quotes in the "front" of the DB (i.e. in the front where postgres stores them)) -- now using `tablesample system(0.1)`if whole table otherwise using `order by random()`
+- [x] Change to Use Gorm to the fullest, oooooooorrr just change returned json to : {"name":"authorName", "id":authorId, "hasIcelandicQuotes":true/false, "nrOfEnglishQuoes":int, "nrOfIcelandicQuotes":int, "quotes":[{"quote": "theQuote", "id":quoteId, "isIcelandic": true/false}]}
+- [x] SEARCHSPEED VERY SLOW ON SERVER (10-15sec!) => indexes + move to DynamoDB/NOSql!
+- [x] QOD/AOD history called -> if QOD/AOD not set for some day in the history then create that row for that date! -> Made a cron job in AWS lambda (setOfTheDay see https://github.com/skjaldbaka17/quotel-sls-api)
+- [x] WebsiteLogo
+- [x] automate setting up the EC2 and fetching the code and running server -- basically did that with aws lambda (see https://github.com/skjaldbaka17/quotel-sls-api )
+- [x] Separate WhoTheFuckSaidThat.com from the API (i.e. have as its own APP that queries the API! + its own Repo)
+- [x] Find cheapest option to run the API and the API/USER front end and use that!
+- [x] Test/Use AWS lambda (Cheaper?)
+- [x] Test/Use Amazon's API Gateway + Lambda (Cheaper?) //https://www.quora.com/What-is-the-best-and-cheapest-way-of-hosting-REST-API-as-a-startup-I-am-using-AWS-EC2-but-I-am-not-sure-whether-that-is-the-best-option-or-not-for-the-startup-who-has-limited-budget
+- [x] Copy The PostgresDB (as it is just after setup) into an S3 bucket for safekeeping -- at least made pg_dump/pg_restore
 - [x] Frontend Look fixes according to Roberto
 - [x] More info about author (Wikipedia link + birth-death i.e. for example 1901-2000)
 - [x] Buy and setup Domain name
